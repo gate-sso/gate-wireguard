@@ -30,7 +30,7 @@ sudo ./setup.sh docker
 GateWireGuard is rails project, requires rails.
 1. Install required libraries 
    |
-    ```sudo apt-get install libmysqlclient-dev git wget nodejs ruby-full docker.io```
+    ```sudo apt-get install libmysqlclient-dev mysql-client git wget nodejs ruby-full docker.io```
 2. Docker in only required if you do not want to install mysql on local server, else you can just install mysql server
 3. Setup gate_wireguard_dev database in mysql
     |

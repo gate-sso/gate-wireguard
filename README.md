@@ -8,7 +8,7 @@ Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as b
 
 ## Setup
 
-We configure the system using ansible. 
+We configure the system using ansible. Hopefully this will work
 
 ````bash
 sudo apt-get install ansible wget curl 

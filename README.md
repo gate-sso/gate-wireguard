@@ -69,3 +69,10 @@ GateWireGuard is rails project, requires rails.
 * Deployment instructions - You can setup gate-wireguard with or without docker, with docker, it's just docker-compose, without docker, please follow the steps below
   * checkout latest tar, run ./setup_production.sh
   * run ./configure_production.sh (this will create database etc)
+
+
+#### Credits
+
+OpenSource is not possible without people contributing to it, The following posts, resources have helped me immensely to get this going off the ground. Some credits to internet reading material for helping me with various tasks
+
+* Ryan Bigg - [Adding bootstrap to rails](https://ryanbigg.com/2023/04/rails-7-bootstrap-css-javascript-with-esbuild) 

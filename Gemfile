@@ -62,3 +62,8 @@ end
 
 
 gem "jsbundling-rails", "~> 1.3"
+
+#Google oAuth Implementation
+
+gem 'dotenv-rails'
+gem 'omniauth-google-oauth2'

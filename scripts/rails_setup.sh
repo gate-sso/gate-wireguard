@@ -3,6 +3,8 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y ansible wget curl
 ansible-playbook scripts/rails_setup.yml
+sudo gem install bundler
+sudo gem install rails
 bundle config set --local path '.local'
 sudo npm install --save-exact --save-dev esbuild yarn npx
 bundle install

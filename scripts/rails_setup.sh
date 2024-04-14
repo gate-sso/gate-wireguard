@@ -11,6 +11,8 @@ bundle install
 bin/rails javascript:install:esbuild
 yarn build
 esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets
+sudo usermod -aG docker `whoami`
+newgrp docker
 #Monospace Neon, Monaco, 'Courier New', monospace
 
 

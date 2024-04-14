@@ -1,2 +1,2 @@
 #!/bin/bash
-ansible-playbook -i inventory scripts/wireguard.yml
+ansible-playbook scripts/wireguard.yml

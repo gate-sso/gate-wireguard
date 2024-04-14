@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: "Install Wireguard on the current host"
+  hosts: localhost
   become: true
   tasks:
     - name: Install required packages

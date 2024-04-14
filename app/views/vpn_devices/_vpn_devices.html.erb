@@ -1,0 +1,25 @@
+<table class="table table-striped table-hover">
+  <thead class="table-light">
+    <tr>
+      <th>Description</th>
+      <th>Private Key</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% vpn_devices.each do |vpn_device| %>
+      <tr>
+        <td><%= vpn_device.description %></td>
+        <td><%= vpn_device.private_key %></td>
+        <td><%= link_to 'Show', vpn_device, class: 'btn btn-primary btn-sm' %></td>
+        <td><%= link_to 'Edit', edit_vpn_device_path(vpn_device), class: 'btn btn-secondary btn-sm' %></td>
+        <td><%= link_to 'Destroy', vpn_device, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New VPN Device', new_vpn_device_path, class: 'btn btn-primary' %>

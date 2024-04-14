@@ -1,0 +1,37 @@
+<%= form_with(model: vpn_device) do |form| %>
+  <% if vpn_device.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(vpn_device.errors.count, "error") %> prohibited this vpn_device from being saved:</h2>
+
+      <ul>
+        <% vpn_device.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :user_id, style: "display: block" %>
+    <%= form.text_field :user_id %>
+  </div>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.text_field :description %>
+  </div>
+
+  <div>
+    <%= form.label :private_key, style: "display: block" %>
+    <%= form.text_field :private_key %>
+  </div>
+
+  <div>
+    <%= form.label :public_key, style: "display: block" %>
+    <%= form.text_field :public_key %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

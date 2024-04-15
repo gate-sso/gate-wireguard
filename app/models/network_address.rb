@@ -1,3 +1,3 @@
 class NetworkAddress < ApplicationRecord
-  belongs_to :configuration
+  belongs_to :vpn_configuration
 end

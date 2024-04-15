@@ -13,11 +13,10 @@ Rails.application.routes.draw do
 
   get 'admin/users'
   get 'admin/vpn_configurations'
-  namespace :admin do
-    resources :vpn_configurations, only: [:show, :update]
-    resources :users, only: [:show]
-  end
+  patch 'admin/vpn_configuration/:id', to: 'admin#update_vpn_configuration', as: 'update_vpn_configuration'
 
+  post 'admin/:id/network_address', to: 'admin#add_network_address', as: 'add_network_address'
+  delete 'admin/network_address/:id', to: 'admin#remove_network_address', as: "remove_network_address"
 
   # Defines the root path route ("/")
   root "admin#index"

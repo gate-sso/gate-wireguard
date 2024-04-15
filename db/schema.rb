@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_15_053710) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
   create_table "network_addresses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "configuration_id", null: false
+    t.bigint "vpn_configuration_id", null: false
     t.string "network_address"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["configuration_id"], name: "index_network_addresses_on_configuration_id"
+    t.index ["vpn_configuration_id"], name: "index_network_addresses_on_vpn_configuration_id"
   end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -48,6 +48,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_15_053710) do
     t.index ["user_id"], name: "index_vpn_devices_on_user_id"
   end
 
-  add_foreign_key "network_addresses", "vpn_configurations", column: "configuration_id"
+  add_foreign_key "network_addresses", "vpn_configurations"
   add_foreign_key "vpn_devices", "users"
 end

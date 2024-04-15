@@ -1,6 +1,6 @@
 require 'open3'
 
-class WireGuardConfigGenerator
+class WireguardConfigGenerator
   class << self
     def generate_server_config
       private_key = `wg genkey`.strip

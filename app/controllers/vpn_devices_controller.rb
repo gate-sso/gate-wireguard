@@ -1,24 +1,22 @@
 class VpnDevicesController < ApplicationController
   before_action :set_vpn_device, only: %i[ show edit update destroy ]
+  before_action :require_login
+  layout 'admin'
 
   # GET /vpn_devices or /vpn_devices.json
   def index
-    @user = current_user
-    @vpn_devices = @user.vpn_devices
+    @vpn_devices = VpnDevice.all
   end
 
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
+    @vpn_device = VpnDevice.find(params[:id])
   end
 
   # GET /vpn_devices/new
   def new
     @vpn_device = current_user.vpn_devices.build
     @config_file = WireGuardConfigGenerator.generate_config(current_user.id)
-  end
-
-  # GET /vpn_devices/1/edit
-  def edit
   end
 
   # POST /vpn_devices or /vpn_devices.json

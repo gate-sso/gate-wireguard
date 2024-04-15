@@ -1,10 +1,3 @@
 <p style="color: green"><%= notice %></p>
-
-<%= render @vpn_device %>
-
-<div>
-  <%= link_to "Edit this vpn device", edit_vpn_device_path(@vpn_device) %> |
-  <%= link_to "Back to vpn devices", vpn_devices_path %>
-
-  <%= button_to "Destroy this vpn device", @vpn_device, method: :delete %>
+    <%= @vpn_device.description %>
 </div>

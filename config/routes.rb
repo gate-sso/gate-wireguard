@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   get 'auth/failure', to: redirect('/')
   get 'logout', to: 'sessions#destroy', as: 'logout'
 
-
+  get 'admin/users'
   # Defines the root path route ("/")
   root "admin#index"
   get 'login', to:'home#login', as: 'login'

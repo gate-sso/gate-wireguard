@@ -1,14 +1,10 @@
 <p style="color: green"><%= notice %></p>
 
-<h1>Vpn devices</h1>
+<h4>Listing all vpn devices</h4>
+<hr/>
+<div id="vpn_devices"> 
 
-<div id="vpn_devices">
-  <% @vpn_devices.each do |vpn_device| %>
-    <%= render vpn_device %>
-    <p>
-      <%= link_to "Show this vpn device", vpn_device %>
-    </p>
-  <% end %>
+    <% @vpn_devices.each do |vpn_device| %>
+      <%= render vpn_device %>
+    <% end %>
 </div>
-
-<%= link_to "New vpn device", new_vpn_device_path %>

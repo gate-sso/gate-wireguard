@@ -5,20 +5,25 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav me-auto mb-2 mb-md-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Users</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Devices</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Configuration</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" aria-disabled="true" href="/logout">Logout</a>
-        </li>
-      </ul>
+     
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <% if current_user.admin? %>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/admin/users">Users</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/vpn_devices">Devices</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Configuration</a>
+          </li>
+          <% end %>
+          <li class="nav-item">
+            <a class="nav-link"  href="/logout">Logout</a>
+          </li>
+        </ul>
+   
+    
     </div>
   </div>
 </nav>

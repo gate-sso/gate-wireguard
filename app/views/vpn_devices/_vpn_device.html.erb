@@ -1,22 +1,22 @@
-<div id="<%= dom_id vpn_device %>">
-  <p>
-    <strong>User:</strong>
-    <%= vpn_device.user_id %>
-  </p>
+<table class="table table-striped table-hover">
+  <thead class="table-light">
+    <tr>
+      <th>User</th>
+      <th>VPN Device</th>
+      <th colspan="2"></th>
+    </tr>
+  </thead>
 
-  <p>
-    <strong>Description:</strong>
-    <%= vpn_device.description %>
-  </p>
+  <tbody>
+    <% @vpn_devices.each do |vpn_device| %>
+      <tr>
+        <td><%= vpn_device.user.name %></td>
+        <td><%= link_to vpn_device.description, vpn_device %></td>
 
-  <p>
-    <strong>Private key:</strong>
-    <%= vpn_device.private_key %>
-  </p>
+        <td><%= link_to 'Destroy', vpn_device, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
-  <p>
-    <strong>Public key:</strong>
-    <%= vpn_device.public_key %>
-  </p>
-
-</div>
+<br>

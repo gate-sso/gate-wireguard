@@ -1,6 +1,7 @@
 class ConfigurationsController < ApplicationController
   before_action :set_configuration, only: %i[ show edit update destroy ]
-
+  before_action :require_login
+  layout 'admin'
   # GET /configurations or /configurations.json
   def index
     @configurations = Configuration.all

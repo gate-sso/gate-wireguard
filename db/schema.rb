@@ -10,16 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
-  create_table "configurations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "wg_private_key"
-    t.string "wg_public_key"
-    t.string "wg_ip_address"
-    t.string "wg_port"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
+ActiveRecord::Schema[7.1].define(version: 2024_04_15_053710) do
   create_table "network_addresses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "configuration_id", null: false
     t.string "network_address"
@@ -38,6 +29,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
     t.boolean "admin"
   end
 
+  create_table "vpn_configurations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "wg_private_key"
+    t.string "wg_public_key"
+    t.string "wg_ip_address"
+    t.string "wg_port"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "vpn_devices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "description"
@@ -48,6 +48,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
     t.index ["user_id"], name: "index_vpn_devices_on_user_id"
   end
 
-  add_foreign_key "network_addresses", "configurations"
+  add_foreign_key "network_addresses", "vpn_configurations", column: "configuration_id"
   add_foreign_key "vpn_devices", "users"
 end

@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get 'logout', to: 'sessions#destroy', as: 'logout'
 
   get 'admin/users'
+  get 'admin/vpn_configurations'
   # Defines the root path route ("/")
   root "admin#index"
   get 'login', to:'home#login', as: 'login'

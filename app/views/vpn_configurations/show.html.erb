@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @vpn_configuration %>
+
+<div>
+  <%= link_to "Edit this vpn_configuration", edit_vpn_configuration_path(@vpn_configuration) %> |
+  <%= link_to "Back to vpn_configurations", vpn_configurations_path %>
+
+  <%= button_to "Destroy this vpn_configuration", @vpn_configuration, method: :delete %>
+</div>

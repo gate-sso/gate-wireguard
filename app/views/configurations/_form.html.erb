@@ -1,0 +1,37 @@
+<%= form_with(model: configuration) do |form| %>
+  <% if configuration.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(configuration.errors.count, "error") %> prohibited this configuration from being saved:</h2>
+
+      <ul>
+        <% configuration.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :wg_private_key, style: "display: block" %>
+    <%= form.text_field :wg_private_key %>
+  </div>
+
+  <div>
+    <%= form.label :wg_public_key, style: "display: block" %>
+    <%= form.text_field :wg_public_key %>
+  </div>
+
+  <div>
+    <%= form.label :wg_ip_address, style: "display: block" %>
+    <%= form.text_field :wg_ip_address %>
+  </div>
+
+  <div>
+    <%= form.label :wg_port, style: "display: block" %>
+    <%= form.text_field :wg_port %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

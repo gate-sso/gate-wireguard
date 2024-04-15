@@ -29,6 +29,9 @@ config/master.key
 .env
 .env*.local
 
+/.idea
+
+
 ## Environment normalization:
 /.bundle
 /vendor/bundle

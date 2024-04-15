@@ -13,6 +13,12 @@ Rails.application.routes.draw do
 
   get 'admin/users'
   get 'admin/vpn_configurations'
+  namespace :admin do
+    resources :vpn_configurations, only: [:show, :update]
+    resources :users, only: [:show]
+  end
+
+
   # Defines the root path route ("/")
   root "admin#index"
   get 'login', to:'home#login', as: 'login'

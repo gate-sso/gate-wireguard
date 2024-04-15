@@ -2,6 +2,21 @@ require 'open3'
 
 class WireGuardConfigGenerator
   class << self
+    def generate_server_config
+      private_key = `wg genkey`.strip
+      public_key = `echo #{private_key} | wg pubkey`.strip
+      endpoint = ""
+
+      keys = {
+        private_key: private_key,
+        public_key: public_key,
+        endpoint: endpoint
+      }
+
+      return keys
+
+
+    end
     def generate_config(user_id)
       # Generate a unique peer configuration for the user
       private_key = `wg genkey`.strip

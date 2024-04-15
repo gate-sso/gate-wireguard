@@ -10,14 +10,18 @@ class AdminController < ApplicationController
     end
   end
 
-  def vpn_configuration
+  def vpn_configurations
     if current_user.admin?
       @vpn_configuration = VpnConfiguration.all
       if @vpn_configuration.empty?
-        redirect_to new_vpn_configuration_path
-      else
-        redirect_to vpn_configuration_path(@vpn_configuration.first)
+        keys = WireGuardConfigGenerator.generate_server_config
+        @vpn_configuration = VpnConfiguration.new
+        @vpn_configuration.wg_private_key = keys[:private_key]
+        @vpn_configuration.wg_public_key = keys[:public_key]
+        @vpn_configuration.wg_ip_address = keys[:endpoint]
+        @vpn_configuration.save!
       end
+
     else
       redirect_to root_path, alert: "You are not authorized to access this page."
     end

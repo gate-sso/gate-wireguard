@@ -145,6 +145,8 @@ GEM
     net-smtp (0.5.0)
       net-protocol
     nio4r (2.7.1)
+    nokogiri (1.16.4-aarch64-linux)
+      racc (~> 1.4)
     nokogiri (1.16.4-x86_64-linux)
       racc (~> 1.4)
     oauth2 (2.0.9)
@@ -251,6 +253,7 @@ GEM
     zeitwerk (2.6.13)
 
 PLATFORMS
+  aarch64-linux
   x86_64-linux
 
 DEPENDENCIES

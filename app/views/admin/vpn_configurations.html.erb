@@ -59,7 +59,7 @@
 
     <div class="form-group">
       <div class="col-sm-10">
-        <%= form.submit "Update configuration", data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: "btn btn-primary" %>
+        <%= form.submit "Update configuration", data: { turbo_method: :delete, turbo_confirm: "**DANGER ZONE** \n--------------------\nAre you sure? Clients may not be able to connect to vpn service.\n\nIt's possible that you will be required to re-configure all client devices. \n\nPlease be careful, **click cancel** if you don't understand this action." }, class: "btn btn-primary" %>
       </div>
     </div>
   <% end %>

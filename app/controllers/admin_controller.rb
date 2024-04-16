@@ -21,6 +21,7 @@ class AdminController < ApplicationController
         @vpn_configuration.wg_private_key = keys[:private_key]
         @vpn_configuration.wg_public_key = keys[:public_key]
         @vpn_configuration.wg_port = keys[:port]
+        @vpn_configuration.wg_ip_range = keys[:range]
         @vpn_configuration.dns_servers = keys[:dns_servers]
         @vpn_configuration.save!
       end
@@ -83,7 +84,7 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port)
+    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port, :wg_ip_range)
   end
 
 end

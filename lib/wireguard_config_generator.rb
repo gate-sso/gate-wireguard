@@ -11,7 +11,8 @@ class WireguardConfigGenerator
         private_key: private_key,
         public_key: public_key,
         endpoint: endpoint,
-        port: 51820
+        port: 51820,
+        range: "10.42.5.0"
       }
 
       return keys

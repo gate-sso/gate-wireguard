@@ -1,87 +1,109 @@
-<%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal" } do |form| %>
-  <div class="form-group">
-    <label class="control-label col-sm-4" for="wg_private_key">Private Key:</label>
-    <div class="col-sm-6">
-      <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
+<div class="container col-sm-6">
+  <h2>WireGuard Configuration</h2>
+  <h6>WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
+    minimal and fast. It is a VPN protocol that is very easy to setup and use. It is also very secure and fast. You can
+    read more about WireGuard <a href="https://www.wireguard.com/">here</a></h6>
+  <hr>
+
+  <h6>Please <b style="color: red">click here</b> to download server config. <h5>
+    <h5>We automatically rewrite configuration if you update Port, IP Range or Server public IP address.</h5>
+  <div style="color: red">You will be required to re-configure all client devices on update, please be careful, don't do it if you don't understand</div>
+  <hr>
+  <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal" } do |form| %>
+    <div class="form-group">
+      <label class="control-label col-sm-4" for="wg_private_key">Private Key:</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
+      </div>
     </div>
-  </div>
-  <p>
+    <p>
 
-  <div class="form-group">
-    <label class="control-label col-sm-4" for="wg_public_key">Public Key:</label>
-    <div class="col-sm-6">
-      <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
+    <div class="form-group">
+      <label class="control-label col-sm-6" for="wg_public_key">Public Key:</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
+      </div>
     </div>
-  </div>
-  <p>
+    <p>
 
-  <div class="form-group">
-    <label class="control-label col-sm-4" for="wg_ip_address">IP Address:</label>
-    <div class="col-sm-6">
-      <%= form.text_field :wg_port, id: "wg_port", class: "form-control", placeholder: "Wireguard port (UDP)" %>
+    <div class="form-group">
+      <label class="control-label col-sm-12" for="wg_port">WireGuard Port (UDP) - don't change, unless you know what are you doing:</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_port, id: "wg_port", class: "form-control", placeholder: "Wireguard port (UDP)" %>
+      </div>
     </div>
-  </div>
-  <p>
+    <p>
 
-  <div class="form-group">
-    <label class="control-label col-sm-4" for="wg_ip_address">IP Address:</label>
-    <div class="col-sm-6">
-      <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address" %>
+    <div class="form-group">
+      <label class="control-label col-sm-12" for="wg_ip_range">Client IP Range - by default it's /24, leave it, unless you have a conflict:</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0/24" %>
+      </div>
     </div>
-  </div>
-  <p>
-  <div class="form-group">
-    <label class="control-label col-sm-4" for="dns_servers">DNS Server(s) (Comma Separated, Leave empty, if not dns server setup):</label>
-    <div class="col-sm-6">
-      <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS Server(s) address" %>
+    <p>
+
+    <div class="form-group">
+      <label class="control-label col-sm-6" for="wg_ip_address">Public IP Address:</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address" %>
+      </div>
     </div>
-  </div>
-  <p>
-
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <%= form.submit "Save Configuration", class: "btn btn-primary" %>
+    <p>
+    <div class="form-group">
+      <label class="control-label col-sm-12" for="dns_servers">DNS Server (Comma Separated, Leave empty if there you don't have a DNS server):</label>
+      <div class="col-sm-12">
+        <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS Server(s) address" %>
+      </div>
     </div>
-  </div>
-<% end %>
+    <p>
 
-<hr/>
-<h4>Allowed Networks</h4>
-<h6>These Network addresses are for internal routing for wireguard. Also, when creating clients, these IP address will be automatically added to peer configuration</h6>
-
-
-<table class="table table-striped">
-  <thead>
-  <tr>
-    <th>Address</th>
-    <th>Action</th>
-  </tr>
-  </thead>
-  <tbody>
-  <% @vpn_configuration.network_addresses.each do |network_address| %>
-    <tr>
-      <td><%= network_address.network_address %></td>
-      <td><%= link_to 'Delete', remove_network_address_path(network_address.id), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
-    </tr>
-
+    <div class="form-group">
+      <div class="col-sm-10">
+        <%= form.submit "Update configuration", class: "btn btn-primary" %>
+      </div>
+    </div>
   <% end %>
-  </tbody>
-</table>
 
-<%= form_with model: @network_address, url: add_network_address_path(@vpn_configuration), local: true, html: { class: "form-horizontal" } do |form| %>
-  <div class="form-group">
-    <label class="control-label col-sm-8" for="network_address">Network Address (in Address/Netmask format):</label>
-    <div class="col-sm-10">
-      <%= form.text_field :network_address, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
+  <hr/>
+
+
+  <h4>Allowed Networks</h4>
+  <h6>These Network addresses are for internal routing for wireguard. Also, when creating clients, these IP address will
+    be automatically added to peer configuration</h6>
+
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Address</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% @vpn_configuration.network_addresses.each do |network_address| %>
+      <tr>
+        <td><%= network_address.network_address %></td>
+        <td><%= link_to 'Delete', remove_network_address_path(network_address.id), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+      </tr>
+
+    <% end %>
+    </tbody>
+  </table>
+
+  <%= form_with model: @network_address, url: add_network_address_path(@vpn_configuration), local: true do |form| %>
+    <div class="form-group">
+      <label class="control-label col-sm-8" for="network_address">Network Address (in Address/Netmask format):</label>
+      <div class="row">
+        <div class="col-sm-8">
+          <%= form.text_field :network_address, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
+        </div>
+        <div class="col-sm-4">
+          <%= form.submit "Add network address", class: "btn btn-primary" %>
+        </div>
+      </div>
     </div>
-  </div>
-  <p>
+    <p>
+  <% end %>
+</div>
 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-4">
-      <%= form.submit "Add network address", class: "btn btn-primary" %>
-    </div>
-  </div>
-
-<% end %>
 

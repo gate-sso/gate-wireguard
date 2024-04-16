@@ -11,8 +11,9 @@ class WireguardConfigGenerator
         private_key: private_key,
         public_key: public_key,
         endpoint: endpoint,
-        port: 51820,
-        range: "10.42.5.0"
+        port: 51820, # This is the default port for WireGuard
+        range: "10.42.5.0", # This is the default range for WireGuard
+        interface_name: "wg0",  # This is the default interface name for WireGuard
       }
 
       return keys

@@ -23,6 +23,7 @@ class AdminController < ApplicationController
         @vpn_configuration.wg_port = keys[:port]
         @vpn_configuration.wg_ip_range = keys[:range]
         @vpn_configuration.dns_servers = keys[:dns_servers]
+        @vpn_configuration.wg_interface_name = keys[:interface_name]
         @vpn_configuration.save!
       end
       @vpn_configuration = VpnConfiguration.all.first
@@ -38,6 +39,7 @@ class AdminController < ApplicationController
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
       if @vpn_configuration.update(vpn_configuration_params)
+        # WireguardConfigGenerator.write_server_configuration(@vpn_configuration)
         format.html { redirect_to admin_vpn_configurations_path, notice: "Vpn configuration was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_configuration }
       else

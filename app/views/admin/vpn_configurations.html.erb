@@ -47,10 +47,7 @@
   <% @vpn_configuration.network_addresses.each do |network_address| %>
     <tr>
       <td><%= network_address.network_address %></td>
-      <td><%= def delete_network_address(i)
-                # code here
-              end
-              link_to 'Delete', remove_network_address_path(network_address.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+      <td><%= link_to 'Delete', remove_network_address_path(network_address.id), data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
     </tr>
 
   <% end %>

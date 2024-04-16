@@ -62,7 +62,6 @@
         name:
           - docker-ce
           - docker-ce-cli
-          - docker.io
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin  # Updated to include Docker Compose as an apt package

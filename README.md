@@ -75,12 +75,12 @@ GateWireGuard is rails project, requires rails.
 
 If you are doing local development and you need to sync the file to remote box as they change, following command can be useful for running rails server that automatically gets new files
 
-````shell
+```shell
 watchmedo shell-command \
     --recursive \
     --command='echo "${watch_src_path}"' \
     /some/folder
-````
+```
 
 If you running Ubuntu and have "ruby-full" package, and want to install gems locally, following commands are useful
 
@@ -93,8 +93,21 @@ source ~/.bashrc
 If you want to install newer node framework, required for this repo
 
 ```shell
-
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install 20
 ```
+
+If you are not able to get ruby to build and compile, use rvm on macos and then
+    
+```shell
+brew install ruby-build
+brew install openssl@1.1
+export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig/
+rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
+```
+
+
 
 #### Credits
 

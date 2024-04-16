@@ -1,24 +1,39 @@
 <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal" } do |form| %>
   <div class="form-group">
-    <label class="control-label col-sm-2" for="wg_private_key">Private Key:</label>
-    <div class="col-sm-10">
+    <label class="control-label col-sm-4" for="wg_private_key">Private Key:</label>
+    <div class="col-sm-6">
       <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
     </div>
   </div>
   <p>
 
   <div class="form-group">
-    <label class="control-label col-sm-2" for="wg_public_key">Public Key:</label>
-    <div class="col-sm-10">
+    <label class="control-label col-sm-4" for="wg_public_key">Public Key:</label>
+    <div class="col-sm-6">
       <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
     </div>
   </div>
   <p>
 
   <div class="form-group">
-    <label class="control-label col-sm-2" for="wg_ip_address">IP Address:</label>
-    <div class="col-sm-10">
+    <label class="control-label col-sm-4" for="wg_ip_address">IP Address:</label>
+    <div class="col-sm-6">
+      <%= form.text_field :wg_port, id: "wg_port", class: "form-control", placeholder: "Wireguard port (UDP)" %>
+    </div>
+  </div>
+  <p>
+
+  <div class="form-group">
+    <label class="control-label col-sm-4" for="wg_ip_address">IP Address:</label>
+    <div class="col-sm-6">
       <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address" %>
+    </div>
+  </div>
+  <p>
+  <div class="form-group">
+    <label class="control-label col-sm-4" for="dns_servers">DNS Server(s) (Comma Separated, Leave empty, if not dns server setup):</label>
+    <div class="col-sm-6">
+      <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS Server(s) address" %>
     </div>
   </div>
   <p>
@@ -28,12 +43,11 @@
       <%= form.submit "Save Configuration", class: "btn btn-primary" %>
     </div>
   </div>
-
 <% end %>
 
 <hr/>
-
-<h4>Allowed IP Address</h4>
+<h4>Allowed Networks</h4>
+<h6>These Network addresses are for internal routing for wireguard. Also, when creating clients, these IP address will be automatically added to peer configuration</h6>
 
 
 <table class="table table-striped">

@@ -20,7 +20,8 @@ class AdminController < ApplicationController
         @vpn_configuration = VpnConfiguration.new
         @vpn_configuration.wg_private_key = keys[:private_key]
         @vpn_configuration.wg_public_key = keys[:public_key]
-        @vpn_configuration.wg_ip_address = keys[:endpoint]
+        @vpn_configuration.wg_port = keys[:port]
+        @vpn_configuration.dns_servers = keys[:dns_servers]
         @vpn_configuration.save!
       end
       @vpn_configuration = VpnConfiguration.all.first
@@ -48,6 +49,7 @@ class AdminController < ApplicationController
   def add_network_address
     @vpn_configuration = VpnConfiguration.find(params[:id])
     @network_address = NetworkAddress.new
+    @network_address.network_address = params[:network_address][:network_address]
     @network_address.network_address = params[:network_address][:network_address]
     @network_address.vpn_configuration_id = @vpn_configuration.id
 
@@ -81,7 +83,7 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address)
+    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port)
   end
 
 end

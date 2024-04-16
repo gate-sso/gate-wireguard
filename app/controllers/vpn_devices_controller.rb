@@ -11,12 +11,35 @@ class VpnDevicesController < ApplicationController
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
     @vpn_device = VpnDevice.find(params[:id])
+    if @vpn_device.description.nil? or @vpn_device.description.empty?
+      redirect_to root_path, alert: "Vpn device description is empty."
+    end
+
+    @vpn_configuration = VpnConfiguration.all.first
+    @device_configuaration = {
+      private_key: @vpn_device.private_key,
+      endpoint: @vpn_configuration.wg_ip_address,
+      server_public_key: @vpn_configuration.public_key,
+      server_port: @vpn_configuration.wg_port
+    }
   end
 
   # GET /vpn_devices/new
   def new
     @vpn_device = current_user.vpn_devices.build
-    @config_file = WireGuardConfigGenerator.generate_config(current_user.id)
+    @keys = WireguardConfigGenerator.generate_client_keys
+    @vpn_device.public_key = @keys[:private_key]
+    @vpn_device.private_key = @keys[:public_key]
+    respond_to do |format|
+      if @vpn_device.save!
+        format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
+        format.json { render :show, status: :ok, location: @vpn_device }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: @vpn_device.errors, status: :unprocessable_entity }
+      end
+    end
+
   end
 
   # POST /vpn_devices or /vpn_devices.json
@@ -35,7 +58,7 @@ class VpnDevicesController < ApplicationController
   def update
     respond_to do |format|
       if @vpn_device.update(vpn_device_params)
-        format.html { redirect_to vpn_device_url(@vpn_device), notice: "Vpn device was successfully updated." }
+        format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_device }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -49,7 +72,7 @@ class VpnDevicesController < ApplicationController
     @vpn_device.destroy!
 
     respond_to do |format|
-      format.html { redirect_to vpn_devices_url, notice: "Vpn device was successfully destroyed." }
+      format.html { redirect_to root_path, notice: "Vpn device was successfully destroyed." }
       format.json { head :no_content }
     end
   end

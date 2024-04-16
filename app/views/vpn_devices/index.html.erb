@@ -2,9 +2,27 @@
 
 <h4>Listing all vpn devices</h4>
 <hr/>
-<div id="vpn_devices"> 
+<div id="vpn_devices">
 
+  <table class="table table-striped table-hover">
+    <thead class="table-light">
+    <tr>
+      <th>User</th>
+      <th>Device description</th>
+      <th colspan="2"></th>
+    </tr>
+    </thead>
+
+    <tbody>
     <% @vpn_devices.each do |vpn_device| %>
-      <%= render vpn_device %>
+      <tr>
+        <td><%= vpn_device.user.name %></td>
+        <td><%= vpn_device.description %></td>
+
+        <td><%= link_to 'Destroy', vpn_device, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+      </tr>
     <% end %>
+    </tbody>
+  </table>
+  <br>
 </div>

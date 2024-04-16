@@ -1,7 +1,7 @@
 ## Gate-WireGuard
 
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections.
-
+    
 * You will need to configure an oAuth backend, usually Google. We prefer Google because then you can limit your company domain to sign uop.
 * Install Gate-WireGuard on a VM or Container
 * WireGuard needs UDP port 51820 open, you can configure this on your router/firewall
@@ -70,6 +70,31 @@ GateWireGuard is rails project, requires rails.
   * checkout latest tar, run ./setup_production.sh
   * run ./configure_production.sh (this will create database etc)
 
+
+#### Useful commands
+
+If you are doing local development and you need to sync the file to remote box as they change, following command can be useful for running rails server that automatically gets new files
+
+````shell
+watchmedo shell-command \
+    --recursive \
+    --command='echo "${watch_src_path}"' \
+    /some/folder
+````
+
+If you running Ubuntu and have "ruby-full" package, and want to install gems locally, following commands are useful
+
+```shell
+echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc
+echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+If you want to install newer node framework, required for this repo
+
+```shell
+
+```
 
 #### Credits
 

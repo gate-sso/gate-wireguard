@@ -1,25 +1,63 @@
 <table class="table table-striped table-hover">
   <thead class="table-light">
-    <tr>
-      <th>Description</th>
-      <th>Private Key</th>
-      <th colspan="3"></th>
-    </tr>
+  <tr>
+    <th>Description</th>
+    <th>Private Key</th>
+    <th colspan="3"></th>
+  </tr>
   </thead>
 
   <tbody>
-    <% vpn_devices.each do |vpn_device| %>
+  <% vpn_devices.each do |vpn_device| %>
+    <% if vpn_device.description? %>
       <tr>
+
         <td><%= vpn_device.description %></td>
         <td><%= vpn_device.private_key %></td>
-        <td><%= link_to 'Show', vpn_device, class: 'btn btn-primary btn-sm' %></td>
-        <td><%= link_to 'Edit', edit_vpn_device_path(vpn_device), class: 'btn btn-secondary btn-sm' %></td>
-        <td><%= link_to 'Destroy', vpn_device, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
+        <td><%= link_to 'Show Configuration', vpn_device, class: 'btn btn-primary btn-sm' %></td>
+        <td><%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
       </tr>
     <% end %>
+  <% end %>
   </tbody>
 </table>
 
 <br>
 
-<%= link_to 'New VPN Device', new_vpn_device_path, class: 'btn btn-primary' %>
+
+
+<% vpn_devices_require_updates = vpn_devices.select { |device| (device.description.nil? or device.description.length == 0) } %>
+
+
+<% if vpn_devices_require_updates.count > 0 %>
+
+  <h4>Please add description, devices with no description can't have configuration</h4>
+  <p/>
+  <% vpn_devices_require_updates.each do |vpn_device| %>
+    <%= form_with model: vpn_device do |form| %>
+      <div class="row">
+
+        <div class="col-sm-4">
+          <%= form.text_field :description, id: "description", class: "form-control", placeholder: "Device Description" %>
+        </div>
+
+        <div class="col-sm-3">
+          <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
+        </div>
+        <div class="col-sm-3">
+          <%= form.text_field :public_key, id: "public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
+        </div>
+
+        <div class="col-sm-offset-2 col-sm-2">
+          <%= form.submit "Update", class: "btn btn-primary" %>
+        </div>
+      </div>
+      <p/>
+    <% end %>
+  <% end %>
+
+<% end %>
+
+<% if vpn_devices_require_updates.count == 0 %>
+  <%= link_to 'New VPN Device', new_vpn_device_path, class: 'btn btn-primary' %>
+<% end %>

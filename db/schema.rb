@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
+ActiveRecord::Schema[7.1].define(version: 2024_04_16_044116) do
   create_table "network_addresses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "vpn_configuration_id", null: false
     t.string "network_address"
@@ -36,6 +36,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_04_15_032022) do
     t.string "wg_port"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "dns_servers"
   end
 
   create_table "vpn_devices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

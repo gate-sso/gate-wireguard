@@ -59,7 +59,7 @@
 
     <div class="form-group">
       <div class="col-sm-10">
-        <%= form.submit "Update configuration", class: "btn btn-primary" %>
+        <%= form.submit "Update configuration", data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: "btn btn-primary" %>
       </div>
     </div>
   <% end %>

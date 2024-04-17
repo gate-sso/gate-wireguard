@@ -1,11 +1,23 @@
 class VpnDevice < ApplicationRecord
   belongs_to :user
-  has_one :ip_allocation
+  has_one :ip_allocation, dependent: :destroy
 
-  def setup_device_with_keys_and_ip
+  def setup_device_with_keys
     @keys = WireguardConfigGenerator.generate_client_keys
     self.public_key = @keys[:private_key]
     self.private_key = @keys[:public_key]
+  end
+
+  def generate_qr_code
+    qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.all.first));
+    svg = qr.as_svg(
+      offset: 0,
+      color: '000',
+      shape_rendering: 'crispEdges',
+      module_size: 2,
+      level: 1
+    )
+    svg
   end
 
 

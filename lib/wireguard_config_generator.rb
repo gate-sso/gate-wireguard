@@ -22,6 +22,27 @@ class WireguardConfigGenerator
 
     end
 
+    def generate_client_config(client, vpn_configuration)
+      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
+
+
+
+      config = "[Interface]\n"
+      config += "# User: #{client.user.name}, Device: #{client.description}\n"
+      config += "PrivateKey = #{client.private_key}\n"
+      config += "Address = #{client.ip_allocation.ip_address}\n"
+      config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
+
+      config += "[Peer]\n"
+      config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
+      config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
+      config += "AllowedIPs = #{allowed_ips}\n"
+      config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      config += "\n"
+
+      config
+    end
+
     def generate_client_keys
       # Generate a unique peer configuration for the user
       private_key = `wg genkey`.strip
@@ -71,24 +92,7 @@ class WireguardConfigGenerator
       peer_config
     end
 
-    def generate_client_config(client, vpn_configuration)
-      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
 
-
-      config = "[Interface]\n"
-      config += "PrivateKey = #{client.private_key}\n"
-      config += "Address = #{client.ip_address}\n"
-      config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
-
-      config += "[Peer]\n"
-      config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
-      config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
-      config += "AllowedIPs = #{allowed_ips}\n"
-      config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
-      config += "\n"
-
-      config
-    end
   end
 end
 

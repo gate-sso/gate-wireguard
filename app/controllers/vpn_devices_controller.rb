@@ -17,13 +17,20 @@ class VpnDevicesController < ApplicationController
     @vpn_configuration = VpnConfiguration.all.first
   end
 
+  def download_config
+    @vpn_device = VpnDevice.find(params[:id])
+    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.all.first)
+    send_data config_content, filename: "#{@vpn_device.user.name}_#{@vpn_device.id}_vpn_config.conf"
+  end
+
   # GET /vpn_devices/new
   def new
     @vpn_device = current_user.vpn_devices.build
-    @vpn_device.setup_device_with_keys_and_ip
+    @vpn_device.setup_device_with_keys
 
     respond_to do |format|
       if @vpn_device.save!
+        IpAllocation.allocate_ip(@vpn_device)
         format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_device }
       else
@@ -70,13 +77,14 @@ class VpnDevicesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_vpn_device
-      @vpn_device = VpnDevice.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def vpn_device_params
-      params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_vpn_device
+    @vpn_device = VpnDevice.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def vpn_device_params
+    params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key)
+  end
 end

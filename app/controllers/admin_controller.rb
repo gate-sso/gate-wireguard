@@ -18,6 +18,8 @@ class AdminController < ApplicationController
     end
   end
 
+
+
   def vpn_configurations
     if current_user.admin?
       @vpn_configurations = VpnConfiguration.all

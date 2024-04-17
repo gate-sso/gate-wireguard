@@ -61,6 +61,13 @@ class WireguardConfigGenerator
       config_file = config_dir.join("#{vpn_configuration.wg_interface_name}.conf")
       File.write(config_file, generate_config(vpn_configuration))
 
+      private_key_file = config_dir.join("private.key")
+      File.write(private_key_file, vpn_configuration.wg_private_key)
+
+      public_key_file = config_dir.join("public.key")
+      File.write(public_key_file, vpn_configuration.wg_public_key)
+
+
     end
 
     def generate_config (vpn_configuration)

@@ -1,7 +1,3 @@
-<h2> 
-Hello! <%= @current_user.name %> 
-</h2>
-<hr/>
 
 <% if @current_user.vpn_devices.empty? %>
   <div class="container my-5">
@@ -16,7 +12,17 @@ Hello! <%= @current_user.name %>
     </div>
   </div>
 <% else %>
-  <h4>VPN Devices</h4>
+
+  <div class="border-primary rounded-3">
+    <h2>WireGuard Configuration</h2>
+    <h6>WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
+      minimal and fast. It is a VPN protocol that is very easy to setup and use. It is also very secure and fast. You can
+      read more about WireGuard <a href="https://www.wireguard.com/">here</a></h6>
+
+  </div>
+  <hr>
+
+  <h4>Hello! <%= @current_user.name %>, Your VPN Devices</h4>
 <%= render 'vpn_devices/vpn_devices', vpn_devices: @current_user.vpn_devices %>
 <% end %>
 

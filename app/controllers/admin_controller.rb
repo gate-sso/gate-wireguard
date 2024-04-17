@@ -1,8 +1,14 @@
 class AdminController < ApplicationController
   before_action :require_login
   # before_action :set_vpn_configuration, only: %i[ show update edit ]
+  after_action :update_wireguard_config, only: %i[ update_vpn_configuration add_network_address remove_network_address ]
 
   layout 'admin'
+
+  def index
+    @vpn_configuration = VpnConfiguration.all.first
+
+  end
 
   def users
     if current_user.admin?
@@ -14,8 +20,8 @@ class AdminController < ApplicationController
 
   def vpn_configurations
     if current_user.admin?
-      @vpn_configuration = VpnConfiguration.all
-      if @vpn_configuration.empty?
+      @vpn_configurations = VpnConfiguration.all
+      if @vpn_configurations.empty?
         keys = WireguardConfigGenerator.generate_server_config
         @vpn_configuration = VpnConfiguration.new
         @vpn_configuration.wg_private_key = keys[:private_key]
@@ -24,6 +30,8 @@ class AdminController < ApplicationController
         @vpn_configuration.wg_ip_range = keys[:range]
         @vpn_configuration.dns_servers = keys[:dns_servers]
         @vpn_configuration.wg_interface_name = keys[:interface_name]
+        @vpn_configuration.wg_keep_alive = keys[:keep_alive]
+        @vpn_configuration.wg_forward_interface = keys[:forward_interface]
         @vpn_configuration.save!
       end
       @vpn_configuration = VpnConfiguration.all.first
@@ -38,8 +46,9 @@ class AdminController < ApplicationController
   def update_vpn_configuration
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
+      @vpn_configuration.server_vpn_ip_address = "#{vpn_configuration_params[:wg_ip_range].split('.')[0..2].join('.')}.1" if vpn_configuration_params[:wg_ip_range]
       if @vpn_configuration.update(vpn_configuration_params)
-        # WireguardConfigGenerator.write_server_configuration(@vpn_configuration)
+
         format.html { redirect_to admin_vpn_configurations_path, notice: "Vpn configuration was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_configuration }
       else
@@ -86,7 +95,11 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port, :wg_ip_range)
+    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port, :wg_ip_range, :wg_network_address, :wg_interface_name, :wg_listen_address, :wg_keep_alive, :wg_forward_interface)
+  end
+
+  def update_wireguard_config
+    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
   end
 
 end

@@ -14,6 +14,8 @@ class WireguardConfigGenerator
         port: 51820, # This is the default port for WireGuard
         range: "10.42.5.0", # This is the default range for WireGuard
         interface_name: "wg0",  # This is the default interface name for WireGuard
+        keep_alive: "25", # This is the default keep alive for WireGuard
+        forward_interface: "eth0", # This is the default forward interface for WireGuard
       }
 
       return keys
@@ -30,38 +32,63 @@ class WireguardConfigGenerator
         public_key: public_key
       }
       return keys
-
-      # Write the configuration to a file
-      # config_dir = Rails.root.join('config', 'wireguard')
-      # FileUtils.mkdir_p(config_dir)
-      # config_file = config_dir.join("user_#{user_id}.conf")
-      # File.write(config_file, <<~CONF)
-      #   [Interface]
-      #   PrivateKey = #{private_key}
-      #   Address = 10.0.0.#{rand(2..254)}/24
-      #   DNS = 8.8.8.8, 8.8.4.4
-      #
-      #   [Peer]
-      #   PublicKey = #{public_key}
-      #   Endpoint = #{endpoint}
-      #   AllowedIPs = #{allowed_ips}
-      # CONF
     end
 
-    def write_configuration
+    def write_server_configuration(vpn_configuration)
       config_dir = Rails.root.join('config', 'wireguard')
       FileUtils.mkdir_p(config_dir)
-      config_file = config_dir.join("user_#{user_id}.conf")
-      File.write(config_file, <<~CONF)
-        [Interface]
-        PrivateKey = #{private_key}
-        Address = 10.0.0.#{rand(2..254)}/24
-        DNS =
-        [Peer]
-        PublicKey = #{public_key}
-        Endpoint = #{endpoint}
-        AllowedIPs = #{allowed_ips}
-      CONF
+      config_file = config_dir.join("#{vpn_configuration.wg_interface_name}.conf")
+      File.write(config_file, generate_config(vpn_configuration))
+
+    end
+
+    def generate_config (vpn_configuration)
+      config = "[Interface]\n"
+      config += "PrivateKey = #{vpn_configuration.wg_private_key}\n"
+      config += "Address = #{vpn_configuration.server_vpn_ip_address}\n"
+      config += "ListenPort = #{vpn_configuration.wg_port}\n\n"
+
+      VpnDevice.all.each do |client|
+        config += generate_peer_config(client, vpn_configuration)
+      end
+
+      config
+    end
+
+    private
+
+    def generate_peer_config(client, vpn_configuration)
+
+      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
+
+      peer_config = "[Peer]\n"
+      peer_config += "# User: #{client.user.name}, Device: #{client.description}\n"
+      peer_config += "PublicKey = #{client.public_key}\n"
+      peer_config += "AllowedIPs = #{allowed_ips}\n"
+      peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
+      peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      peer_config += "\n"
+      peer_config
+    end
+
+    def generate_client_config(client, vpn_configuration)
+      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
+
+
+      config = "[Interface]\n"
+      config += "PrivateKey = #{client.private_key}\n"
+      config += "Address = #{client.ip_address}\n"
+      config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
+
+      config += "[Peer]\n"
+      config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
+      config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
+      config += "AllowedIPs = #{allowed_ips}\n"
+      config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      config += "\n"
+
+      config
     end
   end
 end
+

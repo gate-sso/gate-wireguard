@@ -1,27 +1,42 @@
-<table class="table table-striped table-hover">
-  <thead class="table-light">
-  <tr>
-    <th>Description</th>
-    <th>Private Key</th>
-    <th colspan="3"></th>
-  </tr>
-  </thead>
+<% vpn_devices.each do |vpn_device| %>
+  <% if vpn_device.description? %>
 
-  <tbody>
-  <% vpn_devices.each do |vpn_device| %>
-    <% if vpn_device.description? %>
-      <tr>
+    <div class="card">
+      <div class="card-header">
+        <%= vpn_device.description %>
+      </div>
+      <div class="card-body">
+        <div class="container-sm col-sm-8 align-content-start">
+          <div class="row">
+            <div class="col-sm-4">
+              <h5 class="card-title">VPN Server IP</h5>
+            </div>
+            <div class="col-sm-8">
+              <h5 class="card-title"> <%= @vpn_configuration.wg_ip_address %></h5>
+            </div>
+          </div>
 
-        <td><%= vpn_device.description %></td>
-        <td><%= vpn_device.private_key %></td>
-        <td><%= link_to 'Show Configuration', vpn_device, class: 'btn btn-primary btn-sm' %></td>
-        <td><%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
-      </tr>
-    <% end %>
+          <div class="row">
+            <div class="col-sm-4">
+              <h6 class="card-title">Device Private Key</h6>
+            </div>
+            <div class="col-sm-8">
+              <td></td>
+              <h6 class="card-title"> <%= vpn_device.private_key %></h6>
+            </div>
+          </div>
+          <%= link_to 'Show Configuration', vpn_device, class: 'btn btn-primary btn-sm' %>
+          <%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
+
+        </div>
+        <div class="container-sm col-sm-4">
+
+        </div>
+
+      </div>
+    </div>
   <% end %>
-  </tbody>
-</table>
-
+<% end %>
 <br>
 
 

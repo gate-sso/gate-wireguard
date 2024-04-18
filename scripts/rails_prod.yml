@@ -1,0 +1,26 @@
+---
+- name: Install packages and gems on localhost
+  hosts: localhost
+  become: yes  # Use sudo to become the root user
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install necessary packages
+      ansible.builtin.apt:
+        name:
+          - libmysqlclient-dev
+          - mysql-client
+          - ruby-full
+          - nodejs
+          - npm
+          - libyaml-dev
+          - build-essential
+          - default-libmysqlclient-dev
+          - libvips
+          - pkg-config
+          - mysql-server
+        state: present
+

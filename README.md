@@ -41,6 +41,12 @@ GateWireGuard is rails project, requires rails.
    grant all privileges on gate_wireguard_test to 'gate_wireguard'@% identified by 'gate_wireguard';
     ```
 4. Run database migrations and you should be good to go.
+5. If you get mysql root@localhost denied error on fresh install then
+    ```sudo mysql -u root -p
+   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+        FLUSH PRIVILEGES;
+    ```
+
 
 
 ---

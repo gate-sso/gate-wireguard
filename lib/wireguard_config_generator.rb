@@ -30,13 +30,14 @@ class WireguardConfigGenerator
       config = "[Interface]\n"
       config += "# User: #{client.user.name}, Device: #{client.description}\n"
       config += "PrivateKey = #{client.private_key}\n"
-      config += "Address = #{client.ip_allocation.ip_address}\n"
+      config += "Address = #{client.ip_allocation.ip_address}/32\n"
       config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
 
       config += "[Peer]\n"
       config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
       config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
       config += "AllowedIPs = #{allowed_ips}\n"
+      config += "AllowedIPs = #{vpn_configuration.server_vpn_ip_address}/32\n"
       config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
       config += "\n"
 
@@ -73,7 +74,7 @@ class WireguardConfigGenerator
     def generate_config (vpn_configuration)
       config = "[Interface]\n"
       config += "PrivateKey = #{vpn_configuration.wg_private_key}\n"
-      config += "Address = #{vpn_configuration.server_vpn_ip_address}\n"
+      config += "Address = #{vpn_configuration.server_vpn_ip_address}/32\n"
       config += "ListenPort = #{vpn_configuration.wg_port}\n\n"
 
       VpnDevice.all.each do |client|
@@ -87,12 +88,12 @@ class WireguardConfigGenerator
 
     def generate_peer_config(client, vpn_configuration)
 
-      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
+      #allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
 
       peer_config = "[Peer]\n"
       peer_config += "# User: #{client.user.name}, Device: #{client.description}\n"
       peer_config += "PublicKey = #{client.public_key}\n"
-      peer_config += "AllowedIPs = #{allowed_ips}\n"
+      peer_config += "AllowedIPs = #{client.ip_allocation.ip_address}/32\n"
       peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
       peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
       peer_config += "\n"

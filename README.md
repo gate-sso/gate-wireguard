@@ -1,6 +1,7 @@
 ## Gate-WireGuard
 
-Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections.
+Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management 
+tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 
 #### Installation
 

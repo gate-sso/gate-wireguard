@@ -3,9 +3,9 @@ class VpnDevice < ApplicationRecord
   has_one :ip_allocation, dependent: :destroy
 
   def setup_device_with_keys
-    @keys = WireguardConfigGenerator.generate_client_keys
-    self.public_key = @keys[:private_key]
-    self.private_key = @keys[:public_key]
+    @keys = WireguardConfigGenerator.generate_keys
+    self.public_key = @keys[:public_key]
+    self.private_key = @keys[:private_key]
   end
 
   def generate_qr_code

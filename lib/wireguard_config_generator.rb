@@ -3,16 +3,12 @@ require 'open3'
 class WireguardConfigGenerator
   class << self
     def generate_server_config
-      #private_key = `wg genkey`.strip
-      private_key = Open3.capture2('wg genkey')[0].strip
-      #public_key = `echo #{private_key} | wg pubkey`.strip
-      public_key = Open3.capture2('wg pubkey', stdin_data: private_key)[0].strip
-      endpoint = ""
+      keys = generate_keys
 
       keys = {
-        private_key: private_key,
-        public_key: public_key,
-        endpoint: endpoint,
+        private_key: keys[:private_key],
+        public_key: keys[:public_key],
+        endpoint: '',
         port: 51820, # This is the default port for WireGuard
         range: "10.42.5.0", # This is the default range for WireGuard
         interface_name: "wg0",  # This is the default interface name for WireGuard
@@ -49,19 +45,15 @@ class WireguardConfigGenerator
       config
     end
 
-    def generate_client_keys
+    def generate_keys
 
-      #private_key = `wg genkey`.strip
       private_key = Open3.capture2('wg genkey')[0].strip
-      #public_key = `echo #{private_key} | wg pubkey`.strip
       public_key = Open3.capture2('wg pubkey', stdin_data: private_key)[0].strip
-      # Generate a unique peer configuration for the user
 
-      keys = {
+      return {
         private_key: private_key,
         public_key: public_key
       }
-      return keys
     end
 
     def write_server_configuration(vpn_configuration)
@@ -96,14 +88,12 @@ class WireguardConfigGenerator
 
     def generate_peer_config(client, vpn_configuration)
 
-      #allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
-      #peer_config = "# User: #{client.user.name}, Device: #{client.description}\n"
+      peer_config = "# User: #{client.user.name}, Device: #{client.description}\n"
       #peer_config += "[Peer]\n"
-      peer_config = "[Peer]\n"
       peer_config += "PublicKey = #{client.public_key}\n"
       peer_config += "AllowedIPs = #{client.ip_allocation.ip_address}/32\n"
-      #peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
-      #peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
+      peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
       peer_config += "\n\n"
       peer_config
     end

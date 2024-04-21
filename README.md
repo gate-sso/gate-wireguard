@@ -113,6 +113,34 @@ export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig/
 rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
 ```
 
+Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W
+
+Also, once you have wireguard setup, you need to be able to accept the traffic, and source nat it.
+
+```shell
+sudo iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interface>
+sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>
+```
+
+We use snat because we are using a private ip address, and we need to masquerade it to the routable return address for the server.
+
+So our traffic works like this, here is ascii diagram for VPN Client -> VPN Server -> Local Network
+
+```
++-----------------+        +-----------------+        +-----------------+
+|                 |        |                 |        |                 |
+|  VPN Client     |------->|  VPN Server     |------->|  Local Network  |
+|                 |        |                 |        |                 |
++-----------------+        +-----------------+        +-----------------+
+        VPN Traffic       wg0    VPN Traffic  eth0       Local Traffic
+```
+
+so in this case SNAT address will be the eth0 address of the VPN Server, and the return traffic will be sent to the VPN Server, which will then forward it to the VPN Client.
+
+
+
+
 
 
 #### Credits
@@ -120,3 +148,4 @@ rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
 OpenSource is not possible without people contributing to it, The following posts, resources have helped me immensely to get this going off the ground. Some credits to internet reading material for helping me with various tasks
 
 * Ryan Bigg - [Adding bootstrap to rails](https://ryanbigg.com/2023/04/rails-7-bootstrap-css-javascript-with-esbuild) 
+

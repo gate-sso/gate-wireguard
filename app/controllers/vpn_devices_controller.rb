@@ -20,7 +20,7 @@ class VpnDevicesController < ApplicationController
   def download_config
     @vpn_device = VpnDevice.find(params[:id])
     config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.all.first)
-    send_data config_content, filename: "#{@vpn_device.user.name}_#{@vpn_device.id}_vpn_config.conf"
+    send_data config_content, filename: "gate_vpn_config.conf"
   end
 
   # GET /vpn_devices/new

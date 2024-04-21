@@ -3,8 +3,10 @@ require 'open3'
 class WireguardConfigGenerator
   class << self
     def generate_server_config
-      private_key = `wg genkey`.strip
-      public_key = `echo #{private_key} | wg pubkey`.strip
+      #private_key = `wg genkey`.strip
+      private_key = Open3.capture2('wg genkey')[0].strip
+      #public_key = `echo #{private_key} | wg pubkey`.strip
+      public_key = Open3.capture2('wg pubkey', stdin_data: private_key)[0].strip
       endpoint = ""
 
       keys = {
@@ -27,27 +29,33 @@ class WireguardConfigGenerator
 
 
 
+      #config = "# User: #{client.user.name}, Device: #{client.description}\n"
+      #config += "[Interface]\n"
       config = "[Interface]\n"
-      config += "# User: #{client.user.name}, Device: #{client.description}\n"
       config += "PrivateKey = #{client.private_key}\n"
-      config += "Address = #{client.ip_allocation.ip_address}/32\n"
+      config += "Address = #{client.ip_allocation.ip_address}/24\n"
       config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
 
       config += "[Peer]\n"
       config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
       config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
-      config += "AllowedIPs = #{allowed_ips}\n"
       config += "AllowedIPs = #{vpn_configuration.server_vpn_ip_address}/32\n"
-      config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      vpn_configuration.network_addresses.each { |ip_address|
+        config += "AllowedIPs = #{ip_address.network_address}\n"
+      }
+      #config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
       config += "\n"
 
       config
     end
 
     def generate_client_keys
+
+      #private_key = `wg genkey`.strip
+      private_key = Open3.capture2('wg genkey')[0].strip
+      #public_key = `echo #{private_key} | wg pubkey`.strip
+      public_key = Open3.capture2('wg pubkey', stdin_data: private_key)[0].strip
       # Generate a unique peer configuration for the user
-      private_key = `wg genkey`.strip
-      public_key = `echo #{private_key} | wg pubkey`.strip
 
       keys = {
         private_key: private_key,
@@ -74,8 +82,8 @@ class WireguardConfigGenerator
     def generate_config (vpn_configuration)
       config = "[Interface]\n"
       config += "PrivateKey = #{vpn_configuration.wg_private_key}\n"
-      config += "Address = #{vpn_configuration.server_vpn_ip_address}/32\n"
-      config += "ListenPort = #{vpn_configuration.wg_port}\n\n"
+      config += "ListenPort = #{vpn_configuration.wg_port}\n"
+      config += "Address = #{vpn_configuration.server_vpn_ip_address}/24 \n\n"
 
       VpnDevice.all.each do |client|
         config += generate_peer_config(client, vpn_configuration)
@@ -89,14 +97,14 @@ class WireguardConfigGenerator
     def generate_peer_config(client, vpn_configuration)
 
       #allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(", ")
-
+      #peer_config = "# User: #{client.user.name}, Device: #{client.description}\n"
+      #peer_config += "[Peer]\n"
       peer_config = "[Peer]\n"
-      peer_config += "# User: #{client.user.name}, Device: #{client.description}\n"
       peer_config += "PublicKey = #{client.public_key}\n"
       peer_config += "AllowedIPs = #{client.ip_allocation.ip_address}/32\n"
-      peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
-      peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
-      peer_config += "\n"
+      #peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
+      #peer_config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      peer_config += "\n\n"
       peer_config
     end
 

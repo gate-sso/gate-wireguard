@@ -28,6 +28,17 @@
                 <h6 class="card-title"> <%= vpn_device.private_key %></h6>
               </div>
             </div>
+
+            <div class="row">
+              <div class="col-sm-4">
+                <h6 class="card-title">Device Public Key</h6>
+              </div>
+              <div class="col-sm-8">
+                <td></td>
+                <h6 class="card-title"> <%= vpn_device.public_key %></h6>
+              </div>
+            </div>
+
             <div class="row">
               <div class="col-sm-4">
                 <h6 class="card-title">Device IP Address</h6>
@@ -51,7 +62,7 @@
             <%= link_to 'Download Configuration',download_config_path(vpn_device.id), class: 'btn btn-primary btn-sm' %>
             <%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
           </div>
-          <div class="container-sm col-sm-4 align-content-end">
+          <div class="container-sm col-sm-4 align-content-end pt-2 pb-2">
             <%= raw vpn_device.generate_qr_code %>
           </div>
         </div>
@@ -81,10 +92,10 @@
         </div>
 
         <div class="col-sm-3">
-          <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
+          <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Private Key" %>
         </div>
         <div class="col-sm-3">
-          <%= form.text_field :public_key, id: "public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
+          <%= form.text_field :public_key, id: "public_key", class: "form-control", disabled: true, placeholder: "Public Key" %>
         </div>
 
         <div class="col-sm-offset-2 col-sm-2">

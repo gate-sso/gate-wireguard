@@ -7,7 +7,9 @@ class AdminController < ApplicationController
 
   def index
     @vpn_configuration = VpnConfiguration.all.first
-
+    if @vpn_configuration.nil?
+      redirect_to admin_vpn_configurations_path
+    end
   end
 
   def users

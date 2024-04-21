@@ -2,7 +2,7 @@
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y ansible wget curl
+sudo apt-get install -y ansible wget curl rsync git
 
 export NVM_DIR="$HOME/.nvm"
 echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc

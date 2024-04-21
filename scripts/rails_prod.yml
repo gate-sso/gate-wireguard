@@ -14,8 +14,6 @@
           - libmysqlclient-dev
           - mysql-client
           - ruby-full
-          - nodejs
-          - npm
           - libyaml-dev
           - build-essential
           - default-libmysqlclient-dev

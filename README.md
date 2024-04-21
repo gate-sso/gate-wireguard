@@ -115,6 +115,12 @@ rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
 
 Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W
 
+```shell
+incus config device add gate <udp51820> proxy listen=udp:0.0.0.0:51820 connect=udp:0.0.0.0:51820
+incus config device add gate tcp8080 proxy listen=tcp:0.0.0.0:8080 connect=tcp:0.0.0.0:8080
+
+```
+    
 Also, once you have wireguard setup, you need to be able to accept the traffic, and source nat it.
 
 ```shell

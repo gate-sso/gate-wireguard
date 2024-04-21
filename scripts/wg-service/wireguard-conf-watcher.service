@@ -1,0 +1,22 @@
+#This service installs file watcher for wireguard configuration file and reloads the service when the file changes
+#This file should be installed in /etc/systemd/system/wg_conf_watcher.service
+#after than please execute following commands to ensure that this service works
+#sudo systemctl daemon-reload
+#sudo systemctl enable wg-conf-watcher.service
+#sudo systemctl start wg-conf-watcher.service
+#make sure that you have copied the wg_conf_watcher.sh file to /etc/wireguard/wg_conf_watcher.sh
+#
+# To know the status
+# sudo systemctl status wg-conf-watcher.service
+# To know details of the service user journnal
+# sudo journalctl -u wg-conf-watcher.service
+
+[Unit]
+Description=Monitor WireGuard configuration file and reload service
+
+[Service]
+ExecStart=/etc/wireguard/wg_conf_watcher.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/chunky_png-1.4.0.iml" filepath="$PROJECT_DIR$/.idea/modules/chunky_png-1.4.0.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/gate-wireguard.iml" filepath="$PROJECT_DIR$/.idea/gate-wireguard.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nokogiri-1.16.4-x86_64-darwin.iml" filepath="$PROJECT_DIR$/.idea/modules/nokogiri-1.16.4-x86_64-darwin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rqrcode-2.2.0.iml" filepath="$PROJECT_DIR$/.idea/modules/rqrcode-2.2.0.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rqrcode_core-1.2.0.iml" filepath="$PROJECT_DIR$/.idea/modules/rqrcode_core-1.2.0.iml" />
     </modules>
   </component>
 </project>

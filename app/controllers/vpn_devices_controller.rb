@@ -57,6 +57,7 @@ class VpnDevicesController < ApplicationController
   def update
     respond_to do |format|
       if @vpn_device.update(vpn_device_params)
+        WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
         format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_device }
       else

@@ -89,7 +89,7 @@ class WireguardConfigGenerator
     def generate_peer_config(client, vpn_configuration)
 
       peer_config = "# User: #{client.user.name}, Device: #{client.description}\n"
-      #peer_config += "[Peer]\n"
+      peer_config += "[Peer]\n"
       peer_config += "PublicKey = #{client.public_key}\n"
       peer_config += "AllowedIPs = #{client.ip_allocation.ip_address}/32\n"
       peer_config += "# Optionally, add a PersistentKeepalive for NAT traversal\n"
@@ -97,7 +97,6 @@ class WireguardConfigGenerator
       peer_config += "\n\n"
       peer_config
     end
-
 
   end
 end

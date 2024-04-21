@@ -3,10 +3,12 @@
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections.
 
 #### Installation
+
+##### Source Code
 * Checkout the latest source code, and run scripts/rails_prod.sh
-* Now, change the config/database.yml to point to your mysql server
-* You might have to compile assets, at this moment run rails assets:precompile, assuming you know how to production setup rails
-* Setup a reverse proxy to point to the port 3000, or use puma to run on port 80, we use caddy as reverse proxy for this project
+* Add changes the config/database.yml to point to your mysql server
+
+##### Google Auth
 * Go to Google cloud console, and create a new project, and enable oAuth for this project, make note of client id and secret.
 * Create .env file in the root of the project, and add the following
 ```shell
@@ -14,8 +16,14 @@ GOOGLE_CLIENT_ID=<client_id>
 GOOGLE_CLIENT_SECRET=<client_secret>
 GOOGLE_HOSTED_DOMAINS=<your_domain>
 ```
-* Run the server, and you should be able to sign up using google oauth, and it will sign you uo and make you admin.
-* Goto configuration page and it should show you the wireguard configuration, edit settings and you should be good to go.
+
+##### Networking, Server setup
+* Just setup caddy to point to gate-wireguard server. Simple caddy file can be like this
+````shell
+gate.<your domain name> {
+  reverse_proxy 127.0.0.1:8080
+}
+````
 * Configure wg-service. Checkout wireguard-conf-watcher.service file for more details.
 * You will need to enable port 51820 on your firewall, and forward it to the server running gate-wireguard
 * Wireguard will need traffic routing and snat as well You can use the following iptables rules to get it working
@@ -24,6 +32,12 @@ sudo iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
 sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interface>
 sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>
 ```
+
+##### WireGuard
+* goto gate.<yourdomain> and sign in using allowed domain name, check default configuration, add your public end point, private ip address, click "Save & Generate configuration"
+* Add your local network address, beware if you enter 0.0.0.0 it will route all traffic through vpn and you will need to setup a DNS server as well.
+* Then click <Gate> and add your device, download the configuration file, and use it to connect to the VPN server.
+* Standard wireguard clients work with this setup, you can use wireguard on linux, windows, macos, ios, android etc. Please [click here](https://www.wireguard.com/install/) for more information on clients
 
 General traffic setup should look like this, here is ascii diagram for VPN Client -> VPN Server -> Local Network
 

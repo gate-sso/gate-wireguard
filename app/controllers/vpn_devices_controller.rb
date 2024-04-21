@@ -1,6 +1,7 @@
 class VpnDevicesController < ApplicationController
   before_action :set_vpn_device, only: %i[ show edit update destroy ]
   before_action :require_login
+  after_action :update_wireguard_config, only: %i[ update destroy ]
   layout 'admin'
 
   # GET /vpn_devices or /vpn_devices.json
@@ -57,7 +58,6 @@ class VpnDevicesController < ApplicationController
   def update
     respond_to do |format|
       if @vpn_device.update(vpn_device_params)
-        WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
         format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
         format.json { render :show, status: :ok, location: @vpn_device }
       else
@@ -70,7 +70,6 @@ class VpnDevicesController < ApplicationController
   # DELETE /vpn_devices/1 or /vpn_devices/1.json
   def destroy
     @vpn_device.destroy!
-
     respond_to do |format|
       format.html { redirect_to root_path, notice: "Vpn device was successfully destroyed." }
       format.json { head :no_content }
@@ -87,5 +86,9 @@ class VpnDevicesController < ApplicationController
   # Only allow a list of trusted parameters through.
   def vpn_device_params
     params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key)
+  end
+
+  def update_wireguard_config
+    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
   end
 end

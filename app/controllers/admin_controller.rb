@@ -1,9 +1,10 @@
 class AdminController < ApplicationController
   before_action :require_login
   # before_action :set_vpn_configuration, only: %i[ show update edit ]
-  after_action :update_wireguard_config, only: %i[ update_vpn_configuration add_network_address remove_network_address ]
 
   layout 'admin'
+  after_action :update_wireguard_config, only: %i[ update_vpn_configuration add_network_address remove_network_address ]
+
 
   def index
     @vpn_configuration = VpnConfiguration.all.first

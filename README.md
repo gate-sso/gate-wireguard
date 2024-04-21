@@ -1,38 +1,52 @@
 ## Gate-WireGuard
 
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections.
-    
-* You will need to configure an oAuth backend, usually Google. We prefer Google because then you can limit your company domain to sign uop.
-* Install Gate-WireGuard on a VM or Container
-* WireGuard needs UDP port 51820 open, you can configure this on your router/firewall
 
-## Setup
+#### Installation
+* Checkout the latest source code, and run scripts/rails_prod.sh
+* Now, change the config/database.yml to point to your mysql server
+* You might have to compile assets, at this moment run rails assets:precompile, assuming you know how to production setup rails
+* Setup a reverse proxy to point to the port 3000, or use puma to run on port 80, we use caddy as reverse proxy for this project
+* Go to Google cloud console, and create a new project, and enable oAuth for this project, make note of client id and secret.
+* Create .env file in the root of the project, and add the following
+```shell
+GOOGLE_CLIENT_ID=<client_id>
+GOOGLE_CLIENT_SECRET=<client_secret>
+GOOGLE_HOSTED_DOMAINS=<your_domain>
+```
+* Run the server, and you should be able to sign up using google oauth, and it will sign you uo and make you admin.
+* Goto configuration page and it should show you the wireguard configuration, edit settings and you should be good to go.
+* Configure wg-service. Checkout wireguard-conf-watcher.service file for more details.
+* You will need to enable port 51820 on your firewall, and forward it to the server running gate-wireguard
+* Wireguard will need traffic routing and snat as well You can use the following iptables rules to get it working
+```shell
+sudo iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
+sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interface>
+sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>
+```
 
-We configure the system using ansible. Hopefully this will work
+General traffic setup should look like this, here is ascii diagram for VPN Client -> VPN Server -> Local Network
 
-````bash
-sudo apt-get install ansible wget curl 
-wget <gate-sso> latest 
-tar -czvf /path/to/gate-wireguard-latest.tar.gz 
-cd gate-wireguard
-````
-execute following command if you want to do docker setup.
-````bash
-sudo ./setup.sh docker
-````
-execute following command if you want to do no docker setup. you will need to install mysql-server
-````shell
-sudo ./setup.sh docker
-````
+```
++-----------------+        +-----------------+        +-----------------+
+|                 |        |                 |        |                 |
+|  VPN Client     |------->|  VPN Server     |------->|  Local Network  |
+|                 |        |                 |        |                 |
++-----------------+        +-----------------+        +-----------------+
+        VPN Traffic       wg0    VPN Traffic  eth0       Local Traffic
+```
+
 
 ## Development
 
-GateWireGuard is rails project, requires rails.
-1. Install required libraries 
-   |
-    ```sudo apt-get install libmysqlclient-dev mysql-client git wget nodejs ruby-full docker.io```
+1. Checkout gate-wireguard, and run the following commands to get it running
+
+````bash
+scripts/rails_setup.sh
+````
 2. Docker in only required if you do not want to install mysql on local server, else you can just install mysql server
-3. Setup gate_wireguard_dev database in mysql
+   * to run docker, just run ```docker compose up db -d``` and you are good to go
+3. Setup gate_wireguard_dev database in mysql for non-root users, for dev you can use root user as well.
     |
     ```sql
    create database gate_wireguard_dev;
@@ -40,14 +54,12 @@ GateWireGuard is rails project, requires rails.
    create database gate_wireguard_test;
    grant all privileges on gate_wireguard_test to 'gate_wireguard'@% identified by 'gate_wireguard';
     ```
-4. Run database migrations and you should be good to go.
-5. If you get mysql root@localhost denied error on fresh install then
+4. Run ```rails db:create db:migrate``` to create the database and run the migrations
+5. If you rather want to use root user root@localhost just do the following.
     ```sudo mysql -u root -p
    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
         FLUSH PRIVILEGES;
     ```
-
-
 
 ---
 #### Deployment Summary

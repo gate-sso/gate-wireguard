@@ -34,6 +34,22 @@ sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interfa
 sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>
 ```
 
+
+###### MySql Errors on Mac
+````bash
+brew install gcc zstd openssl mysql-client
+# Try this
+bundle config set --global build.mysql2 --with-mysql-config=$(brew --prefix mysql-client)/bin/mysql_config --with-ldflags="-L$(brew --prefix zstd)/lib -L$(brew --prefix openssl)/lib"
+bundle install
+
+## If this does not work then following should work
+export LDFLAGS="-L/opt/homebrew/opt/openssl@3/lib"export CPPFLAGS="-I/opt/homebrew/opt/openssl@3/include"export LIBRARY_PATH=$LIBRARY_PATH:$(brew --prefix zstd)/lib/gem install mysql2 -v '0.5.4' -- --with-opt-dir=$(brew --prefix openssl) --with-ldflags=-L$(brew --prefix zstd)
+
+## You should't have to do the following, but if still the compile fails then 
+export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"export LDFLAGS="-L/opt/homebrew/opt/mysql-client/lib"export CPPFLAGS="-I/opt/homebrew/opt/mysql-client/include"gem install mysql2 -v '0.5.4'
+bundle install
+
+````
 ##### WireGuard
 * goto gate.<yourdomain> and sign in using allowed domain name, check default configuration, add your public end point, private ip address, click "Save & Generate configuration"
 * Add your local network address, beware if you enter 0.0.0.0 it will route all traffic through vpn and you will need to setup a DNS server as well.

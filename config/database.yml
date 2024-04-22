@@ -50,6 +50,6 @@ test:
 #
 production:
   <<: *default
-  database: gate_wireguard_production
-  username: gate_wireguard
+  database: <%= ENV["GATE_WIREGUARD_DATABASE"]%>
+  username: <%= ENV["GATE_WIREGUARD_DATABASE_USER"]%>
   password: <%= ENV["GATE_WIREGUARD_DATABASE_PASSWORD"] %>

@@ -3,7 +3,79 @@
     <h5>VPN Device configuration</h5>
     <p style="color: red"><%= alert %></p>
     <p style="color: green"><%= notice %></p>
-    <%= @vpn_device.description %>
+    
 <p style="color: green"><%= notice %></p>
-    <%= @vpn_device.description %>
+  
+    <% if @vpn_device.description? %>
+
+    <div class="card">
+      <div class="card-header">
+        <%= @vpn_device.description %>
+      </div>
+      <div class="card-body">
+        <div class="row">
+
+
+          <div class="container-sm col-sm-8 align-content-start">
+            <div class="row">
+              <div class="col-sm-4">
+                <h5 class="card-title">VPN Server IP</h5>
+              </div>
+              <div class="col-sm-8">
+                <h5 class="card-title"> <%= @vpn_configuration.wg_ip_address %></h5>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-4">
+                <h6 class="card-title">Device Private Key</h6>
+              </div>
+              <div class="col-sm-8">
+                <td></td>
+                <h6 class="card-title"> <%= @vpn_device.private_key %></h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-4">
+                <h6 class="card-title">Device Public Key</h6>
+              </div>
+              <div class="col-sm-8">
+                <td></td>
+                <h6 class="card-title"> <%= @vpn_device.public_key %></h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-sm-4">
+                <h6 class="card-title">Device IP Address</h6>
+              </div>
+              <div class="col-sm-8">
+                <td></td>
+                <h6 class="card-title"> <%= @vpn_device.ip_allocation.ip_address %></h6>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-4">
+                <h6 class="card-title">Accessible remote networks</h6>
+              </div>
+              <div class="col-sm-8">
+                <td></td>
+                <h6 class="card-title"> <%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></h6>
+              </div>
+            </div>
+            <br/>
+
+            <%= link_to 'Download Configuration',download_config_path(@vpn_device.id), class: 'btn btn-primary btn-sm' %>
+            <%= link_to 'Remove Configuration', @vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
+          </div>
+          <div class="container-sm col-sm-4 align-content-end pt-2 pb-2">
+            <%= raw @vpn_device.generate_qr_code %>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <br/>
+  <% end %>
 </div>

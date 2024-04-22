@@ -1,7 +1,7 @@
 ---
 - name: Install packages and gems on localhost
   hosts: localhost
-  become: yes  # Use sudo to become the root user
+  become: yes # Use sudo to become the root user
 
   tasks:
     - name: Update apt cache
@@ -21,23 +21,27 @@
           - default-libmysqlclient-dev
           - libvips
           - pkg-config
+          - inotify-tools
+          - openssh-server
+          - wireguard
+          - net-tools
         state: present
 
     - name: Install Rails gem
       ansible.builtin.gem:
         name: rails
         state: present
-        user_install: no  # Install the gem system-wide
+        user_install: no # Install the gem system-wide
 
     - name: Install Bundler gem
       ansible.builtin.gem:
         name: bundler
         state: present
-        user_install: no  # Install the gem system-wide
+        user_install: no # Install the gem system-wide
 
     - name: Install required packages for Docker
       ansible.builtin.apt:
-        name: 
+        name:
           - apt-transport-https
           - ca-certificates
           - curl
@@ -64,7 +68,7 @@
           - docker-ce-cli
           - containerd.io
           - docker-buildx-plugin
-          - docker-compose-plugin  # Updated to include Docker Compose as an apt package
+          - docker-compose-plugin # Updated to include Docker Compose as an apt package
         state: present
         update_cache: yes
 

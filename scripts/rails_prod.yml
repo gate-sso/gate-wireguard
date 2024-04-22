@@ -1,7 +1,7 @@
 ---
 - name: Install packages and gems on localhost
   hosts: localhost
-  become: yes  # Use sudo to become the root user
+  become: yes # Use sudo to become the root user
 
   tasks:
     - name: Update apt cache
@@ -19,10 +19,11 @@
           - default-libmysqlclient-dev
           - libvips
           - pkg-config
-          - mysql-serverA
+          - mysql-server
           - inotify-tools
           - openssh-server
           - wireguard
+          - net-tools
         state: present
     - name: Enable service ssh server and ensure it is not masked
       ansible.builtin.systemd_service:
@@ -38,4 +39,3 @@
       ansible.builtin.systemd:
         name: wg-quick@wg0
         state: enabled
-

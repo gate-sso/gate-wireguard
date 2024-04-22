@@ -91,16 +91,19 @@
           <%= form.text_field :description, id: "description", class: "form-control", placeholder: "Device Description" %>
         </div>
 
-        <div class="col-sm-3">
+        <div class="col-sm-4">
           <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Private Key" %>
         </div>
-        <div class="col-sm-3">
-          <%= form.text_field :public_key, id: "public_key", class: "form-control", disabled: true, placeholder: "Public Key" %>
-        </div>
 
-        <div class="col-sm-offset-2 col-sm-2">
+        <div class="col-sm-4">
+
+        <div class="d-grid gap-4 d-md-block">
           <%= form.submit "Update", class: "btn btn-primary" %>
+       
+          <td><%= link_to 'Remove', vpn_device, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %></td>
         </div>
+        </div> 
+                
       </div>
       <p/>
     <% end %>

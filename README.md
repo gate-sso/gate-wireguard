@@ -1,5 +1,7 @@
 ## Gate-WireGuard
 
+###### Wireguard Web UI with Google Single Sign on for wireguard management.
+
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management 
 tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 

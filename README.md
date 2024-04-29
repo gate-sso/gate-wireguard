@@ -20,6 +20,16 @@ GOOGLE_CLIENT_SECRET=<client_secret>
 GOOGLE_HOSTED_DOMAINS=<your_domain>
 ```
 
+##### Install gem in local bundler
+* Configure bundle to install packages locally by running the following command
+```shell
+bundle config set path '.local'
+```
+* Install the gems by running the following command
+```shell
+bundle install
+```
+
 ##### Networking, Server setup
 * Just setup caddy to point to gate-wireguard server. Simple caddy file can be like this
 ````shell

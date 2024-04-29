@@ -1,5 +1,7 @@
 ## Gate-WireGuard
 
+###### Wireguard Web UI with Google Single Sign on for wireguard management.
+
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management 
 tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 
@@ -154,7 +156,13 @@ brew install ruby-build
 brew install openssl@1.1
 export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig/
 rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
+#for rbenv
+RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl@1.1
+rbenv install 3.0.2
 ```
+
+Also, please read brew's post install messages to be able to install ruby 3.0.2 successfully
+
 
 Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W
 

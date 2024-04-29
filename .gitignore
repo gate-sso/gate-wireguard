@@ -12,6 +12,8 @@ rerun.txt
 pickle-email-*.html
 
 
+
+
 #ignore wireguard configuration
 /config/wireguard
 # Ignore all logfiles and tempfiles.

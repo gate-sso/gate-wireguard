@@ -156,7 +156,13 @@ brew install ruby-build
 brew install openssl@1.1
 export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig/
 rvm install 3.0.2 --with-openssl-dir=/usr/local/opt/openssl@1.1
+#for rbenv
+RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl@1.1
+rbenv install 3.0.2
 ```
+
+Also, please read brew's post install messages to be able to install ruby 3.0.2 successfully
+
 
 Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W
 

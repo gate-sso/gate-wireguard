@@ -2,7 +2,6 @@ class IpAllocation < ApplicationRecord
   validates :ip_address, presence: true, uniqueness: true
   belongs_to :vpn_device
 
-
   def self.next_available_ip
     # Start checking from .2 as .1 is reserved for the server
     (2..254).each do |i|

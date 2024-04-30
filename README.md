@@ -62,6 +62,22 @@ export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"export LDFLAGS="-L/opt/hom
 bundle install
 
 ````
+
+and use following directives as well.
+
+For compilers to find mysql-client you may need to set:
+
+````bash
+export LDFLAGS="-L/usr/local/opt/mysql-client/lib"
+export CPPFLAGS="-I/usr/local/opt/mysql-client/include"
+````
+
+For pkg-config to find mysql-client you may need to set:
+
+````bash
+export PKG_CONFIG_PATH="/usr/local/opt/mysql-client/lib/pkgconfig"
+````
+
 ##### WireGuard
 * goto gate.<yourdomain> and sign in using allowed domain name, check default configuration, add your public end point, private ip address, click "Save & Generate configuration"
 * Add your local network address, beware if you enter 0.0.0.0 it will route all traffic through vpn and you will need to setup a DNS server as well.
@@ -161,7 +177,7 @@ nvm install 20
 
 If you are not able to get ruby to build and compile, use rvm on macos and then
     
-```shell
+```bash
 brew install ruby-build
 brew install openssl@1.1
 export PKG_CONFIG_PATH=/usr/local/opt/openssl@1.1/lib/pkgconfig/
@@ -176,7 +192,7 @@ Also, please read brew's post install messages to be able to install ruby 3.0.2 
 
 Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W
 
-```shell
+```bash
 incus config device add gate <udp51820> proxy listen=udp:0.0.0.0:51820 connect=udp:0.0.0.0:51820
 incus config device add gate tcp8080 proxy listen=tcp:0.0.0.0:8080 connect=tcp:0.0.0.0:8080
 
@@ -184,7 +200,7 @@ incus config device add gate tcp8080 proxy listen=tcp:0.0.0.0:8080 connect=tcp:0
     
 Also, once you have wireguard setup, you need to be able to accept the traffic, and source nat it.
 
-```shell
+```bash
 sudo iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
 sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interface>
 sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>

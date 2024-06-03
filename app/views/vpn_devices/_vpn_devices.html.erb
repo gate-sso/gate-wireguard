@@ -1,9 +1,54 @@
+<% vpn_devices_require_updates = vpn_devices.select { |device| (device.description.nil? or device.description.length == 0) } %>
+<% if vpn_devices_require_updates.count > 0 %>
+  <br/>
+  <h6>Please add description to the followig device(s), devices with no description can't have configuration</h6>
+  <% vpn_devices_require_updates.each do |vpn_device| %>
+    <%= form_with model: vpn_device do |form| %>
+      <div class="row">
+        <div class="col-md-3">
+          <%= form.text_field :description, id: "description", class: "form-control", placeholder: "Device Description" %>
+        </div>
+
+        <div class="col-md-3">
+          <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Private Key" %>
+        </div>
+        <div class="col-md-3">
+          <% if @current_user.admin %>
+            <div class="form-check">
+              <%= form.check_box(:node, class: "form-check-input") %>
+            <label class="form-check-label" for="flexCheckDefault">
+              &nbsp Is infra node?
+            </label>
+            </div>
+
+          <% end %>
+        </div>
+        <div class="col-md-3">
+          <div class="d-grid gap-4 d-md-block">
+            <%= form.submit "Update", class: "btn btn-primary" %>
+            <td><%= link_to 'Remove', vpn_device, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %></td>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<% if vpn_devices_require_updates.count == 0 %>
+  <%= link_to 'Add a VPN Device', new_vpn_device_path, class: 'btn btn-primary btn-sm' %>
+<% end %>
+<br>
+<br>
+
 <% vpn_devices.each do |vpn_device| %>
   <% if vpn_device.description? %>
 
     <div class="card">
       <div class="card-header">
         <%= vpn_device.description %>
+        <% if vpn_device.node %>
+          (Infrastructure node)
+        <% end %>
       </div>
       <div class="card-body">
         <div class="row">
@@ -59,8 +104,12 @@
             </div>
             <br/>
 
-            <%= link_to 'Download Configuration',download_config_path(vpn_device.id), class: 'btn btn-primary btn-sm' %>
-            <%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
+            <%= link_to 'Download Configuration', download_config_path(vpn_device.id), class: 'btn btn-primary btn-sm' %>
+
+
+            <% unless vpn_device.node %>
+              <%= link_to 'Remove Configuration', vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %>
+            <% end %>
           </div>
           <div class="container-sm col-sm-4 align-content-end pt-2 pb-2">
             <%= raw vpn_device.generate_qr_code %>
@@ -72,45 +121,6 @@
     <br/>
   <% end %>
 <% end %>
-<br>
 
 
 
-<% vpn_devices_require_updates = vpn_devices.select { |device| (device.description.nil? or device.description.length == 0) } %>
-
-
-<% if vpn_devices_require_updates.count > 0 %>
-
-  <h4>Please add description, devices with no description can't have configuration</h4>
-  <p/>
-  <% vpn_devices_require_updates.each do |vpn_device| %>
-    <%= form_with model: vpn_device do |form| %>
-      <div class="row">
-
-        <div class="col-sm-4">
-          <%= form.text_field :description, id: "description", class: "form-control", placeholder: "Device Description" %>
-        </div>
-
-        <div class="col-sm-4">
-          <%= form.text_field :private_key, id: "private_key", class: "form-control", disabled: true, placeholder: "Private Key" %>
-        </div>
-
-        <div class="col-sm-4">
-
-        <div class="d-grid gap-4 d-md-block">
-          <%= form.submit "Update", class: "btn btn-primary" %>
-       
-          <td><%= link_to 'Remove', vpn_device, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger' %></td>
-        </div>
-        </div> 
-                
-      </div>
-      <p/>
-    <% end %>
-  <% end %>
-
-<% end %>
-
-<% if vpn_devices_require_updates.count == 0 %>
-  <%= link_to 'New VPN Device', new_vpn_device_path, class: 'btn btn-primary' %>
-<% end %>

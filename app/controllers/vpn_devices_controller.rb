@@ -6,12 +6,20 @@ class VpnDevicesController < ApplicationController
 
   # GET /vpn_devices or /vpn_devices.json
   def index
-    @vpn_devices = VpnDevice.all
+    if params["nodes"].present?
+      @nodes = true;
+      # find vpn devices where node variable is true
+      @vpn_devices = VpnDevice.where(node: true)
+    else
+      @vpn_devices = VpnDevice.all
+    end
   end
 
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
-
+    if params["nodes"].present?
+      @nodes = true;
+    end
     if @vpn_device.description.nil? or @vpn_device.description.empty?
       redirect_to root_path, alert: "Vpn device description is empty."
     end
@@ -39,7 +47,6 @@ class VpnDevicesController < ApplicationController
         format.json { render json: @vpn_device.errors, status: :unprocessable_entity }
       end
     end
-
   end
 
   # POST /vpn_devices or /vpn_devices.json
@@ -85,7 +92,7 @@ class VpnDevicesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_device_params
-    params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key)
+    params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key, :node)
   end
 
   def update_wireguard_config

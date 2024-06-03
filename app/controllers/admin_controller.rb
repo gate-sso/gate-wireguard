@@ -88,7 +88,6 @@ class AdminController < ApplicationController
       format.html { redirect_to "/admin/vpn_configurations", notice: "Network address was deleted" }
       format.json { head :no_content }
     end
-
   end
 
   private
@@ -100,7 +99,7 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.require(:vpn_configuration).permit(:wg_private_key, :wg_public_key, :wg_ip_address, :dns_servers, :wg_port, :wg_ip_range, :wg_network_address, :wg_interface_name, :wg_listen_address, :wg_keep_alive, :wg_forward_interface)
+    params.require(:vpn_configuration).permit(:wg_ip_address, :dns_servers, :wg_port, :wg_ip_range, :wg_network_address, :wg_interface_name, :wg_listen_address, :wg_keep_alive, :wg_forward_interface)
   end
 
   def update_wireguard_config

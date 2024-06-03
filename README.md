@@ -44,6 +44,9 @@ gate.<your domain name> {
 sudo iptables -A FORWARD -i wg0 -o eth0 -j ACCEPT
 sudo iptables -t nat -A POSTROUTING -o eth0 -j SNAT --to-source <the lan interface>
 sudo iptables -t nat -A POSTROUTING -o eth0@if16 -j SNAT --to-source <the lan/vpc interface>
+sudo iptables -A FORWARD -i wg0 -o wg0 -j ACCEPT
+sudo iptables -A FORWARD -i wg0  -j ACCEPT
+sudo iptables -A FORWARD -o wg0  -j ACCEPT
 ```
 
 

@@ -29,6 +29,12 @@ class DnsRecordsController < ApplicationController
     end
   end
 
+  def destroy
+    @dns_record = DnsRecord.find(params[:id])
+    @dns_record.destroy
+    redirect_to dns_records_path, notice: 'DNS record was successfully destroyed.'
+  end
+
   private
 
   # Use callbacks to share common setup or constraints between actions.

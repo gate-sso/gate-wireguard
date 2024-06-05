@@ -68,3 +68,4 @@ gem 'dotenv-rails'
 gem 'omniauth-google-oauth2'
 
 gem "rqrcode", "~> 2.2"
+gem "redis"

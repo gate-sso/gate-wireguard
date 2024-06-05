@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   resources :configurations
   resources :vpn_devices
+  get 'dns_records/refresh', to: 'dns_records#refresh_zones', as: 'refresh_dns_records'
+  resources :dns_records
   get 'home/index'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -24,4 +26,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "admin#index"
   get 'login', to:'home#login', as: 'login'
+
+
 end

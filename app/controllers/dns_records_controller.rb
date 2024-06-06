@@ -44,7 +44,7 @@ class DnsRecordsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def dns_record_params
-    params.require(:dns_record).permit(:host_name, :ip_address, :dns_zone_id)
+    params.require(:dns_record).permit(:host_name, :ip_address)
   end
 
 end

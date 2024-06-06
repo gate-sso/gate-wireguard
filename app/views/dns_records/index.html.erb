@@ -13,11 +13,6 @@
     </div>
 
     <div class="col-md-3">
-      <%= form.text_field :dns_zone_id, id: "dns_zone_id", class: "form-control", value: 1 %>
-    </div>
-
-
-    <div class="col-md-3">
       <div class="d-grid gap-4 d-md-block">
         <%= form.submit "Add", class: "btn btn-primary" %>
       </div>
@@ -35,21 +30,21 @@
   <table class="table table-striped table-hover">
     <thead class="table-light">
     <tr>
-      <th>User</th>
-      <th>Zone</th>
+
       <th>Host name</th>
       <th>IP Address</th>
-      <th colspan="2"></th>
+      <th>User</th>
+      <th colspan="1"></th>
     </tr>
     </thead>
 
     <tbody>
     <% @dns_records.each do |dns_record| %>
       <tr>
-        <td><%= dns_record.user.name %></td>
-        <td><%= dns_record.dns_zone.name %></td>
+
         <td><%= dns_record.host_name %></td>
         <td><%= dns_record.ip_address %></td>
+        <td><%= dns_record.user.name %></td>
 
         <td><%= link_to 'Delete', dns_record, data: { turbo_method: :delete, turbo_confirm: 'Are you sure?' }, class: 'btn btn-danger btn-sm' %></td>
       </tr>

@@ -106,6 +106,10 @@ General traffic setup should look like this, here is ascii diagram for VPN Clien
 ````bash
 scripts/rails_setup.sh
 ````
+ if you need to setup docker as well, because we need compose plugin, please use following script to setup docker.
+````bash
+sh scripts/docker_setup.sh
+````
 2. Docker in only required if you do not want to install mysql on local server, else you can just install mysql server
    * to run docker, just run ```docker compose up db -d``` and you are good to go
 3. Setup gate_wireguard_dev database in mysql for non-root users, for dev you can use root user as well.

@@ -25,6 +25,3 @@ gem install rails
 bundle install
 sudo usermod -aG docker `whoami`
 newgrp docker
-
-
-

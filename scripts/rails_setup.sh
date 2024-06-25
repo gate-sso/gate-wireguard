@@ -1,4 +1,3 @@
-#!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get upgrade -y
@@ -23,5 +22,3 @@ bundle config set --local path '.local'
 gem install rails
 
 bundle install
-sudo usermod -aG docker `whoami`
-newgrp docker

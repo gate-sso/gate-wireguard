@@ -1,4 +1,4 @@
-<a href="/dns_records/refresh" class="btn btn-info" role="button">Refresh Zone</a>
+<h6>DNS Zone: <%= ENV['GATE_DNS_ZONE'] %> </h6> <a href="/dns_records/refresh" class="btn btn-info" role="button">Refresh Zone</a> 
 
 <hr>
 
@@ -42,7 +42,7 @@
     <% @dns_records.each do |dns_record| %>
       <tr>
 
-        <td><%= dns_record.host_name %></td>
+        <td><%= dns_record.host_name+'.'+ENV['GATE_DNS_ZONE'] %></td>
         <td><%= dns_record.ip_address %></td>
         <td><%= dns_record.user.name %></td>
 

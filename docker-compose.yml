@@ -5,6 +5,10 @@ services:
       MYSQL_ROOT_PASSWORD: password
     ports:
       - "3306:3306"
+  redis:
+    image: redis:latest
+    ports:
+      - "16379:6379"
 
   web:
     build:

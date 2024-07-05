@@ -5,9 +5,9 @@ class DnsRecordsController < ApplicationController
   def index
     @dns_records = DnsRecord.all
     @dns_record = DnsRecord.new
-
-
   end
+
+  
 
   def refresh_zones
     @dns_records = DnsRecord.all
@@ -48,4 +48,3 @@ class DnsRecordsController < ApplicationController
   end
 
 end
-

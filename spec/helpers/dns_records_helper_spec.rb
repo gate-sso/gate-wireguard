@@ -11,5 +11,7 @@ require 'rails_helper'
 #   end
 # end
 RSpec.describe DnsRecordsHelper, type: :helper do
-  pending "add some examples to (or delete) #{__FILE__}"
+  it 'checks if a DNS record exists' do
+    expect(DnsRecordsHelper.resolve_dns_record('google.com')).to be_truthy
+  end
 end

@@ -1,3 +1,4 @@
+# Purpose: Model for IP Allocation. This model is used to store the IP address allocated to a VPN device.
 class IpAllocation < ApplicationRecord
   validates :ip_address, presence: true, uniqueness: true
   belongs_to :vpn_device
@@ -8,13 +9,14 @@ class IpAllocation < ApplicationRecord
       ip = "#{get_base_ip}.#{i}"
       return ip unless IpAllocation.exists?(ip_address: ip)
     end
-    nil  # Return nil if no IP is available
+    nil # Return nil if no IP is available
   end
 
   def self.get_base_ip
     vpn_configuration = VpnConfiguration.all.first
-    return vpn_configuration.wg_ip_range.split('.')[0..2].join('.')
+    vpn_configuration.wg_ip_range.split('.')[0..2].join('.')
   end
+
   def self.allocate_ip(vpn_device)
     ip = next_available_ip
     return nil unless ip
@@ -22,7 +24,7 @@ class IpAllocation < ApplicationRecord
     IpAllocation.create!(vpn_device: vpn_device, ip_address: ip)
   end
 
-  def self.deallocate_ip(vpn_client)
-    IpAllocation.where(vpn_device: vpn_client).destroy_all
+  def self.deallocate_ip(vpn_device)
+    IpAllocation.where(vpn_device: vpn_device).destroy_all
   end
 end

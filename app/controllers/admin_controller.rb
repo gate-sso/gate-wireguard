@@ -90,6 +90,3 @@ class AdminController < ApplicationController
     WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
   end
 end
-
-# This is comment for nipun
-# done by ajey

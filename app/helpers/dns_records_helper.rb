@@ -14,4 +14,19 @@ module DnsRecordsHelper
     end
     @result
   end
+
+
+  def self.get_ip_addres(domain, dns_server: nil, dns_server_port: 53) # rubocop: disable Metrics/MethodLength
+    dns_resolver = dns_server ? Resolv::DNS.new(nameserver_port: [[dns_server, dns_server_port]]) : Resolv::DNS.new
+    @result = nil
+    begin
+      dns_resolver.timeouts = 2
+      @result = dns_resolver.getaddress(domain)
+    rescue Resolv::ResolvError, Resolv::ResolvTimeout
+      @result = nil
+    ensure
+      dns_resolver.close
+    end
+    @result
+  end
 end

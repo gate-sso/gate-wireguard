@@ -7,7 +7,7 @@ class DnsRecordsController < ApplicationController
     @dns_record = DnsRecord.new
   end
 
-  
+
 
   def refresh_zones
     @dns_records = DnsRecord.all
@@ -23,6 +23,7 @@ class DnsRecordsController < ApplicationController
     @dns_record.user_id = current_user.id
 
     if @dns_record.save!
+      DnsRecord.add_host_to_zone(@dns_record)
       redirect_to dns_records_path, notice: 'DNS record was successfully created.'
     else
       render :index

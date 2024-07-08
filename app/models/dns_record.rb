@@ -19,4 +19,11 @@ class DnsRecord < ApplicationRecord
   def self.add_host_to_zone(dns_record)
     add_host(ENV['GATE_DNS_ZONE'], dns_record.host_name, dns_record.ip_address)
   end
+
+  def self.refresh_zones
+    REDIS.del("#{ENV['GATE_DNS_ZONE']}.")
+    DnsRecord.all.each do |dns_record|
+      add_host_to_zone(dns_record)
+    end
+  end
 end

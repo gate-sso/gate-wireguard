@@ -15,7 +15,6 @@ module DnsRecordsHelper
     @result
   end
 
-
   def self.get_ip_addres(domain, dns_server: nil, dns_server_port: 53) # rubocop: disable Metrics/MethodLength
     dns_resolver = dns_server ? Resolv::DNS.new(nameserver_port: [[dns_server, dns_server_port]]) : Resolv::DNS.new
     @result = nil

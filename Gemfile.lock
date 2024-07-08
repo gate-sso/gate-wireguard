@@ -290,7 +290,12 @@ GEM
     snaky_hash (2.0.1)
       hashie
       version_gem (~> 1.1, >= 1.1.1)
+    sorbet (0.5.11473)
+      sorbet-static (= 0.5.11473)
     sorbet-runtime (0.5.11465)
+    sorbet-static (0.5.11473-aarch64-linux)
+    sorbet-static (0.5.11473-universal-darwin)
+    sorbet-static (0.5.11473-x86_64-linux)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
@@ -348,6 +353,7 @@ DEPENDENCIES
   rspec-rails
   rubocop
   ruby-lsp
+  sorbet
   sprockets-rails
   stimulus-rails
   turbo-rails

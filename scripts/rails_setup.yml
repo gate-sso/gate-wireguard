@@ -25,6 +25,7 @@
           - openssh-server
           - wireguard
           - net-tools
+          - watchman
         state: present
 
     - name: Install Rails gem

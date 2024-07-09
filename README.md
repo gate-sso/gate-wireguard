@@ -23,6 +23,14 @@ GOOGLE_CLIENT_SECRET=<client_secret>
 GOOGLE_HOSTED_DOMAINS=<your_domain>
 ```
 
+##### CoreDNS Support
+
+```shell
+GATE_REDIS_HOST="127.0.0.1" # replace with your own Redis Host
+GATE_DNS_ZONE="<domain>.dev" # replace with your own DNS Zone
+GATE_REDIS_PORT=16379 # default is 6379, but for Dev we start redis on 16739
+```
+
 ##### Install gem in local bundler
 
 - Configure bundle to install packages locally by running the following command
@@ -136,10 +144,17 @@ sh scripts/docker_setup.sh
    ```
 4. Run `rails db:create db:migrate` to create the database and run the migrations
 5. If you rather want to use root user root@localhost just do the following.
+
    ```sudo mysql -u root -p
    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
        FLUSH PRIVILEGES;
    ```
+
+6. Setup RubyLSP and watchman and then execute
+
+```shell
+bundle exec srb typecheck --lsp
+```
 
 ---
 

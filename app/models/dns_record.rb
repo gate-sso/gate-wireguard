@@ -27,5 +27,3 @@ class DnsRecord < ApplicationRecord
     end
   end
 end
-
-

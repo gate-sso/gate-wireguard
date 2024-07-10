@@ -1,3 +1,4 @@
+# This controllers takes care of VPN Decices
 class VpnDevice < ApplicationRecord
   belongs_to :user
   has_one :ip_allocation, dependent: :destroy
@@ -9,16 +10,13 @@ class VpnDevice < ApplicationRecord
   end
 
   def generate_qr_code
-    qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.all.first));
-    svg = qr.as_svg(
+    qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.all.first))
+    qr.as_svg(
       offset: 0,
       color: '000',
       shape_rendering: 'crispEdges',
       module_size: 2,
       level: 1
     )
-    svg
   end
-
-
 end

@@ -1,3 +1,4 @@
+# DNS Record is a model that represents a DNS record in the database.
 class DnsRecord < ApplicationRecord
   belongs_to :user
   def self.time_to_live

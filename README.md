@@ -1,18 +1,18 @@
-## Gate-WireGuard
+# Gate-WireGuard
 
-###### Wireguard Web UI with Google Single Sign on for wireguard management.
+## Wireguard Web UI with Google Single Sign on for wireguard management
 
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management
 tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 
-#### Installation
+### Installation
 
-##### Source Code
+#### Source Code
 
 - Checkout the latest source code, and run scripts/rails_prod.sh
 - Add changes the config/database.yml to point to your mysql server
 
-##### Google Auth
+#### Google Auth
 
 - Go to Google cloud console, and create a new project, and enable oAuth for this project, make note of client id and secret.
 - Create .env file in the root of the project, and add the following
@@ -23,7 +23,7 @@ GOOGLE_CLIENT_SECRET=<client_secret>
 GOOGLE_HOSTED_DOMAINS=<your_domain>
 ```
 
-##### CoreDNS Support
+#### CoreDNS Support
 
 ```shell
 GATE_REDIS_HOST="127.0.0.1" # replace with your own Redis Host
@@ -31,7 +31,7 @@ GATE_DNS_ZONE="<domain>.dev" # replace with your own DNS Zone
 GATE_REDIS_PORT=16379 # default is 6379, but for Dev we start redis on 16739
 ```
 
-##### Install gem in local bundler
+#### Install gem in local bundler
 
 - Configure bundle to install packages locally by running the following command
 
@@ -45,7 +45,7 @@ bundle config set path '.local'
 bundle install
 ```
 
-##### Networking, Server setup
+#### Networking, Server setup
 
 - Just setup caddy to point to gate-wireguard server. Simple caddy file can be like this
 
@@ -68,7 +68,7 @@ sudo iptables -A FORWARD -i wg0  -j ACCEPT
 sudo iptables -A FORWARD -o wg0  -j ACCEPT
 ```
 
-###### MySql Errors on Mac
+#### MySql Errors on Mac
 
 ```bash
 brew install gcc zstd openssl mysql-client
@@ -100,7 +100,7 @@ For pkg-config to find mysql-client you may need to set:
 export PKG_CONFIG_PATH="/usr/local/opt/mysql-client/lib/pkgconfig"
 ```
 
-##### WireGuard
+##### WireGuard information and configuration
 
 - goto gate.<yourdomain> and sign in using allowed domain name, check default configuration, add your public end point, private ip address, click "Save & Generate configuration"
 - Add your local network address, beware if you enter 0.0.0.0 it will route all traffic through vpn and you will need to setup a DNS server as well.
@@ -122,26 +122,28 @@ General traffic setup should look like this, here is ascii diagram for VPN Clien
 
 1. Checkout gate-wireguard, and run the following commands to get it running
 
-```bash
-scripts/rails_setup.sh
-```
+  ```bash
+  scripts/rails_setup.sh
+  ```
 
-if you need to setup docker as well, because we need compose plugin, please use following script to setup docker.
+  if you need to setup docker as well, because we need compose plugin, please use following script to setup docker.
 
-```bash
-sh scripts/docker_setup.sh
-```
+  ```bash
+  sh scripts/docker_setup.sh
+  ```
 
 2. Docker in only required if you do not want to install mysql on local server, else you can just install mysql server
    - to run docker, just run `docker compose up db -d` and you are good to go
 3. Setup gate_wireguard_dev database in mysql for non-root users, for dev you can use root user as well.
    |
+
    ```sql
    create database gate_wireguard_dev;
    grant all privileges on gate_wireguard_dev to 'gate_wireguard'@% idenfied by 'gate_wireguard';
    create database gate_wireguard_test;
    grant all privileges on gate_wireguard_test to 'gate_wireguard'@% identified by 'gate_wireguard';
    ```
+
 4. Run `rails db:create db:migrate` to create the database and run the migrations
 5. If you rather want to use root user root@localhost just do the following.
 
@@ -158,7 +160,7 @@ bundle exec srb typecheck --lsp
 
 ---
 
-#### Deployment Summary
+### Deployment Summary
 
 - Ruby version - 3.0.2p107
 - System dependencies

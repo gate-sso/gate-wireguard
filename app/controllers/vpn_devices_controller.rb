@@ -1,27 +1,25 @@
 class VpnDevicesController < ApplicationController
-  before_action :set_vpn_device, only: %i[ show edit update destroy ]
+  before_action :set_vpn_device, only: %i[show edit update destroy]
   before_action :require_login
-  after_action :update_wireguard_config, only: %i[ update destroy ]
+  after_action :update_wireguard_config, only: %i[update destroy]
   layout 'admin'
 
   # GET /vpn_devices or /vpn_devices.json
   def index
-    if params["nodes"].present?
-      @nodes = true;
-      # find vpn devices where node variable is true
-      @vpn_devices = VpnDevice.where(node: true)
-    else
-      @vpn_devices = VpnDevice.all
-    end
+    @nodes =  if params['nodes'].present?
+    @vpn_devices = if @nodes = true
+                     # find vpn devices where node variable is true
+                     VpnDevice.where(node: true)
+                   else
+                     VpnDevice.all
+                   end
   end
 
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
-    if params["nodes"].present?
-      @nodes = true;
-    end
+    @nodes = true if params['nodes'].present?
     if @vpn_device.description.nil? or @vpn_device.description.empty?
-      redirect_to root_path, alert: "Vpn device description is empty."
+      redirect_to root_path, alert: 'Vpn device description is empty.'
     end
     @vpn_configuration = VpnConfiguration.all.first
   end
@@ -29,7 +27,7 @@ class VpnDevicesController < ApplicationController
   def download_config
     @vpn_device = VpnDevice.find(params[:id])
     config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.all.first)
-    send_data config_content, filename: "gate_vpn_config.conf"
+    send_data config_content, filename: 'gate_vpn_config.conf'
   end
 
   # GET /vpn_devices/new
@@ -40,7 +38,7 @@ class VpnDevicesController < ApplicationController
     respond_to do |format|
       if @vpn_device.save!
         IpAllocation.allocate_ip(@vpn_device)
-        format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
+        format.html { redirect_to root_path, notice: 'Vpn device was successfully updated.' }
         format.json { render :show, status: :ok, location: @vpn_device }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -65,7 +63,7 @@ class VpnDevicesController < ApplicationController
   def update
     respond_to do |format|
       if @vpn_device.update(vpn_device_params)
-        format.html { redirect_to root_path, notice: "Vpn device was successfully updated." }
+        format.html { redirect_to root_path, notice: 'Vpn device was successfully updated.' }
         format.json { render :show, status: :ok, location: @vpn_device }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -78,7 +76,7 @@ class VpnDevicesController < ApplicationController
   def destroy
     @vpn_device.destroy!
     respond_to do |format|
-      format.html { redirect_to root_path, notice: "Vpn device was successfully destroyed." }
+      format.html { redirect_to root_path, notice: 'Vpn device was successfully destroyed.' }
       format.json { head :no_content }
     end
   end

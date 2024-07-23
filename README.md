@@ -244,6 +244,12 @@ RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl@1.1
 rbenv install 3.0.2
 ```
 
+On Mac installing Ruby
+
+```
+rvm install ruby-3.3.4 --reconfigure --enable-yjit --with-openssl-dir=$(brew --prefix openssl@3.0)
+```
+
 Also, please read brew's post install messages to be able to install ruby 3.0.2 successfully
 
 Getting wireguard to work inside lxc containers you need to use [proxy device](https://linuxcontainers.org/incus/docs/main/reference/devices_proxy/)W

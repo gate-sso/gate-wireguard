@@ -55,8 +55,10 @@ end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
+  gem 'erb-formatter'
   gem 'rubocop'
   gem 'ruby-lsp'
+  gem 'sorbet-runtime'
   # Please note Sorbet required watchman, install in your system
   # after that rung
   # bundle exec srb typecheck --lsp

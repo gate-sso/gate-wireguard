@@ -6,11 +6,7 @@ class User < ApplicationRecord
       user.name = auth.info.name
       user.provider = auth.provider
       user.uid = auth.uid
-      if User.all.count == 0
-        user.admin = true
-      else
-        user.admin = false
-      end
+      user.admin = User.all.count == 0
     end
   end
 end

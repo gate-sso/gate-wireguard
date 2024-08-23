@@ -49,8 +49,7 @@ class AdminController < ApplicationController
   def add_network_address
     @vpn_configuration = VpnConfiguration.find(params[:id])
     @network_address = NetworkAddress.new
-    @network_address.network_address = params[:network_address][:network_address]
-    @network_address.network_address = params[:network_address][:network_address]
+    @network_address.network_address = params[:network_address]
     @network_address.vpn_configuration_id = @vpn_configuration.id
 
     respond_to do |format|

@@ -44,8 +44,8 @@ class WireguardConfigGenerator
       private_key = Open3.capture2('wg genkey')[0].strip
       public_key = Open3.capture2('wg pubkey', stdin_data: private_key)[0].strip
       {
-        private_key:,
-        public_key:
+        private_key: public_key,
+        public_key: private_key
       }
     end
 

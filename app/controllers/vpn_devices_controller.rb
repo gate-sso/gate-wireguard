@@ -6,19 +6,14 @@ class VpnDevicesController < ApplicationController
 
   # GET /vpn_devices or /vpn_devices.json
   def index
-    @nodes =  if params['nodes'].present?
-    @vpn_devices = if @nodes = true
-                     # find vpn devices where node variable is true
-                     VpnDevice.where(node: true)
-                   else
-                     VpnDevice.all
-                   end
+    @nodes = true if params['nodes'].present?
+    @vpn_devices = (@nodes == true ? VpnDevice.where(node: true) : VpnDevice.all)
   end
 
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
     @nodes = true if params['nodes'].present?
-    if @vpn_device.description.nil? or @vpn_device.description.empty?
+    if @vpn_device.description.nil? || @vpn_device.description.empty?
       redirect_to root_path, alert: 'Vpn device description is empty.'
     end
     @vpn_configuration = VpnConfiguration.all.first

@@ -7,7 +7,12 @@ class VpnDevicesController < ApplicationController
   # GET /vpn_devices or /vpn_devices.json
   def index
     @nodes = true if params['nodes'].present?
-    @vpn_devices = (@nodes == true ? VpnDevice.where(node: true) : VpnDevice.all)
+    @vpn_devices = if @nodes == true
+                     # find vpn devices where node variable is true
+                     VpnDevice.where(node: true)
+                   else
+                     VpnDevice.all
+                   end
   end
 
   # GET /vpn_devices/1 or /vpn_devices/1.json
@@ -21,7 +26,7 @@ class VpnDevicesController < ApplicationController
 
   def download_config
     @vpn_device = VpnDevice.find(params[:id])
-    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.all.first)
+    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.first)
     send_data config_content, filename: 'gate_vpn_config.conf'
   end
 
@@ -89,6 +94,6 @@ class VpnDevicesController < ApplicationController
   end
 
   def update_wireguard_config
-    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
+    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.first)
   end
 end

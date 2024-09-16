@@ -12,6 +12,7 @@ echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.zshrc
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 . ~/.nvm/nvm.sh
 nvm install 20
+export CI=true
 corepack enable
 
 
@@ -23,6 +24,10 @@ elif [ -n "$ZSH_VERSION" ]; then
     source ~/.zshrc
 fi
 
+#if Object object error happens
+npm i -d postcss  
+yarn install
+
 ansible-playbook scripts/rails_setup.yml
 gem install bundler
 bundle config set --local path '.local'
@@ -30,6 +35,3 @@ gem install rails
 
 bundle install
 
-#if Object object error happens
-npm i -d postcss  
-yarn install

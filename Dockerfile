@@ -39,6 +39,7 @@ RUN bundle install && \
 
 # Install node modules
 COPY package.json yarn.lock ./
+ENV CI=true
 RUN corepack enable
 RUN yarn install --frozen-lockfile
 

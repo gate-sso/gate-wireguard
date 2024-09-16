@@ -4,7 +4,7 @@
   become: yes # Use sudo to become the root user
   vars:
     app_name: "gate-wireguard"
-    deploy_yser: "deploy"
+    deploy_user: "deploy"
     home_path: "/home/{{ deploy_user }}"
     app_path: "/home/{{ deploy_user }}/{{ app_name }}"
     db_user: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}"

@@ -4,10 +4,12 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y ansible wget curl rsync git libssl-dev libreadline-dev zlib1g-dev libffi-dev libffi8
 cd ~
-rm -rf ruby-3.3.4.tar.
+sudo rm -rf ruby-3.3.4.tar ruby-33.4
 wget "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz"
 tar -xzvf ruby-3.3.4.tar.gz
-cd ruby-3.3.4 && ./configure && make 
+cd ruby-3.3.4 
+./configure --with-libffi-dir=/usr/lib/x86_64-linux-gnu 
+make 
 sudo make install
 
 

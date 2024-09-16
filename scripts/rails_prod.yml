@@ -32,7 +32,6 @@
           - docker.io
           - libmysqlclient-dev
           - mysql-client
-          - ruby-full
           - libyaml-dev
           - build-essential
           - default-libmysqlclient-dev

@@ -4,14 +4,14 @@
   become: yes # Use sudo to become the root user
   vars:
     app_name: "gate-wireguard"
-    deploy_user: "deploy"
-    home_path: "/home/{{ deploy_user }}"
-    app_path: "/home/{{ deploy_user }}/{{ app_name }}"
+    app_user: "deploy"
+    home_path: "/home/{{ app_user }}"
+    app_path: "/home/{{ app_user }}/{{ app_name }}"
     db_user: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}"
     db_password: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_PASSWORD') }}"
     db_name: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}"
     db_host: "localhost"
-    puma_port: 3000
+    puma_port: 8080
     ruby_release: "3.3"
     ruby_version: "{{ ruby_release }}.4"
 
@@ -60,7 +60,7 @@
     - name: Install Caddy
       apt:
         name: "{{ item }}"
-        state: presentd
+        state: present
       loop:
         - debian-keyring
         - debian-archive-keyring
@@ -84,10 +84,10 @@
         dest: /etc/caddy/Caddyfile
         content: |
           {{ lookup('ansible.builtin.env', 'DOMAIN_NAME') }} {
-            root * {{ app_directory }}/public
+            root * {{ app_path }}/public
             encode gzip
             file_server
-            reverse_proxy / http://localhost:3000 {
+            reverse_proxy / http://localhost:{{ puma_port }} {
               header_up X-Real-IP {remote}
               header_up X-Forwarded-For {remote}
               header_up X-Forwarded-Proto {scheme}
@@ -101,13 +101,13 @@
 
     - name: Create Puma configuration file
       copy:
-        dest: "{{ app_directory }}/config/puma.rb"
+        dest: "{{ app_path }}/config/puma.rb"
         content: |
           workers ENV.fetch("WEB_CONCURRENCY") { 2 }
           threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }
           threads threads_count, threads_count
           preload_app!
-          port ENV.fetch("PORT") { 3000 }
+          port ENV.fetch("PORT") { {{ puma_port }} }
           environment ENV.fetch("RAILS_ENV") { "production" }
           on_worker_boot do
             ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
@@ -124,8 +124,8 @@
           [Service]
           Type=simple
           User={{ app_user }}
-          WorkingDirectory={{ app_directory }}
-          ExecStart=/usr/local/bin/puma -C {{ app_directory }}/config/puma.rb
+          WorkingDirectory={{ app_path }}
+          ExecStart=/usr/local/bin/puma -C {{ app_path }}/config/puma.rb
           Restart=always
 
           [Install]

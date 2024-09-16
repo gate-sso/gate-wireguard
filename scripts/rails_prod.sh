@@ -7,9 +7,9 @@ cd ~
 sudo rm -rf ruby-3.3.4.tar ruby-33.4
 wget "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz"
 tar -xzvf ruby-3.3.4.tar.gz
-cd ruby-3.3.4 
-./configure --with-libffi-dir=/usr/lib/x86_64-linux-gnu 
-make 
+cd ruby-3.3.4
+./configure --with-libffi-dir=/usr/lib/x86_64-linux-gnu
+make
 sudo make install
 
 
@@ -37,7 +37,3 @@ GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install bundler
 
 bundle config set --local path '.local'
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" bundle install
-
-
-
-

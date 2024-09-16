@@ -2,40 +2,151 @@
 - name: Install packages and gems on localhost
   hosts: localhost
   become: yes # Use sudo to become the root user
+  vars:
+    app_name: "gate-wireguard"
+    deploy_yser: "deploy"
+    home_path: "/home/{{ deploy_user }}"
+    app_path: "/home/{{ deploy_user }}/{{ app_name }}"
+    db_user: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}"
+    db_password: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_PASSWORD') }}"
+    db_name: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}""
+    db_host: "localhost"
+    puma_port: 3000
 
   tasks:
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: yes
 
-    - name: Install necessary packages
-      ansible.builtin.apt:
-        name:
-          - libmysqlclient-dev
-          - mysql-client
-          - ruby-full
-          - libyaml-dev
-          - build-essential
-          - default-libmysqlclient-dev
-          - libvips
-          - pkg-config
-          - mysql-server
-          - inotify-tools
-          - openssh-server
-          - wireguard
-          - net-tools
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
         state: present
-    - name: Enable service ssh server and ensure it is not masked
-      ansible.builtin.systemd_service:
-        name: ssh
-        enabled: true
+      with_items:
+        - git
+        - curl
+        - nodejs
+        - build-essential
+        - libpq-dev
+        - yarn
+        - docker.io
+        - libmysqlclient-dev
+        - mysql-client
+        - ruby-full
+        - libyaml-dev
+        - build-essential
+        - default-libmysqlclient-dev
+        - libvips
+        - pkg-config
+        - mysql-server
+        - inotify-tools
+        - openssh-server
+        - wireguard
+        - net-tools
+        - libssl-dev
+        - libreadline-dev
+        - zlib1g-dev
 
-    - name: Make sure ssh service is running
-      ansible.builtin.systemd:
-        name: ssh
+    - name: Download and install Ruby
+      become: yes
+      become_user: deploy
+      args:
+        chdir: "{{ home_path }}"
+      shell: |
+        wget "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz"
+        tar -xzvf ruby-{{ ruby_version }}.tar.gz
+        cd ruby-{{ ruby_version }} && ./configure && make && make install
+      args:
+        creates: /usr/local/bin/ruby
+
+    - name: Verify Ruby installation
+      command: ruby --version
+    
+    - name: Install Bundler gem
+      gem:
+        name: bundler
+        state: present
+    
+    - name: Install Bundler
+      command: bundle install chdir={{ app_path }}
+    
+    - name: Install Caddy
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - debian-keyring
+        - debian-archive-keyring
+        - apt-transport-https
+
+    - name: Add Caddy GPG key and repository
+      shell: |
+        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | tee /etc/apt/trusted.gpg.d/caddy-stable.asc
+        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+      args:
+        creates: /etc/apt/trusted.gpg.d/caddy-stable.asc
+
+    - name: Install Caddy package
+      apt:
+        name: caddy
+        update_cache: yes
+        state: present
+
+    - name: Create Caddyfile
+      copy:
+        dest: /etc/caddy/Caddyfile
+        content: |
+          {{ lookup('ansible.builtin.env', 'DOMAIN_NAME') }} {
+            root * {{ app_directory }}/public
+            encode gzip
+            file_server
+            reverse_proxy / http://localhost:3000 {
+              header_up X-Real-IP {remote}
+              header_up X-Forwarded-For {remote}
+              header_up X-Forwarded-Proto {scheme}
+            }
+          }
+
+    - name: Reload Caddy
+      systemd:
+        name: caddy
+        state: reloaded
+
+    - name: Create Puma configuration file
+      copy:
+        dest: "{{ app_directory }}/config/puma.rb"
+        content: |
+          workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+          threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }
+          threads threads_count, threads_count
+          preload_app!
+          port ENV.fetch("PORT") { 3000 }
+          environment ENV.fetch("RAILS_ENV") { "production" }
+          on_worker_boot do
+            ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+          end
+
+    - name: Create systemd service for Puma
+      copy:
+        dest: /etc/systemd/system/puma.service
+        content: |
+          [Unit]
+          Description=Puma HTTP Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{ app_user }}
+          WorkingDirectory={{ app_directory }}
+          ExecStart=/usr/local/bin/puma -C {{ app_directory }}/config/puma.rb
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Enable and start Puma
+      systemd:
+        name: puma
+        enabled: yes
         state: started
 
-    - name: Make sure wireguard wg-quick@wg0 service is running
-      ansible.builtin.systemd:
-        name: wg-quick@wg0
-        state: enabled

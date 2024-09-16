@@ -4,6 +4,10 @@ sudo apt-get update
 sudo apt-get upgrade -y
 sudo apt-get install -y ansible wget curl rsync git
 
+
+# Install Ruby
+
+
 export NVM_DIR="$HOME/.nvm"
 echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc
 echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
@@ -18,9 +22,9 @@ source ~/.bashrc
 export GEM_HOME=~/.ruby/
 export PATH="$PATH:~/.ruby/bin"
 
-ansible-playbook scripts/rails_prod.yml
+GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" ansible-playbook scripts/rails_prod.yml
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install bundler
-rm -rf .local
+
 bundle config set --local path '.local'
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install rails
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" bundle install

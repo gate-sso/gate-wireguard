@@ -2,7 +2,12 @@
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y ansible wget curl rsync git
+sudo apt-get install -y ansible wget curl rsync git libssl-dev libreadline-dev zlib1g-dev libffi-dev libffi
+cd ~
+wget "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz"
+tar -xzvf ruby-3.3.4.tar.gz
+cd ruby-3.3.4 && ./configure && make 
+sudo make install
 
 
 # Install Ruby
@@ -26,7 +31,6 @@ GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" ansible-playbook scripts/rails_prod.y
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install bundler
 
 bundle config set --local path '.local'
-GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install rails
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" bundle install
 
 

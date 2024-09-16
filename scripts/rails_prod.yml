@@ -45,31 +45,18 @@
           - libssl-dev
           - libreadline-dev
           - zlib1g-dev
+          - libffi-dev
+          - libffi
         state: present
 
-    - name: Download and install Ruby
-      become: yes
-      become_user: deploy
-      args:
-        chdir: "{{ home_path }}"
-      shell: |
-        wget "https://cache.ruby-lang.org/pub/ruby/{{ ruby_release }}/ruby-{{ ruby_version }}.tar.gz"
-        tar -xzvf ruby-{{ ruby_version }}.tar.gz
-        cd ruby-{{ ruby_version }} && ./configure && make && make install
-      args:
-        creates: /usr/local/bin/ruby
-
-    - name: Verify Ruby installation
-      command: ruby --version
-    
     - name: Install Bundler gem
       gem:
         name: bundler
         state: present
-    
+
     - name: Install Bundler
       command: bundle install chdir={{ app_path }}
-    
+
     - name: Install Caddy
       apt:
         name: "{{ item }}"
@@ -149,4 +136,3 @@
         name: puma
         enabled: yes
         state: started
-

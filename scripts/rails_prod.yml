@@ -9,7 +9,7 @@
     app_path: "/home/{{ deploy_user }}/{{ app_name }}"
     db_user: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}"
     db_password: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE_PASSWORD') }}"
-    db_name: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}""
+    db_name: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}"
     db_host: "localhost"
     puma_port: 3000
 
@@ -73,7 +73,7 @@
     - name: Install Caddy
       apt:
         name: "{{ item }}"
-        state: present
+        state: presentd
       loop:
         - debian-keyring
         - debian-archive-keyring

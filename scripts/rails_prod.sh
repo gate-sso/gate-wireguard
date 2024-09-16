@@ -2,7 +2,8 @@
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get upgrade -y
-sudo apt-get install -y ansible wget curl rsync git libssl-dev libreadline-dev zlib1g-dev libffi-dev libffi8
+sudo apt-get install -y ansible wget curl rsync git libssl-dev libreadline-dev zlib1g-dev libffi-dev libffi8 build-essential libyaml-dev
+
 
 if command -v ruby >/dev/null 2>&1; then
   INSTALLED_RUBY_VERSION=$(ruby -v | awk '{print $2}')

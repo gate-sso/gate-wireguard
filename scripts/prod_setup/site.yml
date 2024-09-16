@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  become: yes
+  connection: local # This will run the playbook locally
+  vars:
+    app_user: deploy
+    app_directory: /home/deploy/gate-wireguard
+    ruby_version: 3.3.4
+
+  roles:
+    - system
+    - ruby
+    - rails_app
+    - puma
+    - caddy

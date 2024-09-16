@@ -5,6 +5,16 @@
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management
 tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 
+# Production Deployment for GateWireguard
+
+You can't use container for gate, because it requires wireguard and also adds some snat rules. If you are comfortable doing that inside docker container, then you can use [kamal](https://kamal-deploy.org/docs/installation/) for rails deployment. Else please follow here.
+
+# Prepare your server
+
+- Login to the box, add a user 'deploy' or the user of your choice
+- copy gate
+-
+
 ### Installation
 
 #### Source Code
@@ -122,15 +132,15 @@ General traffic setup should look like this, here is ascii diagram for VPN Clien
 
 1. Checkout gate-wireguard, and run the following commands to get it running
 
-  ```bash
-  scripts/rails_setup.sh
-  ```
+```bash
+scripts/rails_setup.sh
+```
 
-  if you need to setup docker as well, because we need compose plugin, please use following script to setup docker.
+if you need to setup docker as well, because we need compose plugin, please use following script to setup docker.
 
-  ```bash
-  sh scripts/docker_setup.sh
-  ```
+```bash
+sh scripts/docker_setup.sh
+```
 
 2. Docker in only required if you do not want to install mysql on local server, else you can just install mysql server
    - to run docker, just run `docker compose up db -d` and you are good to go

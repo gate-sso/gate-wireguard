@@ -1,0 +1,14 @@
+
+- name: Install bundler
+  gem:
+    name: bundler
+    executable: /usr/local/bin/gem
+
+- name: Install gems
+  command: bundle install --deployment --without development test chdir="{{ app_directory }}"
+
+- name: Precompile assets
+  command: bundle exec rails assets:precompile RAILS_ENV=production chdir="{{ app_directory }}"
+
+- name: Migrate database
+  command: bundle exec rails db:migrate RAILS_ENV=production chdir="{{ app_directory }}"

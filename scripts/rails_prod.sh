@@ -75,7 +75,7 @@ source ~/.bashrc
 export GEM_HOME=~/.ruby/
 export PATH="$PATH:~/.ruby/bin"
 
-cd gate-wireguard
+cd ~/gate-wireguard
 
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" ansible-playbook scripts/rails_prod.yml
 GEM_HOME=~/.ruby/ PATH="$PATH:~/.ruby/bin" gem install bundler

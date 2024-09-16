@@ -1,4 +1,38 @@
 #!/bin/bash
+
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# ----------------------------
+# Configuration Variables
+# ----------------------------
+
+# List of required environment variables
+REQUIRED_VARS=("GATE_DATABASE_USER" "GATE_DATABASE_PASSWORD" "GATE_DATABASE" "DOMAIN_NAME")
+
+# Function to check environment variables
+check_env_vars() {
+  local missing_vars=()
+  
+  for var in "${REQUIRED_VARS[@]}"; do
+    if [[ -z "${!var}" ]]; then
+      missing_vars+=("$var")
+    fi
+  done
+  
+  if [ ${#missing_vars[@]} -ne 0 ]; then
+    echo "Error: The following environment variable(s) are not set: ${missing_vars[*]}"
+    exit 1
+  fi
+}
+
+# Check required environment variables
+check_env_vars
+
+# If all required variables are set, proceed with the rest of the script
+echo "All required environment variables are set. Proceeding with the script..."
+
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update
 sudo apt-get upgrade -y

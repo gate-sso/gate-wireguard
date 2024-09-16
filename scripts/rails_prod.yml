@@ -25,16 +25,10 @@
         name:
           - git
           - curl
-          - nodejs
-          - build-essential
           - libpq-dev
-          - yarn
-          - docker.io
           - libmysqlclient-dev
           - mysql-client
           - libyaml-dev
-          - build-essential
-          - default-libmysqlclient-dev
           - libvips
           - pkg-config
           - mysql-server

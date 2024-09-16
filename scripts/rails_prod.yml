@@ -119,8 +119,12 @@
           Type=simple
           User={{ app_user }}
           WorkingDirectory={{ app_path }}
-          ExecStart=/usr/local/bin/puma -C {{ app_path }}/config/puma.rb
+          ExecStart=/usr/local/bin/bundle exec puma -C puma -C {{ app_path }}/config/puma.rb
           Restart=always
+          Environment=RAILS_ENV=production
+          Environment=GATE_DATABASE_USER={{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}
+          Environment=GATE_DATABASE_PASSWORD={{ lookup('ansible.builtin.env', 'GATE_DATABASE_PASSWORD') }}
+          Environment=GATE_DATABASE={{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}
 
           [Install]
           WantedBy=multi-user.target

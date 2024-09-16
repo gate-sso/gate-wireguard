@@ -12,6 +12,8 @@
     db_name: "{{ lookup('ansible.builtin.env', 'GATE_DATABASE') }}"
     db_host: "localhost"
     puma_port: 3000
+    ruby_release: "3.3"
+    ruby_version: "{{ ruby_release }}.4"
 
   tasks:
     - name: Update apt cache
@@ -19,33 +21,32 @@
         update_cache: yes
 
     - name: Install dependencies
-      apt:
-        name: "{{ item }}"
+      ansible.builtin.apt:
+        name:
+          - git
+          - curl
+          - nodejs
+          - build-essential
+          - libpq-dev
+          - yarn
+          - docker.io
+          - libmysqlclient-dev
+          - mysql-client
+          - ruby-full
+          - libyaml-dev
+          - build-essential
+          - default-libmysqlclient-dev
+          - libvips
+          - pkg-config
+          - mysql-server
+          - inotify-tools
+          - openssh-server
+          - wireguard
+          - net-tools
+          - libssl-dev
+          - libreadline-dev
+          - zlib1g-dev
         state: present
-      with_items:
-        - git
-        - curl
-        - nodejs
-        - build-essential
-        - libpq-dev
-        - yarn
-        - docker.io
-        - libmysqlclient-dev
-        - mysql-client
-        - ruby-full
-        - libyaml-dev
-        - build-essential
-        - default-libmysqlclient-dev
-        - libvips
-        - pkg-config
-        - mysql-server
-        - inotify-tools
-        - openssh-server
-        - wireguard
-        - net-tools
-        - libssl-dev
-        - libreadline-dev
-        - zlib1g-dev
 
     - name: Download and install Ruby
       become: yes
@@ -53,7 +54,7 @@
       args:
         chdir: "{{ home_path }}"
       shell: |
-        wget "https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.4.tar.gz"
+        wget "https://cache.ruby-lang.org/pub/ruby/{{ ruby_release }}/ruby-{{ ruby_version }}.tar.gz"
         tar -xzvf ruby-{{ ruby_version }}.tar.gz
         cd ruby-{{ ruby_version }} && ./configure && make && make install
       args:

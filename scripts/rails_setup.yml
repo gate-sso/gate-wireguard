@@ -26,6 +26,8 @@
           - wireguard
           - net-tools
           - watchman
+          - redis-server
+          - redis-tools
         state: present
 
     - name: Install Rails gem

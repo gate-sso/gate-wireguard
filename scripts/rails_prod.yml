@@ -41,6 +41,8 @@
           - zlib1g-dev
           - libffi-dev
           - libffi8
+          - redis-server
+          - redis-tools
         state: present
 
     - name: Install Bundler gem
@@ -119,7 +121,7 @@
           Type=simple
           User={{ app_user }}
           WorkingDirectory={{ app_path }}
-          ExecStart=/usr/local/bin/bundle exec puma -C puma -C {{ app_path }}/config/puma.rb
+          ExecStart=/usr/local/bin/bundle exec puma -C {{ app_path }}/config/puma.rb
           Restart=always
           Environment=RAILS_ENV=production
           Environment=GATE_DATABASE_USER={{ lookup('ansible.builtin.env', 'GATE_DATABASE_USER') }}

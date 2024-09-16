@@ -46,7 +46,7 @@
           - libreadline-dev
           - zlib1g-dev
           - libffi-dev
-          - libffi
+          - libffi8
         state: present
 
     - name: Install Bundler gem

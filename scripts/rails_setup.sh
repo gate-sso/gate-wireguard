@@ -12,7 +12,9 @@ echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.zshrc
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 . ~/.nvm/nvm.sh
 nvm install 20
-npm install -g yarn
+corepack enable
+
+
 
 #need to source appropriate shell rc file
 if [ -n "$BASH_VERSION" ]; then
@@ -27,3 +29,7 @@ bundle config set --local path '.local'
 gem install rails
 
 bundle install
+
+#if Object object error happens
+npm i -d postcss  
+yarn install

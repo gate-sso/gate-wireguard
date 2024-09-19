@@ -50,6 +50,8 @@ test:
 #
 production:
   <<: *default
-  database: <%= ENV["GATE_DATABASE"]%>
-  username: <%= ENV["GATE_DATABASE_USER"]%>
-  password: <%= ENV["GATE_DATABASE_PASSWORD"] %>
+  database: <%= ENV["GATE_WIREGUARD_DATABASE"]%>
+  username: <%= ENV["GATE_WIREGUARD_DATABASE_USER"]%>
+  password: <%= ENV["GATE_WIREGUARD_DATABASE_PASSWORD"] %>
+  host: <%= ENV["GATE_WIREGUARD_DATABASE_HOST"] %>
+  port: 3306

@@ -4,10 +4,6 @@ sudo apt-get upgrade -y
 sudo apt-get install -y ansible wget curl
 
 export NVM_DIR="$HOME/.nvm"
-echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc
-echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
-echo 'export GEM_HOME=~/.ruby/' >> ~/.zshrc
-echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.zshrc
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 . ~/.nvm/nvm.sh
@@ -18,9 +14,13 @@ corepack enable
 
 
 #need to source appropriate shell rc file
-if [ -n "$BASH_VERSION" ]; then
+if [ -n "$BASH_VERSION" ]; 
+    echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc
+    echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
     source ~/.bashrc
 elif [ -n "$ZSH_VERSION" ]; then
+    echo 'export GEM_HOME=~/.ruby/' >> ~/.zshrc
+    echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.zshrc
     source ~/.zshrc
 fi
 

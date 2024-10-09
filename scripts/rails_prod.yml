@@ -25,7 +25,6 @@
         name:
           - git
           - curl
-          - libpq-dev
           - libmysqlclient-dev
           - mysql-client
           - libyaml-dev

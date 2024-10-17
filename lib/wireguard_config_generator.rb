@@ -34,7 +34,7 @@ class WireguardConfigGenerator
       vpn_configuration.network_addresses.each do |ip_address|
         config += "AllowedIPs = #{ip_address.network_address}\n"
       end
-      # config += "PersistentKeepalive = 25\n" if vpn_configuration.wg_keep_alive.present?
+      config += "PersistentKeepalive = 20\n" if vpn_configuration.wg_keep_alive.present?
       config += "\n"
 
       config

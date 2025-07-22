@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class VpnDevicesController < ApplicationController
   before_action :set_vpn_device, only: %i[show edit update destroy]
   before_action :require_login
@@ -13,15 +15,13 @@ class VpnDevicesController < ApplicationController
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
     @nodes = true if params['nodes'].present?
-    if @vpn_device.description.nil? || @vpn_device.description.empty?
-      redirect_to root_path, alert: 'Vpn device description is empty.'
-    end
-    @vpn_configuration = VpnConfiguration.all.first
+    redirect_to root_path, alert: 'Vpn device description is empty.' if @vpn_device.description.blank?
+    @vpn_configuration = VpnConfiguration.first
   end
 
   def download_config
     @vpn_device = VpnDevice.find(params[:id])
-    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.all.first)
+    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.first)
     send_data config_content, filename: 'gate_vpn_config.conf'
   end
 
@@ -85,10 +85,10 @@ class VpnDevicesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_device_params
-    params.require(:vpn_device).permit(:user_id, :description, :private_key, :public_key, :node)
+    params.expect(vpn_device: %i[user_id description private_key public_key node])
   end
 
   def update_wireguard_config
-    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
+    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.first)
   end
 end

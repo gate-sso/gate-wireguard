@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This controllers takes care of VPN Decices
 class VpnDevice < ApplicationRecord
   belongs_to :user
@@ -10,7 +12,7 @@ class VpnDevice < ApplicationRecord
   end
 
   def generate_qr_code
-    qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.all.first))
+    qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.first))
     qr.as_svg(
       offset: 0,
       color: '000',

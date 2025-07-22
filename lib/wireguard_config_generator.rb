@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'open3'
 # WireGuard config generator, this expects you to have wg utility installed on the same box for generating keys
 class WireguardConfigGenerator
@@ -17,11 +19,8 @@ class WireguardConfigGenerator
       }
     end
 
-    def generate_client_config(client, vpn_configuration)
-      allowed_ips = vpn_configuration.network_addresses.map(&:network_address).join(', ')
-
-      # config = "# User: #{client.user.name}, Device: #{client.description}\n"
-      # config += "[Interface]\n"
+    def generate_client_config(client, vpn_configuration) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      vpn_configuration.network_addresses.map(&:network_address).join(', ')
       config = "[Interface]\n"
       config += "PrivateKey = #{client.private_key}\n"
       config += "Address = #{client.ip_allocation.ip_address}/24\n"

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 # ruby "3.0.2"
@@ -56,13 +58,17 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem 'erb-formatter'
-  gem 'rubocop'
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
+  gem 'rubocop-rails', require: false
+  gem 'rubocop-rspec', require: false
+  gem 'rubocop-rspec_rails', require: false
   gem 'ruby-lsp'
-  gem 'sorbet-runtime'
   # Please note Sorbet required watchman, install in your system
   # after that rung
   # bundle exec srb typecheck --lsp
-  gem 'sorbet'
+  gem 'sorbet-static-and-runtime', require: false
+  gem 'tapioca', require: false, group: %i[development test]
   gem 'web-console'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]

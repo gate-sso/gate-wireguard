@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This is redis dns records controller
 class DnsRecordsController < ApplicationController
   before_action :require_login
@@ -44,6 +46,6 @@ class DnsRecordsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def dns_record_params
-    params.require(:dns_record).permit(:host_name, :ip_address)
+    params.expect(dns_record: %i[host_name ip_address])
   end
 end

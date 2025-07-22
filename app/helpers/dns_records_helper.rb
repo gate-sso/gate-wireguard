@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # DNS Record helper
 module DnsRecordsHelper
   def self.resolve_dns_record(domain, dns_server: nil, dns_server_port: 53) # rubocop:disable Metrics/MethodLength

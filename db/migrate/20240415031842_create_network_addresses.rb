@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateNetworkAddresses < ActiveRecord::Migration[7.1]
   def change
     create_table :network_addresses do |t|

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # DNS Record is a model that represents a DNS record in the database.
 class DnsRecord < ApplicationRecord
   belongs_to :user
@@ -18,12 +20,12 @@ class DnsRecord < ApplicationRecord
   end
 
   def self.add_host_to_zone(dns_record)
-    add_host(ENV['GATE_DNS_ZONE'], dns_record.host_name, dns_record.ip_address)
+    add_host(ENV.fetch('GATE_DNS_ZONE', nil), dns_record.host_name, dns_record.ip_address)
   end
 
   def self.refresh_zones
-    REDIS.del("#{ENV['GATE_DNS_ZONE']}.")
-    DnsRecord.all.each do |dns_record|
+    REDIS.del("#{ENV.fetch('GATE_DNS_ZONE', nil)}.")
+    DnsRecord.find_each do |dns_record|
       add_host_to_zone(dns_record)
     end
   end

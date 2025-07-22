@@ -1,4 +1,5 @@
-pool_size = 20
-REDIS =  ConnectionPool::Wrapper.new do
-  Redis.new(host: ENV['GATE_REDIS_HOST'], port: ENV['GATE_REDIS_PORT'])
+# frozen_string_literal: true
+
+REDIS = ConnectionPool::Wrapper.new do
+  Redis.new(host: ENV.fetch('GATE_REDIS_HOST', nil), port: ENV.fetch('GATE_REDIS_PORT', nil))
 end

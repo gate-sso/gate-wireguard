@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AdminController < ApplicationController
   before_action :require_login
   # before_action :set_vpn_configuration, only: %i[ show update edit ]
@@ -6,7 +8,7 @@ class AdminController < ApplicationController
   after_action :update_wireguard_config, only: %i[update_vpn_configuration add_network_address remove_network_address]
 
   def index
-    @vpn_configuration = VpnConfiguration.all.first
+    @vpn_configuration = VpnConfiguration.first
     return unless @vpn_configuration.nil?
 
     redirect_to admin_vpn_configurations_path
@@ -81,11 +83,11 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.require(:vpn_configuration).permit(:wg_ip_address, :dns_servers, :wg_port, :wg_ip_range,
-                                              :wg_network_address, :wg_interface_name, :wg_listen_address, :wg_keep_alive, :wg_forward_interface)
+    params.expect(vpn_configuration: %i[wg_ip_address dns_servers wg_port wg_ip_range
+                                        wg_network_address wg_interface_name wg_listen_address wg_keep_alive wg_forward_interface])
   end
 
   def update_wireguard_config
-    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.all.first)
+    WireguardConfigGenerator.write_server_configuration(VpnConfiguration.first)
   end
 end

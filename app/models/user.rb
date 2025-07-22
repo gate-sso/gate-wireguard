@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   has_many :vpn_devices, dependent: :destroy
   def self.from_omniauth(auth)
@@ -6,7 +8,7 @@ class User < ApplicationRecord
       user.name = auth.info.name
       user.provider = auth.provider
       user.uid = auth.uid
-      user.admin = User.all.count == 0
+      user.admin = User.none?
     end
   end
 end

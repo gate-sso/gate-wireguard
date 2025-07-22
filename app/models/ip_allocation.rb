@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Purpose: Model for IP Allocation. This model is used to store the IP address allocated to a VPN device.
 class IpAllocation < ApplicationRecord
   validates :ip_address, presence: true, uniqueness: true
@@ -13,7 +15,7 @@ class IpAllocation < ApplicationRecord
   end
 
   def self.get_base_ip
-    vpn_configuration = VpnConfiguration.all.first
+    vpn_configuration = VpnConfiguration.first
     vpn_configuration.wg_ip_range.split('.')[0..2].join('.')
   end
 

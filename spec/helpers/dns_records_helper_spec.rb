@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 # Specs in this file have access to a helper object that includes
@@ -10,8 +12,8 @@ require 'rails_helper'
 #     end
 #   end
 # end
-RSpec.describe DnsRecordsHelper, type: :helper do
+RSpec.describe DnsRecordsHelper do
   it 'checks if a DNS record exists' do
-    expect(DnsRecordsHelper.resolve_dns_record('google.com')).to be_truthy
+    expect(described_class.resolve_dns_record('google.com')).to be_truthy
   end
 end

@@ -1,0 +1,28 @@
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails
+
+AllCops:
+  TargetRubyVersion: 3.3.4
+  NewCops: enable
+  Exclude:
+    - 'db/schema.rb'
+    - 'bin/**/*'
+    - 'node_modules/**/*'
+    - 'vendor/**/*'
+    - 'lib/**/*.rb'
+
+Rails:
+  Enabled: true
+
+RSpec:
+  Enabled: true
+
+RSpecRails:
+  Enabled: true
+
+Style/Documentation:
+  Enabled: true
+  Exclude:
+    - 'db/**/*'

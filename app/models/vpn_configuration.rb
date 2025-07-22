@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Purpose: Model for VPN configuration.
 # This model is used to store the configuration details of the VPN server.
 class VpnConfiguration < ApplicationRecord

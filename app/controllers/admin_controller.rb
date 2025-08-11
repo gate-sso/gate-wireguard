@@ -24,6 +24,7 @@ class AdminController < ApplicationController
 
   def vpn_configurations
     if current_user.admin?
+      @network_address = NetworkAddress.new
       @vpn_configuration = VpnConfiguration.get_vpn_configuration
 
     else
@@ -84,7 +85,7 @@ class AdminController < ApplicationController
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
     params.expect(vpn_configuration: %i[wg_ip_address dns_servers wg_port wg_ip_range
-                                        wg_network_address wg_interface_name wg_listen_address wg_keep_alive wg_forward_interface])
+                                        wg_network_address wg_interface_name wg_listen_address wg_keep_alive wg_forward_interface wg_fqdn])
   end
 
   def update_wireguard_config

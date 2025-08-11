@@ -15,7 +15,8 @@ class WireguardConfigGenerator
         range: '10.42.5.0', # This is the default range for WireGuard
         interface_name: 'wg0', # This is the default interface name for WireGuard
         keep_alive: '25', # This is the default keep alive for WireGuard
-        forward_interface: 'eth0' # This is the default forward interface for WireGuard
+        forward_interface: 'eth0', # This is the default forward interface for WireGuard
+        dns_servers: nil # Let admin configure DNS servers through the interface
       }
     end
 
@@ -24,11 +25,16 @@ class WireguardConfigGenerator
       config = "[Interface]\n"
       config += "PrivateKey = #{client.private_key}\n"
       config += "Address = #{client.ip_allocation.ip_address}/24\n"
-      config += "DNS = #{vpn_configuration.dns_servers}\n\n" if vpn_configuration.dns_servers.present?
+      
+      # Use configured DNS servers, or default to Google DNS if none are set
+      dns_servers = vpn_configuration.dns_servers.present? ? vpn_configuration.dns_servers : '8.8.8.8, 8.8.4.4'
+      config += "DNS = #{dns_servers}\n\n"
 
       config += "[Peer]\n"
       config += "PublicKey = #{vpn_configuration.wg_public_key}\n"
-      config += "Endpoint = #{vpn_configuration.wg_ip_address}:#{vpn_configuration.wg_port}\n"
+      # Use wg_fqdn if available, otherwise fall back to wg_ip_address
+      endpoint = vpn_configuration.wg_fqdn.present? ? vpn_configuration.wg_fqdn : vpn_configuration.wg_ip_address
+      config += "Endpoint = #{endpoint}:#{vpn_configuration.wg_port}\n"
       config += "AllowedIPs = #{vpn_configuration.server_vpn_ip_address}/32\n"
       vpn_configuration.network_addresses.each do |ip_address|
         config += "AllowedIPs = #{ip_address.network_address}\n"

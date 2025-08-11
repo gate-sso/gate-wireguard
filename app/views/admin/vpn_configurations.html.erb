@@ -76,26 +76,32 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" data-controller="network-address">
       <label class="control-label col-sm-6 text-primary" for="wg_ip_range">Client IP Network range ( It is /24)
       </label><label class="control-label col-sm-6 text-primary" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Server VPN IP Address</label>
       <div class="row">
 
         <div class="col-sm-6">
-          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0/24" %>
+          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0 (defaults to /24)", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
         </div>
 
         <div class="col-sm-6">
-          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control", disabled: true, placeholder: "10.42.5.1" %>
+          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control", placeholder: "10.42.5.1", data: { network_address_target: "serverIp" } %>
         </div>
       </div>
     </div>
     <p>
 
     <div class="form-group">
-      <label class="control-label col-sm-12 text-primary" for="dns_servers">DNS Server (Comma Separated, Leave empty
-        if there you
-        don't have a DNS server):</label>
+      <label class="control-label col-sm-12 text-primary" for="wg_fqdn">Server FQDN (Fully Qualified Domain Name):</label>
+      <div class="col-sm-12">
+        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control", placeholder: "vpn.example.com" %>
+      </div>
+    </div>
+    <p>
+
+    <div class="form-group">
+      <label class="control-label col-sm-12 text-primary" for="dns_servers">DNS Servers :</label>
       <div class="col-sm-12">
         <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS Server(s) address" %>
       </div>

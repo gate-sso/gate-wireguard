@@ -11,6 +11,11 @@ capybara-*.html
 rerun.txt
 pickle-email-*.html
 
+opencode.db
+opencode.db-shm
+opencode.db-wal
+
+
 
 
 

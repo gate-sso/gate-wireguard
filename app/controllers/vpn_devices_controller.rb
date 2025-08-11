@@ -21,8 +21,21 @@ class VpnDevicesController < ApplicationController
 
   def download_config
     @vpn_device = VpnDevice.find(params[:id])
-    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, VpnConfiguration.first)
-    send_data config_content, filename: 'gate_vpn_config.conf'
+    @vpn_configuration = VpnConfiguration.first
+    config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, @vpn_configuration)
+    
+    # Generate filename based on wg_fqdn or fallback to IP address
+    if @vpn_configuration.wg_fqdn.present?
+      filename = "#{@vpn_configuration.wg_fqdn}.conf"
+    elsif @vpn_configuration.wg_ip_address.present?
+      # Replace dots with underscores for IP address
+      filename = "#{@vpn_configuration.wg_ip_address.gsub('.', '_')}.conf"
+    else
+      # Fallback to original filename if neither is available
+      filename = 'gate_vpn_config.conf'
+    end
+    
+    send_data config_content, filename: filename
   end
 
   # GET /vpn_devices/new

@@ -12,7 +12,7 @@
   </div>
   <hr>
 
-  <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal" } do |form| %>
+  <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal", data: { controller: "fqdn-resolver" } } do |form| %>
     <div class="form-group">
       <label class="control-label text-primary col-sm-6 font-weight-bold" for="wg_private_key">Private
         Key:</label><label class="control-label col-sm-6 text-primary" for="wg_public_key">&nbsp;&nbsp;&nbsp;Public
@@ -50,10 +50,22 @@
         Address:</label><label class="control-label col-sm-6 text-primary" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Private interface address:</label>
       <div class="row">
         <div class="col-sm-6">
-          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address" %>
+          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
         </div>
         <div class="col-sm-6">
-          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", placeholder: "Enter server listening IP address" %>
+          <% default_ip = @network_interface_info&.dig(:success) ? @network_interface_info[:ip_address] : "" %>
+          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", 
+                             value: default_ip,
+                             placeholder: "Private interface IP (auto-detected)" %>
+          <% if @network_interface_info&.dig(:success) %>
+            <small class="form-text text-success">
+              ✅ Auto-detected: <%= @network_interface_info[:ip_address] %>
+            </small>
+          <% elsif @network_interface_info&.dig(:error) %>
+            <small class="form-text text-warning">
+              ⚠️ Could not auto-detect IP address
+            </small>
+          <% end %>
         </div>
 
 
@@ -71,7 +83,19 @@
         </div>
 
         <div class="col-sm-6">
-          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", placeholder: "eth0" %>
+          <% default_interface = @network_interface_info&.dig(:success) ? @network_interface_info[:interface_name] : "" %>
+          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", 
+                             value: default_interface, 
+                             placeholder: "Default gateway interface (auto-detected)" %>
+          <% if @network_interface_info&.dig(:success) %>
+            <small class="form-text text-success">
+              ✅ Auto-detected: <%= @network_interface_info[:interface_name] %>
+            </small>
+          <% elsif @network_interface_info&.dig(:error) %>
+            <small class="form-text text-warning">
+              ⚠️ Could not auto-detect: <%= @network_interface_info[:error] %>
+            </small>
+          <% end %>
         </div>
       </div>
     </div>
@@ -95,7 +119,8 @@
     <div class="form-group">
       <label class="control-label col-sm-12 text-primary" for="wg_fqdn">Server FQDN (Fully Qualified Domain Name):</label>
       <div class="col-sm-12">
-        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control", placeholder: "vpn.example.com" %>
+        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control", placeholder: "vpn.example.com", data: { fqdn_resolver_target: "fqdn", action: "input->fqdn-resolver#resolveFqdn" } %>
+        <small class="form-text text-muted">Enter a domain name to automatically resolve its IP address</small>
       </div>
     </div>
     <p>

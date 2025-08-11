@@ -18,7 +18,7 @@ class AdminController < ApplicationController
     if current_user.admin?
       @users = User.all
     else
-      redirect_to root_path, alert: 'You are not authorized to access this page.'
+      redirect_to root_path
     end
   end
 
@@ -26,13 +26,21 @@ class AdminController < ApplicationController
     if current_user.admin?
       @network_address = NetworkAddress.new
       @vpn_configuration = VpnConfiguration.get_vpn_configuration
-
+      
+      # Get network interface information for auto-population
+      @network_interface_info = NetworkInterfaceHelper.get_default_gateway_interface
+      
     else
-      redirect_to root_path, alert: 'You are not authorized to access this page.'
+      redirect_to root_path
     end
   end
 
   def update_vpn_configuration
+    unless current_user.admin?
+      redirect_to root_path
+      return
+    end
+
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
       if vpn_configuration_params[:wg_ip_range]
@@ -50,6 +58,11 @@ class AdminController < ApplicationController
   end
 
   def add_network_address
+    unless current_user.admin?
+      redirect_to root_path
+      return
+    end
+
     @vpn_configuration = VpnConfiguration.find(params[:id])
     @network_address = NetworkAddress.new
     @network_address.network_address = params[:network_address]
@@ -67,6 +80,11 @@ class AdminController < ApplicationController
   end
 
   def remove_network_address
+    unless current_user.admin?
+      redirect_to root_path
+      return
+    end
+
     @network_address = NetworkAddress.find(params[:id])
     @network_address.destroy!
     respond_to do |format|

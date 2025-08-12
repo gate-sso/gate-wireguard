@@ -12,6 +12,13 @@ class VpnDevicesController < ApplicationController
     @vpn_devices = (@nodes == true ? VpnDevice.where(node: true) : VpnDevice.all)
   end
 
+  # GET /my_devices - Show only current user's devices
+  def my_devices
+    @vpn_devices = current_user.vpn_devices
+    @user_devices_only = true
+    render :index
+  end
+
   # GET /vpn_devices/1 or /vpn_devices/1.json
   def show
     @nodes = true if params['nodes'].present?

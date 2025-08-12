@@ -1,3 +1,279 @@
-<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-  <a type="button" class="btn btn-lg btn-outline-success" href="/auth/google_oauth2">Sign in with Google</a>
+<div class="login-container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="card shadow-lg enterprise-card" style="width: 480px; border: none; border-radius: 16px; overflow: hidden;">
+    <div class="card-body p-5 text-center">
+      
+      <!-- Professional Header -->
+      <div class="mb-5">
+        <div class="logo-container mb-4">
+          <div class="company-logo mb-3">
+            <i class="bi bi-shield-lock-fill text-primary" style="font-size: 3.5rem;"></i>
+          </div>
+          <h1 class="h2 fw-bold text-dark mb-2">Gate VPN</h1>
+          <p class="text-muted mb-0" style="font-size: 1.1rem;">
+            Enterprise Secure Network Access
+          </p>
+        </div>
+        
+        <div class="welcome-message">
+          <h3 class="h5 text-dark mb-2">Welcome Back</h3>
+          <p class="text-muted mb-0">
+            Sign in to access your secure network environment
+          </p>
+        </div>
+      </div>
+      
+      <!-- Professional Separator -->
+      <div class="separator-line my-4"></div>
+      
+      <!-- Google Sign In Button -->
+      <div class="d-grid mb-4">
+        <a href="/auth/google_oauth2" 
+           class="btn btn-enterprise btn-lg d-flex align-items-center justify-content-center gap-3 py-3 px-4"
+           style="border-radius: 12px;">
+          
+          <!-- Google Logo SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" class="google-logo">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          
+          <span class="fw-medium">Continue with Google</span>
+        </a>
+      </div>
+      
+      <!-- Security Information -->
+      <div class="security-info mb-4">
+        <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+          <div class="security-badge">
+            <i class="bi bi-shield-check text-success me-1"></i>
+            <small class="text-muted">SSO Enabled</small>
+          </div>
+          <div class="security-badge">
+            <i class="bi bi-lock-fill text-primary me-1"></i>
+            <small class="text-muted">OAuth 2.0</small>
+          </div>
+          <div class="security-badge">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            <small class="text-muted">Secure</small>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Professional Footer -->
+      <div class="footer-info">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+          <small class="text-muted">Powered by</small>
+          <strong class="text-primary">WireGuard®</strong>
+          <small class="text-muted">Protocol</small>
+        </div>
+        <small class="text-muted d-block">
+          Enterprise-grade VPN solution for secure remote access
+        </small>
+      </div>
+    </div>
+  </div>
 </div>
+
+<style>
+  .login-container {
+    position: relative;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #ddd6fe 100%);
+  }
+  
+  /* Dark mode background with beautiful purple/blue gradient */
+  [data-bs-theme="dark"] .login-container {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #3730a3 50%, #1e40af 75%, #1e3a8a 100%);
+  }
+  
+  .enterprise-card {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+  }
+  
+  [data-bs-theme="dark"] .enterprise-card {
+    background: rgba(30, 41, 59, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .company-logo i {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Dark mode logo */
+  [data-bs-theme="dark"] .company-logo i {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Text colors for light mode */
+  .enterprise-card h1,
+  .enterprise-card h3,
+  .enterprise-card .welcome-message h3 {
+    color: #1f2937;
+    font-weight: 600;
+  }
+  
+  .enterprise-card .text-muted {
+    color: #6b7280 !important;
+  }
+  
+  /* Improved text colors for dark mode - dimmer and lighter weight */
+  [data-bs-theme="dark"] .enterprise-card h1,
+  [data-bs-theme="dark"] .enterprise-card h3,
+  [data-bs-theme="dark"] .enterprise-card .welcome-message h3 {
+    color: rgba(241, 245, 249, 0.9) !important;
+    font-weight: 500 !important; /* Lighter weight for dark mode */
+  }
+  
+  [data-bs-theme="dark"] .enterprise-card .text-muted {
+    color: rgba(156, 163, 175, 0.8) !important;
+    font-weight: 300 !important; /* Much lighter weight */
+  }
+  
+  [data-bs-theme="dark"] .enterprise-card p {
+    color: rgba(209, 213, 219, 0.85) !important;
+    font-weight: 300 !important; /* Lighter weight */
+  }
+  
+  .separator-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+    margin: 2rem 0;
+  }
+  
+  [data-bs-theme="dark"] .separator-line {
+    background: linear-gradient(90deg, transparent, #374151, transparent);
+  }
+  
+  .btn-enterprise {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border: 1.5px solid #e5e7eb;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-enterprise:hover {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    color: #1f2937 !important;
+  }
+  
+  /* Softer, more subtle button styling for dark mode */
+  [data-bs-theme="dark"] .btn-enterprise {
+    background: linear-gradient(135deg, rgba(55, 65, 81, 0.8) 0%, rgba(75, 85, 99, 0.8) 100%);
+    border: 1.5px solid rgba(156, 163, 175, 0.3);
+    color: rgba(249, 250, 251, 0.9) !important;
+    font-weight: 300 !important; /* Lighter weight in dark mode */
+    backdrop-filter: blur(10px);
+  }
+  
+  [data-bs-theme="dark"] .btn-enterprise:hover {
+    background: linear-gradient(135deg, rgba(75, 85, 99, 0.9) 0%, rgba(107, 114, 128, 0.9) 100%);
+    border-color: rgba(156, 163, 175, 0.5);
+    color: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Ensure button text is always visible */
+  .btn-enterprise span {
+    color: inherit !important;
+  }
+  
+  .google-logo {
+    transition: transform 0.2s ease;
+  }
+  
+  .btn-enterprise:hover .google-logo {
+    transform: scale(1.05);
+  }
+  
+  .security-badge {
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  [data-bs-theme="dark"] .security-badge {
+    background: rgba(59, 130, 246, 0.15);
+  }
+  
+  [data-bs-theme="dark"] .security-badge .text-muted {
+    color: rgba(156, 163, 175, 0.9) !important;
+    font-weight: 300 !important;
+  }
+  
+  /* Footer text colors with lighter weight for dark mode */
+  .footer-info .text-muted {
+    color: #6b7280 !important;
+  }
+  
+  [data-bs-theme="dark"] .footer-info .text-muted {
+    color: rgba(156, 163, 175, 0.8) !important;
+    font-weight: 300 !important;
+  }
+  
+  .footer-info .text-primary {
+    color: #3b82f6 !important;
+    font-weight: 600;
+  }
+  
+  [data-bs-theme="dark"] .footer-info .text-primary {
+    color: rgba(96, 165, 250, 0.9) !important;
+    font-weight: 400 !important; /* Lighter weight in dark mode */
+  }
+  
+  [data-bs-theme="dark"] .footer-info small {
+    font-weight: 300 !important;
+  }
+  
+  .footer-info {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  [data-bs-theme="dark"] .footer-info {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  @media (max-width: 480px) {
+    .enterprise-card {
+      width: 90% !important;
+      margin: 0 20px;
+    }
+    
+    .company-logo i {
+      font-size: 3rem !important;
+    }
+    
+    .h2 {
+      font-size: 1.75rem !important;
+    }
+    
+    .security-info {
+      flex-direction: column;
+      gap: 0.5rem !important;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .btn-enterprise,
+    .google-logo {
+      transition: none !important;
+    }
+  }
+</style>

@@ -1,93 +1,285 @@
-<div>
-  <h5>VPN Device configuration</h5>
-  <p style="color: red"><%= alert %></p>
-  <p style="color: green"><%= notice %></p>
-
-  <p style="color: green"><%= notice %></p>
-
-  <% if @vpn_device.description? %>
-
-    <div class="card">
-      <div class="card-header">
-        <%= @vpn_device.description %>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+      
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h3 class="fw-semibold mb-1">
+            <i class="bi bi-shield-lock-fill text-primary me-2"></i>
+            VPN Device Configuration
+          </h3>
+          <p class="text-muted mb-0">Secure network access configuration</p>
+        </div>
+        <div class="d-flex gap-2">
+          <%= link_to vpn_devices_path, class: "btn btn-outline-secondary btn-sm d-flex align-items-center gap-2" do %>
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Devices</span>
+          <% end %>
+        </div>
       </div>
-      <div class="card-body">
-        <div class="row">
 
-          <div class="container-sm col-sm-8 align-content-start">
-            <div class="row">
-              <div class="col-sm-4">
-                <h5 class="card-title">VPN Server IP</h5>
+      <!-- Alert Messages -->
+      <% if alert %>
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <%= alert %>
+        </div>
+      <% end %>
+      
+      <% if notice %>
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <%= notice %>
+        </div>
+      <% end %>
+
+      <% if @vpn_device.description? %>
+        <!-- Main Configuration Card -->
+        <div class="card shadow-professional border-subtle">
+          <div class="card-header bg-subtle border-0 py-3">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-2">
+                  <i class="bi bi-router text-primary"></i>
+                </div>
+                <div>
+                  <h5 class="card-title mb-0 fw-semibold"><%= @vpn_device.description %></h5>
+                  <small class="text-muted">Device Configuration Details</small>
+                </div>
               </div>
-              <div class="col-sm-8">
-                <h5 class="card-title">
-                  <%= @vpn_configuration.wg_ip_address %></h5>
+              <div class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 px-3 py-2">
+                <i class="bi bi-check-circle-fill me-1"></i>
+                Active
               </div>
             </div>
-
-            <div class="row">
-              <div class="col-sm-4">
-                <h6 class="card-title">Device Private Key</h6>
-              </div>
-              <div class="col-sm-8">
-                <td></td>
-                <h6 class="card-title">
-                  <%= @vpn_device.private_key %></h6>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-4">
-                <h6 class="card-title">Device Public Key</h6>
-              </div>
-              <div class="col-sm-8">
-                <td></td>
-                <h6 class="card-title">
-                  <%= @vpn_device.public_key %></h6>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-sm-4">
-                <h6 class="card-title">Device IP Address</h6>
-              </div>
-              <div class="col-sm-8">
-                <td></td>
-                <h6 class="card-title">
-                  <%= @vpn_device.ip_allocation.ip_address %></h6>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-sm-4">
-                <h6 class="card-title">Accessible remote networks</h6>
-              </div>
-              <div class="col-sm-8">
-                <td></td>
-                <h6 class="card-title">
-                  <%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></h6>
-              </div>
-            </div>
-            <br/>
-
-            <%= link_to "Download Configuration",
-            download_config_path(@vpn_device.id),
-            class: "btn btn-primary btn-sm" %>
-            <%= link_to "Remove Configuration",
-            @vpn_device,
-            method: :delete,
-            data: {
-              turbo_method: :delete,
-              turbo_confirm: "Are you sure?",
-            },
-            class: "btn btn-danger btn-sm" %>
           </div>
-          <div class="container-sm col-sm-4 align-content-end pt-2 pb-2">
-            <%= raw @vpn_device.generate_qr_code %>
+          
+          <div class="card-body p-4">
+            <div class="row g-4">
+              
+              <!-- Configuration Details -->
+              <div class="col-lg-8">
+                <div class="row g-3">
+                  
+                  <!-- VPN Server IP -->
+                  <div class="col-12">
+                    <div class="p-3 bg-subtle rounded-3 border">
+                      <div class="row align-items-center">
+                        <div class="col-sm-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-server text-primary"></i>
+                            <label class="form-label fw-medium mb-0">VPN Server IP</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-8">
+                          <div class="d-flex align-items-center gap-2">
+                            <code class="bg-primary bg-opacity-10 text-primary px-2 py-1 rounded">
+                              <%= @vpn_configuration.wg_ip_address %>
+                            </code>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= @vpn_configuration.wg_ip_address %>">
+                              <i class="bi bi-copy"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Device Private Key -->
+                  <div class="col-12">
+                    <div class="p-3 bg-subtle rounded-3 border">
+                      <div class="row align-items-center">
+                        <div class="col-sm-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-key-fill text-warning"></i>
+                            <label class="form-label fw-medium mb-0">Private Key</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-8">
+                          <div class="d-flex align-items-center gap-2">
+                            <code class="bg-warning bg-opacity-10 text-warning px-2 py-1 rounded font-mono" style="font-size: 0.75rem; word-break: break-all;">
+                              <%= @vpn_device.private_key %>
+                            </code>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= @vpn_device.private_key %>">
+                              <i class="bi bi-copy"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Device Public Key -->
+                  <div class="col-12">
+                    <div class="p-3 bg-subtle rounded-3 border">
+                      <div class="row align-items-center">
+                        <div class="col-sm-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-check text-success"></i>
+                            <label class="form-label fw-medium mb-0">Public Key</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-8">
+                          <div class="d-flex align-items-center gap-2">
+                            <code class="bg-success bg-opacity-10 text-success px-2 py-1 rounded font-mono" style="font-size: 0.75rem; word-break: break-all;">
+                              <%= @vpn_device.public_key %>
+                            </code>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= @vpn_device.public_key %>">
+                              <i class="bi bi-copy"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Device IP Address -->
+                  <div class="col-12">
+                    <div class="p-3 bg-subtle rounded-3 border">
+                      <div class="row align-items-center">
+                        <div class="col-sm-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-router-fill text-info"></i>
+                            <label class="form-label fw-medium mb-0">Device IP</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-8">
+                          <div class="d-flex align-items-center gap-2">
+                            <code class="bg-info bg-opacity-10 text-info px-2 py-1 rounded">
+                              <%= @vpn_device.ip_allocation.ip_address %>
+                            </code>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-copy="<%= @vpn_device.ip_allocation.ip_address %>">
+                              <i class="bi bi-copy"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Accessible Networks -->
+                  <div class="col-12">
+                    <div class="p-3 bg-subtle rounded-3 border">
+                      <div class="row align-items-center">
+                        <div class="col-sm-4">
+                          <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-diagram-3 text-secondary"></i>
+                            <label class="form-label fw-medium mb-0">Remote Networks</label>
+                          </div>
+                        </div>
+                        <div class="col-sm-8">
+                          <div class="d-flex flex-wrap gap-2">
+                            <% @vpn_configuration.network_addresses.each do |network| %>
+                              <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 px-2 py-1">
+                                <%= network.network_address %>
+                              </span>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-4 d-flex gap-3 flex-wrap">
+                  <%= link_to download_config_path(@vpn_device.id), 
+                      class: "btn btn-primary d-flex align-items-center gap-2" do %>
+                    <i class="bi bi-download"></i>
+                    <span>Download Configuration</span>
+                  <% end %>
+                  
+                  <%= link_to @vpn_device,
+                      method: :delete,
+                      data: {
+                        turbo_method: :delete,
+                        turbo_confirm: "Are you sure you want to remove this configuration?",
+                      },
+                      class: "btn btn-outline-danger d-flex align-items-center gap-2" do %>
+                    <i class="bi bi-trash3"></i>
+                    <span>Remove Configuration</span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- QR Code Section (Aligned to far right) -->
+              <div class="col-lg-4">
+                <div class="sticky-top" style="top: 2rem;">
+                  <div class="text-center">
+                    <div class="bg-white p-4 rounded-3 border shadow-sm d-inline-block">
+                      <%= raw @vpn_device.generate_qr_code %>
+                    </div>
+                    <div class="mt-3">
+                      <h6 class="fw-semibold mb-1">Quick Setup</h6>
+                      <p class="text-muted small mb-0">Scan with WireGuard app</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
-
-      </div>
+      <% end %>
     </div>
-    <br/>
-  <% end %>
+  </div>
 </div>
+
+<style>
+  .font-mono {
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  }
+  
+  .copy-btn {
+    transition: all 0.2s ease;
+  }
+  
+  .copy-btn:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+  }
+  
+  [data-bs-theme="dark"] .bg-white {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  [data-bs-theme="dark"] .copy-btn {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  [data-bs-theme="dark"] .copy-btn:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: white;
+  }
+</style>
+
+<script>
+  // Copy to clipboard functionality
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const textToCopy = this.dataset.copy;
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        
+        // Visual feedback
+        const originalIcon = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-check"></i>';
+        this.classList.add('btn-success');
+        this.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+          this.innerHTML = originalIcon;
+          this.classList.remove('btn-success');
+          this.classList.add('btn-outline-secondary');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    });
+  });
+</script>

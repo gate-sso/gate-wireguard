@@ -3,6 +3,7 @@
 Rails.application.routes.draw do
   resources :configurations
   resources :vpn_devices
+  get 'my_devices', to: 'vpn_devices#my_devices', as: 'my_devices'
   get 'dns_records/refresh', to: 'dns_records#refresh_zones', as: 'refresh_dns_records'
   resources :dns_records
   get 'home/index'
@@ -14,6 +15,7 @@ Rails.application.routes.draw do
   get 'auth/:provider/callback', to: 'sessions#create'
   get 'auth/failure', to: redirect('/')
   get 'logout', to: 'sessions#destroy', as: 'logout'
+  get 'profile_image', to: 'profile_images#show', as: 'profile_image'
 
   get 'admin/users'
   get 'admin/vpn_configurations'

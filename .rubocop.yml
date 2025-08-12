@@ -19,6 +19,7 @@ AllCops:
     - 'rubocop_results.json'
     - 'check_rubocop.sh'
     - 'app/helpers/network_interface_helper_*'
+    - 'app/views/**/*.erb'
 
 Rails:
   Enabled: true

@@ -2,6 +2,7 @@
 
 require 'rails_helper'
 
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe 'FQDN Resolution' do
   describe 'VPN Configuration Model' do
     it 'saves wg_fqdn and wg_ip_address correctly' do
@@ -47,3 +48,4 @@ RSpec.describe 'FQDN Resolution' do
     end
   end
 end
+# rubocop:enable RSpec/DescribeClass

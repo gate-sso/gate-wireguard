@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Admin Network Interface Detection', type: :request do
+RSpec.describe 'Admin Network Interface Detection' do
   let(:admin_user) do
     User.create!(name: 'Admin User', email: 'admin@example.com', admin: true, provider: 'oauth', uid: '12345')
   end

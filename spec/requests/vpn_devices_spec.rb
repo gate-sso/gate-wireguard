@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'VpnDevices', type: :request do
+RSpec.describe 'VpnDevices' do
   let(:user) { User.create!(email: 'test@example.com', name: 'Test User') }
   let(:vpn_device) do
     device = user.vpn_devices.create!(

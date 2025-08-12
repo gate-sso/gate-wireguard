@@ -2,6 +2,7 @@
 
 require 'rails_helper'
 
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe 'FQDN Resolver JavaScript Controller' do
   describe 'Controller file exists' do
     it 'has the fqdn_resolver_controller.js file' do
@@ -84,3 +85,4 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     end
   end
 end
+# rubocop:enable RSpec/DescribeClass

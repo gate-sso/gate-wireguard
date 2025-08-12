@@ -1,6 +1,8 @@
 
 plugins:
   - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails
 
 AllCops:
   TargetRubyVersion: 3.3.4
@@ -59,3 +61,28 @@ Layout/LineLength:
   Exclude:
     - 'config/environments/**/*'
     - 'spec/**/*'
+
+# RSpec Configuration - Disable overly strict cops
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/AnyInstance:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 5
+
+RSpec/LetSetup:
+  Enabled: false

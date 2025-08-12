@@ -2,6 +2,7 @@
 
 require 'rails_helper'
 
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe 'Network Address Auto-calculation' do
   let(:admin_user) { User.create!(email: 'admin@example.com', name: 'Admin User', admin: true) }
 
@@ -93,3 +94,4 @@ RSpec.describe 'Network Address Auto-calculation' do
     end
   end
 end
+# rubocop:enable RSpec/DescribeClass

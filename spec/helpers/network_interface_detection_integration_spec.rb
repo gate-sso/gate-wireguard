@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 # Integration tests for network interface detection functionality
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe 'Network Interface Detection Integration' do
   describe 'NetworkInterfaceHelper integration' do
     it 'can detect network interfaces in real environment' do
@@ -48,3 +49,4 @@ RSpec.describe 'Network Interface Detection Integration' do
     end
   end
 end
+# rubocop:enable RSpec/DescribeClass

@@ -15,9 +15,6 @@ RSpec.describe DnsRecord do
   end
 
   # Clean up after each test - no actual cleanup needed since we're mocking
-  after do
-    # No cleanup needed for mocked tests
-  end
 
   describe '.dns_record_exists?' do
     it 'returns true if the DNS record exists using a custom DNS server' do

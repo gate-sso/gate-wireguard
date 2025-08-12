@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Admin::VpnConfiguration', type: :request do
+RSpec.describe 'Admin::VpnConfiguration' do
   let(:admin_user) { User.create!(name: 'Admin User', email: 'admin@example.com', admin: true) }
   let(:regular_user) { User.create!(name: 'Regular User', email: 'user@example.com', admin: false) }
   let(:vpn_config) { VpnConfiguration.get_vpn_configuration }

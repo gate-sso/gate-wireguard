@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Admin FQDN Configuration', type: :request do
+RSpec.describe 'Admin FQDN Configuration' do
   let(:admin_user) do
     User.create!(name: 'Test User', email: 'test@example.com', admin: true, provider: 'oauth', uid: '12345')
   end

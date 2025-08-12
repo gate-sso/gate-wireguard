@@ -2,8 +2,8 @@
 
 require 'rails_helper'
 
-RSpec.describe VpnConfiguration, type: :model do
-  let(:vpn_configuration) { VpnConfiguration.new }
+RSpec.describe VpnConfiguration do
+  let(:vpn_configuration) { described_class.new }
 
   describe 'validations and attributes' do
     it 'allows setting wg_fqdn' do
@@ -37,10 +37,10 @@ RSpec.describe VpnConfiguration, type: :model do
                                                 stdin_data: 'test_private_key').and_return(['test_public_key', '',
                                                                                             double(success?: true)])
 
-        expect(VpnConfiguration.count).to eq(0)
-        config = VpnConfiguration.get_vpn_configuration
-        expect(VpnConfiguration.count).to eq(1)
-        expect(config).to be_a(VpnConfiguration)
+        expect(described_class.count).to eq(0)
+        config = described_class.get_vpn_configuration
+        expect(described_class.count).to eq(1)
+        expect(config).to be_a(described_class)
       end
 
       it 'sets default values' do
@@ -51,7 +51,7 @@ RSpec.describe VpnConfiguration, type: :model do
                                                 stdin_data: 'test_private_key').and_return(['test_public_key', '',
                                                                                             double(success?: true)])
 
-        config = VpnConfiguration.get_vpn_configuration
+        config = described_class.get_vpn_configuration
         expect(config.wg_port).to eq('51820')
         expect(config.wg_ip_range).to eq('10.42.5.0')
         expect(config.wg_interface_name).to eq('wg0')
@@ -62,7 +62,7 @@ RSpec.describe VpnConfiguration, type: :model do
 
     context 'when configuration exists' do
       let!(:existing_config) do
-        VpnConfiguration.create!(
+        described_class.create!(
           wg_port: '51820',
           wg_ip_range: '10.42.5.0',
           wg_private_key: 'test_private_key',
@@ -72,16 +72,16 @@ RSpec.describe VpnConfiguration, type: :model do
       end
 
       it 'returns existing configuration' do
-        config = VpnConfiguration.get_vpn_configuration
+        config = described_class.get_vpn_configuration
         expect(config).to eq(existing_config)
-        expect(VpnConfiguration.count).to eq(1)
+        expect(described_class.count).to eq(1)
       end
     end
   end
 
   describe 'wg_fqdn functionality' do
     let!(:config) do
-      VpnConfiguration.create!(
+      described_class.create!(
         wg_fqdn: 'vpn.example.com',
         wg_ip_address: '203.0.113.10',
         wg_port: '51820',
@@ -111,7 +111,7 @@ RSpec.describe VpnConfiguration, type: :model do
   end
 
   describe 'network configuration' do
-    let!(:config) { VpnConfiguration.create!(wg_ip_range: '10.42.5.0/24', server_vpn_ip_address: '10.42.5.254') }
+    let!(:config) { described_class.create!(wg_ip_range: '10.42.5.0/24', server_vpn_ip_address: '10.42.5.254') }
 
     it 'saves network range correctly' do
       expect(config.wg_ip_range).to eq('10.42.5.0/24')
@@ -130,7 +130,7 @@ RSpec.describe VpnConfiguration, type: :model do
   end
 
   describe 'DNS configuration' do
-    let!(:config) { VpnConfiguration.create! }
+    let!(:config) { described_class.create! }
 
     it 'allows custom DNS servers' do
       config.update!(dns_servers: '1.1.1.1, 1.0.0.1')
@@ -151,7 +151,7 @@ RSpec.describe VpnConfiguration, type: :model do
   describe 'complete configuration scenarios' do
     context 'FQDN-based setup' do
       let!(:config) do
-        VpnConfiguration.create!(
+        described_class.create!(
           wg_fqdn: 'vpn.company.com',
           wg_ip_address: '203.0.113.10',
           wg_ip_range: '10.42.5.0/24',
@@ -173,7 +173,7 @@ RSpec.describe VpnConfiguration, type: :model do
 
     context 'IP-only setup' do
       let!(:config) do
-        VpnConfiguration.create!(
+        described_class.create!(
           wg_ip_address: '192.168.100.1',
           wg_ip_range: '172.16.0.0/16',
           server_vpn_ip_address: '172.16.255.254',
@@ -191,7 +191,7 @@ RSpec.describe VpnConfiguration, type: :model do
   end
 
   describe 'associations' do
-    let!(:config) { VpnConfiguration.create! }
+    let!(:config) { described_class.create! }
 
     it 'has many network_addresses' do
       expect(config).to respond_to(:network_addresses)
@@ -200,7 +200,7 @@ RSpec.describe VpnConfiguration, type: :model do
 
     it 'destroys dependent network_addresses' do
       config.network_addresses.create!(network_address: '192.168.1.0/24')
-      expect { config.destroy! }.to change { NetworkAddress.count }.by(-1)
+      expect { config.destroy! }.to change(NetworkAddress, :count).by(-1)
     end
   end
 end

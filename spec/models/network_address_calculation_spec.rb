@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Network Address Auto-calculation', type: :feature do
+RSpec.describe 'Network Address Auto-calculation' do
   let(:admin_user) { User.create!(email: 'admin@example.com', name: 'Admin User', admin: true) }
 
   before do

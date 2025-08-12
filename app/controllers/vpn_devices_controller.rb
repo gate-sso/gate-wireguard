@@ -20,8 +20,15 @@ class VpnDevicesController < ApplicationController
   end
 
   def download_config
-    @vpn_device = VpnDevice.find(params[:id])
+    @vpn_device = current_user.vpn_devices.find(params[:id])
     @vpn_configuration = VpnConfiguration.first
+    
+    # Handle case where no VPN configuration exists
+    if @vpn_configuration.nil?
+      render plain: "VPN configuration not found", status: :service_unavailable
+      return
+    end
+    
     config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, @vpn_configuration)
 
     # Generate filename based on wg_fqdn or fallback to IP address

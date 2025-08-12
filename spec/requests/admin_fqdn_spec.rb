@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Admin FQDN Configuration', type: :request do
-  let(:admin_user) {
+  let(:admin_user) do
     User.create!(name: 'Test User', email: 'test@example.com', admin: true, provider: 'oauth', uid: '12345')
-  }
+  end
   let(:vpn_config) { VpnConfiguration.get_vpn_configuration }
 
   before do

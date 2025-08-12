@@ -14,7 +14,7 @@ class VpnConfiguration < ApplicationRecord
     end
   end
 
-  def self.configure_vpn # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+  def self.configure_vpn
     @vpn_configuration = VpnConfiguration.new
     keys = WireguardConfigGenerator.generate_server_config
     @vpn_configuration.wg_private_key = keys[:private_key]

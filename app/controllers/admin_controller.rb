@@ -28,7 +28,7 @@ class AdminController < ApplicationController
       @vpn_configuration = VpnConfiguration.get_vpn_configuration
 
       # Get network interface information for auto-population
-      @network_interface_info = NetworkInterfaceHelper.get_default_gateway_interface
+      @network_interface_info = NetworkInterfaceHelper.default_gateway_interface
 
     else
       redirect_to root_path
@@ -44,10 +44,10 @@ class AdminController < ApplicationController
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
       if vpn_configuration_params[:wg_ip_range]
-        @vpn_configuration.server_vpn_ip_address = "#{vpn_configuration_params[:wg_ip_range].split('.')[0..2].join('.')}.1"
+        ip_parts = vpn_configuration_params[:wg_ip_range].split('.')[0..2]
+        @vpn_configuration.server_vpn_ip_address = "#{ip_parts.join('.')}.1"
       end
       if @vpn_configuration.update(vpn_configuration_params)
-
         format.html { redirect_to admin_vpn_configurations_path, notice: 'Vpn configuration was successfully updated.' }
         format.json { render :show, status: :ok, location: @vpn_configuration }
       else
@@ -102,8 +102,11 @@ class AdminController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_configuration_params
-    params.expect(vpn_configuration: %i[wg_ip_address dns_servers wg_port wg_ip_range
-                                        wg_network_address wg_interface_name wg_listen_address wg_keep_alive wg_forward_interface wg_fqdn])
+    params.expect(vpn_configuration: %i[
+                    wg_ip_address dns_servers wg_port wg_ip_range
+                    wg_network_address wg_interface_name wg_listen_address
+                    wg_keep_alive wg_forward_interface wg_fqdn
+                  ])
   end
 
   def update_wireguard_config

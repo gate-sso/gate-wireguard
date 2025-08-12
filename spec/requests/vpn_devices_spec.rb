@@ -80,7 +80,7 @@ RSpec.describe 'VpnDevices', type: :request do
       it 'handles missing VPN configuration gracefully' do
         # Clear any existing VPN configuration
         VpnConfiguration.delete_all
-        
+
         get "/vpn_devices/download/#{vpn_device.id}"
 
         expect(response).to have_http_status(:service_unavailable)
@@ -131,7 +131,7 @@ RSpec.describe 'VpnDevices', type: :request do
 
     context 'with invalid device ID' do
       it 'handles invalid device ID gracefully' do
-        get "/vpn_devices/download/99999"
+        get '/vpn_devices/download/99999'
 
         expect(response).to have_http_status(:not_found)
       end

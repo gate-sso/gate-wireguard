@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'FQDN Resolver JavaScript Controller' do
   describe 'Controller file exists' do
     it 'has the fqdn_resolver_controller.js file' do
-      controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
+      controller_path = Rails.root.join('app/javascript/controllers/fqdn_resolver_controller.js')
       expect(File.exist?(controller_path)).to be true
     end
 
     it 'contains the expected controller class and methods' do
-      controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
+      controller_path = Rails.root.join('app/javascript/controllers/fqdn_resolver_controller.js')
       content = File.read(controller_path)
 
       expect(content).to include('export default class extends Controller')
@@ -20,7 +22,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     end
 
     it 'includes DNS over HTTPS functionality' do
-      controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
+      controller_path = Rails.root.join('app/javascript/controllers/fqdn_resolver_controller.js')
       content = File.read(controller_path)
 
       expect(content).to include('cloudflare-dns.com/dns-query')
@@ -28,7 +30,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     end
 
     it 'includes proper error handling and validation' do
-      controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
+      controller_path = Rails.root.join('app/javascript/controllers/fqdn_resolver_controller.js')
       content = File.read(controller_path)
 
       expect(content).to include('showError')
@@ -65,7 +67,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
 
   describe 'Form Integration' do
     it 'verifies admin view template includes FQDN resolver controller' do
-      template_path = Rails.root.join('app', 'views', 'admin', 'vpn_configurations.html.erb')
+      template_path = Rails.root.join('app/views/admin/vpn_configurations.html.erb')
       content = File.read(template_path)
 
       expect(content).to include('controller: "fqdn-resolver"')
@@ -75,7 +77,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     end
 
     it 'includes helpful user guidance text' do
-      template_path = Rails.root.join('app', 'views', 'admin', 'vpn_configurations.html.erb')
+      template_path = Rails.root.join('app/views/admin/vpn_configurations.html.erb')
       content = File.read(template_path)
 
       expect(content).to include('Enter a domain name to automatically resolve its IP address')

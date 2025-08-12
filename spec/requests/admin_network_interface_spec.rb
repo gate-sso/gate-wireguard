@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Admin Network Interface Detection', type: :request do
-  let(:admin_user) {
+  let(:admin_user) do
     User.create!(name: 'Admin User', email: 'admin@example.com', admin: true, provider: 'oauth', uid: '12345')
-  }
+  end
 
   before do
     # Create the user
@@ -16,11 +18,11 @@ RSpec.describe 'Admin Network Interface Detection', type: :request do
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
 
       # Mock the helper to return test data
-      allow(NetworkInterfaceHelper).to receive(:get_default_gateway_interface).and_return({
-                                                                                            interface_name: 'eth0',
-                                                                                            ip_address: '192.168.1.100',
-                                                                                            success: true
-                                                                                          })
+      allow(NetworkInterfaceHelper).to receive(:default_gateway_interface).and_return({
+                                                                                        interface_name: 'eth0',
+                                                                                        ip_address: '192.168.1.100',
+                                                                                        success: true
+                                                                                      })
 
       get '/admin/vpn_configurations'
 
@@ -36,10 +38,10 @@ RSpec.describe 'Admin Network Interface Detection', type: :request do
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
 
       # Mock the helper to return an error
-      allow(NetworkInterfaceHelper).to receive(:get_default_gateway_interface).and_return({
-                                                                                            error: "No default route found",
-                                                                                            success: false
-                                                                                          })
+      allow(NetworkInterfaceHelper).to receive(:default_gateway_interface).and_return({
+                                                                                        error: 'Network detection failed',
+                                                                                        success: false
+                                                                                      })
 
       get '/admin/vpn_configurations'
 

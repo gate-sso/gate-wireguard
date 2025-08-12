@@ -1,0 +1,2 @@
+.rubocop.yml:28: `Layout/LineLength` is concealed by line 54
+Configuration file not found: /home/ajey/workspace/gate-wireguard/.local/ruby/3.3.0/gems/rubocop-performance-1.25.0/rubocop.yml

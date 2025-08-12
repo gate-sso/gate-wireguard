@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Admin::VpnConfiguration', type: :request do
@@ -48,7 +50,7 @@ RSpec.describe 'Admin::VpnConfiguration', type: :request do
 
       it 'handles complex FQDN values' do
         complex_fqdn = 'secure-vpn.corporate.example.com'
-        
+
         patch "/admin/vpn_configuration/#{vpn_config.id}", params: {
           vpn_configuration: {
             wg_fqdn: complex_fqdn,

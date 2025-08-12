@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Admin::NetworkInterface', type: :request do
@@ -14,11 +16,11 @@ RSpec.describe 'Admin::NetworkInterface', type: :request do
 
         it 'displays network interface information for admin users' do
           # Mock the helper to return test data
-          allow(NetworkInterfaceHelper).to receive(:get_default_gateway_interface).and_return({
-            interface_name: 'eth0',
-            ip_address: '192.168.1.100',
-            success: true
-          })
+          allow(NetworkInterfaceHelper).to receive(:default_gateway_interface).and_return({
+                                                                                            interface_name: 'eth0',
+                                                                                            ip_address: '192.168.1.100',
+                                                                                            success: true
+                                                                                          })
 
           get '/admin/vpn_configurations'
 
@@ -31,15 +33,15 @@ RSpec.describe 'Admin::NetworkInterface', type: :request do
 
         it 'handles network detection errors gracefully' do
           # Mock the helper to return an error
-          allow(NetworkInterfaceHelper).to receive(:get_default_gateway_interface).and_return({
-            error: "No default route found",
-            success: false
-          })
+          allow(NetworkInterfaceHelper).to receive(:default_gateway_interface).and_return({
+                                                                                            error: 'Network detection failed',
+                                                                                            success: false
+                                                                                          })
 
           get '/admin/vpn_configurations'
 
           expect(response).to be_successful
-          expect(response.body).to include('No default route found')
+          expect(response.body).to include('Network detection failed')
         end
       end
 

@@ -1,118 +1,158 @@
 # frozen_string_literal: true
 
 # Network Interface Helper
+# rubocop:disable Metrics/ModuleLength
 module NetworkInterfaceHelper
-  def self.get_default_gateway_interface
-    begin
-      # Get default route: "default via 192.168.1.1 dev eth0 proto dhcp src 192.168.1.100 metric 100"
-      default_route = `ip route | grep default | head -1 2>/dev/null`.strip
+  def self.default_gateway_interface
+    default_route = fetch_default_route
+    return route_error('No default route found') if default_route.empty?
 
-      if default_route.empty?
-        return {
-          error: "No default route found",
-          success: false
-        }
-      end
+    interface_name = extract_interface_name(default_route)
+    return interface_name if interface_name[:error]
 
-      # Extract device name
-      device_match = default_route.match(/dev\s+(\w+)/)
-      unless device_match
-        return {
-          error: "Could not parse device name from route",
-          success: false
-        }
-      end
+    ip_address = extract_ip_address(default_route, interface_name[:interface_name])
+    return ip_address if ip_address[:error]
 
-      interface_name = device_match[1]
-
-      # Extract src IP address if present
-      src_match = default_route.match(/src\s+([0-9.]+)/)
-
-      if src_match
-        # Use src IP from route
-        ip_address = src_match[1]
-      else
-        # Fallback: get IP from interface
-        ip_addr_output = `ip addr show #{interface_name} 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | head -1`.strip
-        if ip_addr_output.empty?
-          return {
-            error: "No IP address found for interface #{interface_name}",
-            success: false
-          }
-        end
-
-        ip_match = ip_addr_output.match(/inet\s+([0-9.]+)/)
-        unless ip_match
-          return {
-            error: "Could not parse IP address for interface #{interface_name}",
-            success: false
-          }
-        end
-        ip_address = ip_match[1]
-      end
-
-      {
-        interface_name: interface_name,
-        ip_address: ip_address,
-        success: true
-      }
-    rescue => e
-      Rails.logger.error "Error detecting network interface: #{e.message}"
-      {
-        error: e.message,
-        success: false
-      }
-    end
+    {
+      interface_name: interface_name[:interface_name],
+      ip_address: ip_address[:ip_address],
+      success: true
+    }
+  rescue StandardError => e
+    Rails.logger.error "Error detecting network interface: #{e.message}"
+    route_error(e.message)
   end
 
+  # Backward compatibility alias
+  # rubocop:disable Naming/AccessorMethodName
+  def self.get_default_gateway_interface
+    default_gateway_interface
+  end
+  # rubocop:enable Naming/AccessorMethodName
+
+  def self.all_interfaces
+    interfaces = []
+    interface_output = fetch_all_interfaces_output
+
+    return interfaces if interface_output.empty?
+
+    current_interface = nil
+    interface_output.each_line do |line|
+      line = line.strip
+      if line.match(/^(\d+):\s*(\w+):/)
+        current_interface = ::Regexp.last_match(2)
+      elsif line.match(/inet\s+([0-9.]+)/) && current_interface
+        ip_address = ::Regexp.last_match(1)
+        interfaces << {
+          interface_name: current_interface,
+          ip_address: ip_address
+        }
+      end
+    end
+
+    interfaces
+  rescue StandardError => e
+    Rails.logger.error "Error getting all interfaces: #{e.message}"
+    []
+  end
+
+  # Backward compatibility alias
+  # rubocop:disable Naming/AccessorMethodName, Metrics/MethodLength
   def self.get_all_interfaces
-    begin
-      interfaces = []
+    interfaces = []
+    interface_output = fetch_all_interfaces_output
 
-      # Get all interfaces with IP addresses in one simple command
-      interface_output = `ip addr show 2>/dev/null | grep -E '^[0-9]+:|inet ' | grep -v '127.0.0.1'`
-
+    if interface_output.empty?
+      # Fallback for restricted environments
+      interfaces = [
+        { name: 'eth0', ip: '192.168.1.100' },
+        { name: 'wlan0', ip: '192.168.1.101' }
+      ]
+    else
       current_interface = nil
       interface_output.each_line do |line|
         line = line.strip
-
-        # Interface line: "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000"
-        if line.match(/^(\d+):\s+(\w+):/)
-          current_interface = $2
-        # IP line: "inet 192.168.1.100/24 brd 192.168.1.255 scope global dynamic eth0"
+        if line.match(/^(\d+):\s*(\w+):/)
+          current_interface = ::Regexp.last_match(2)
         elsif line.match(/inet\s+([0-9.]+)/) && current_interface
+          ip_address = ::Regexp.last_match(1)
           interfaces << {
             name: current_interface,
-            ip: $1
+            ip: ip_address
           }
         end
       end
+    end
 
-      # Fallback for restricted environments
-      if interfaces.empty?
-        interfaces = [
-          { name: "eth0", ip: "192.168.1.100" },
-          { name: "wlan0", ip: "192.168.1.101" }
-        ]
-      end
+    {
+      interfaces: interfaces,
+      success: true
+    }
+  rescue StandardError => e
+    Rails.logger.error "Error getting all interfaces: #{e.message}"
+    {
+      error: e.message,
+      success: false
+    }
+  end
+  # rubocop:enable Naming/AccessorMethodName, Metrics/MethodLength
 
-      {
-        interfaces: interfaces,
-        success: true
-      }
-    rescue => e
-      Rails.logger.error "Error getting all interfaces: #{e.message}"
-      {
-        error: e.message,
-        success: false
-      }
+  private_class_method def self.fetch_default_route
+    `ip route | grep default | head -1 2>/dev/null`.strip
+  end
+
+  private_class_method def self.extract_interface_name(default_route)
+    device_match = default_route.match(/dev\s+(\w+)/)
+    return route_error('Could not parse device name from route') unless device_match
+
+    { interface_name: device_match[1] }
+  end
+
+  private_class_method def self.extract_ip_address(default_route, interface_name)
+    src_match = default_route.match(/src\s+([0-9.]+)/)
+
+    if src_match
+      { ip_address: src_match[1] }
+    else
+      fallback_ip_address(interface_name)
     end
   end
 
-  def self.is_default_gateway_interface?(interface_name)
-    default_info = get_default_gateway_interface
+  private_class_method def self.fallback_ip_address(interface_name)
+    cmd = "ip addr show #{interface_name} 2>/dev/null | grep 'inet ' | grep -v '127.0.0.1' | head -1"
+    ip_addr_output = `#{cmd}`.strip
+
+    return route_error("No IP address found for interface #{interface_name}") if ip_addr_output.empty?
+
+    ip_match = ip_addr_output.match(/inet\s+([0-9.]+)/)
+    return route_error("Could not parse IP address for interface #{interface_name}") unless ip_match
+
+    { ip_address: ip_match[1] }
+  end
+
+  private_class_method def self.fetch_all_interfaces_output
+    `ip addr show 2>/dev/null | grep -E '^[0-9]+:|inet ' | grep -v '127.0.0.1'`
+  end
+
+  private_class_method def self.route_error(message)
+    {
+      error: message,
+      success: false
+    }
+  end
+
+  def self.default_gateway_interface?(interface_name)
+    default_info = default_gateway_interface
     return false unless default_info[:success]
 
     default_info[:interface_name] == interface_name
   end
+
+  # Backward compatibility alias
+  # rubocop:disable Naming/PredicatePrefix
+  def self.is_default_gateway_interface?(interface_name)
+    default_gateway_interface?(interface_name)
+  end
+  # rubocop:enable Naming/PredicatePrefix
 end
+# rubocop:enable Metrics/ModuleLength

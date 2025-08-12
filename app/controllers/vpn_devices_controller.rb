@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class VpnDevicesController < ApplicationController
-  before_action :set_vpn_device, only: %i[show edit update destroy]
+  before_action :set_vpn_device, only: %i[show update destroy]
   before_action :require_login
   after_action :update_wireguard_config, only: %i[update destroy]
   layout 'admin'
@@ -22,25 +22,25 @@ class VpnDevicesController < ApplicationController
   def download_config
     @vpn_device = current_user.vpn_devices.find(params[:id])
     @vpn_configuration = VpnConfiguration.first
-    
+
     # Handle case where no VPN configuration exists
     if @vpn_configuration.nil?
-      render plain: "VPN configuration not found", status: :service_unavailable
+      render plain: 'VPN configuration not found', status: :service_unavailable
       return
     end
-    
+
     config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, @vpn_configuration)
 
     # Generate filename based on wg_fqdn or fallback to IP address
-    if @vpn_configuration.wg_fqdn.present?
-      filename = "#{@vpn_configuration.wg_fqdn}.conf"
-    elsif @vpn_configuration.wg_ip_address.present?
-      # Replace dots with underscores for IP address
-      filename = "#{@vpn_configuration.wg_ip_address.gsub('.', '_')}.conf"
-    else
-      # Fallback to original filename if neither is available
-      filename = 'gate_vpn_config.conf'
-    end
+    filename = if @vpn_configuration.wg_fqdn.present?
+                 "#{@vpn_configuration.wg_fqdn}.conf"
+               elsif @vpn_configuration.wg_ip_address.present?
+                 # Replace dots with underscores for IP address
+                 "#{@vpn_configuration.wg_ip_address.gsub('.', '_')}.conf"
+               else
+                 # Fallback to original filename if neither is available
+                 'gate_vpn_config.conf'
+               end
 
     send_data config_content, filename: filename
   end

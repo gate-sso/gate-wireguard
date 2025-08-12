@@ -61,7 +61,7 @@ RSpec.describe VpnConfiguration, type: :model do
     end
 
     context 'when configuration exists' do
-      let!(:existing_config) {
+      let!(:existing_config) do
         VpnConfiguration.create!(
           wg_port: '51820',
           wg_ip_range: '10.42.5.0',
@@ -69,7 +69,7 @@ RSpec.describe VpnConfiguration, type: :model do
           wg_public_key: 'test_public_key',
           wg_ip_address: '192.168.1.1'
         )
-      }
+      end
 
       it 'returns existing configuration' do
         config = VpnConfiguration.get_vpn_configuration
@@ -80,7 +80,7 @@ RSpec.describe VpnConfiguration, type: :model do
   end
 
   describe 'wg_fqdn functionality' do
-    let!(:config) {
+    let!(:config) do
       VpnConfiguration.create!(
         wg_fqdn: 'vpn.example.com',
         wg_ip_address: '203.0.113.10',
@@ -88,7 +88,7 @@ RSpec.describe VpnConfiguration, type: :model do
         wg_private_key: 'test_private_key',
         wg_public_key: 'test_public_key'
       )
-    }
+    end
 
     it 'saves wg_fqdn correctly' do
       expect(config.wg_fqdn).to eq('vpn.example.com')

@@ -254,6 +254,18 @@ body {
   color: var(--bs-body-color) !important;
 }
 
+.thead-dynamic {
+  background-color: var(--table-bg) !important;
+  color: var(--bs-body-color) !important;
+  border-bottom: 2px solid var(--card-border) !important;
+
+  th {
+    background-color: var(--table-bg) !important;
+    color: var(--bs-body-color) !important;
+    border-bottom: 1px solid var(--card-border) !important;
+  }
+}
+
 .alert-dynamic {
   background-color: var(--modal-bg) !important;
   color: var(--bs-body-color) !important;
@@ -313,6 +325,18 @@ body {
 :root {
   .navbar {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .thead-dynamic {
+    background-color: var(--table-bg) !important;
+    border-bottom: 2px solid var(--card-border) !important;
+
+    th {
+      background-color: var(--table-bg) !important;
+      color: var(--bs-body-color) !important;
+      border-bottom: 1px solid var(--card-border) !important;
+      font-weight: 600;
+    }
   }
 }
 

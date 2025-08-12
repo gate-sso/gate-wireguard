@@ -1,8 +1,8 @@
-<nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
+<nav class="navbar navbar-expand-md fixed-top navbar-dynamic">
   <div class="container-sm">
-    <a class="navbar-brand" href="/">GATE</a>
+    <a class="navbar-brand text-dynamic" href="/">GATE</a>
     <button
-      class="navbar-toggler"
+      class="navbar-toggler navbar-toggler-dynamic"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarCollapse"
@@ -15,27 +15,36 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
 
       <ul class="navbar-nav me-auto mb-2 mb-md-0">
-        <% if current_user.admin? %>
+        <% if current_user&.admin? %>
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/admin/users">Users</a>
+            <a class="nav-link nav-link-dynamic active" aria-current="page" href="/admin/users">Users</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/vpn_devices">Devices</a>
+            <a class="nav-link nav-link-dynamic" href="/vpn_devices">Devices</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/vpn_devices?nodes=true">Nodes</a>
+            <a class="nav-link nav-link-dynamic" href="/vpn_devices?nodes=true">Nodes</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/dns_records">DNS Records</a>
+            <a class="nav-link nav-link-dynamic" href="/dns_records">DNS Records</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/admin/vpn_configurations">Configuration</a>
+            <a class="nav-link nav-link-dynamic" href="/admin/vpn_configurations">Configuration</a>
           </li>
         <% end %>
-        <li class="nav-item">
-          <a class="nav-link" data-turbo="false" href="/logout">Logout</a>
-        </li>
+        <% if current_user %>
+          <li class="nav-item">
+            <a class="nav-link nav-link-dynamic" data-turbo="false" href="/logout">Logout</a>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <a class="nav-link nav-link-dynamic" href="/login">Login</a>
+          </li>
+        <% end %>
       </ul>
+      <div class="ms-auto d-flex align-items-center">
+        <%= render 'shared/dark_mode_toggle' %>
+      </div>
     </div>
   </div>
 </nav>

@@ -1,44 +1,44 @@
-<div class="container col-sm-8">
-  <h2>WireGuard Configuration</h2>
-  <h6>WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
+<div class="container col-sm-8 card card-dynamic p-4 mt-4">
+  <h2 class="text-dynamic">WireGuard Configuration</h2>
+  <h6 class="text-dynamic">WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
     minimal and fast. It is a VPN protocol that is very easy to setup and use. It is also very secure and fast. You can
-    read more about WireGuard <a href="https://www.wireguard.com/">here</a></h6>
-  <hr>
+    read more about WireGuard <a href="https://www.wireguard.com/" class="text-primary">here</a></h6>
+  <hr class="bg-dynamic">
 
-  <h6>Please <b style="color: red">click here</b> to download server config.</h6>
-  <h5>We automatically rewrite configuration if you update Port, IP Range or Server public IP address.</h5>
-  <div style="color: red">You will be required to re-configure all client devices on update, please be careful,
+  <h6 class="text-dynamic">Please <b class="text-danger">click here</b> to download server config.</h6>
+  <h5 class="text-dynamic">We automatically rewrite configuration if you update Port, IP Range or Server public IP address.</h5>
+  <div class="text-danger">You will be required to re-configure all client devices on update, please be careful,
     don't do it if you don't understand
   </div>
-  <hr>
+  <hr class="bg-dynamic">
 
   <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal", data: { controller: "fqdn-resolver" } } do |form| %>
     <div class="form-group">
-      <label class="control-label text-primary col-sm-6 font-weight-bold" for="wg_private_key">Private
-        Key:</label><label class="control-label col-sm-6 text-primary" for="wg_public_key">&nbsp;&nbsp;&nbsp;Public
+      <label class="control-label label-dynamic col-sm-6 font-weight-bold" for="wg_private_key">Private
+        Key:</label><label class="control-label col-sm-6 label-dynamic" for="wg_public_key">&nbsp;&nbsp;&nbsp;Public
       Key:</label>
       <div class="row">
 
         <div class="col-sm-6">
-          <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control", disabled: true, placeholder: "Enter private key" %>
+          <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control input-dynamic", disabled: true, placeholder: "Enter private key" %>
         </div>
         <div class="col-sm-6">
-          <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control", disabled: true, placeholder: "Enter public key" %>
+          <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control input-dynamic", disabled: true, placeholder: "Enter public key" %>
         </div>
       </div>
 
     </div>
     <p>
     <div class="form-group">
-      <label class="control-label text-primary col-sm-6 font-weight-bold" for="wg_port">WireGuard Port
-        (UDP):</label><label class="control-label col-sm-6 text-primary" for="wg_keep_alive">&nbsp;&nbsp;&nbsp;Connection Keep Alive (Seconds)
+      <label class="control-label label-dynamic col-sm-6 font-weight-bold" for="wg_port">WireGuard Port
+        (UDP):</label><label class="control-label col-sm-6 label-dynamic" for="wg_keep_alive">&nbsp;&nbsp;&nbsp;Connection Keep Alive (Seconds)
       </label>
       <div class="row">
         <div class="col-sm-6">
-          <%= form.text_field :wg_port, id: "wg_port", class: "form-control", placeholder: "WireGuard port (UDP)" %>
+          <%= form.text_field :wg_port, id: "wg_port", class: "form-control input-dynamic", placeholder: "WireGuard port (UDP)" %>
         </div>
         <div class="col-sm-6">
-          <%= form.text_field :wg_keep_alive, id: "wg_keep_alive", class: "form-control", placeholder: "25" %>
+          <%= form.text_field :wg_keep_alive, id: "wg_keep_alive", class: "form-control input-dynamic", placeholder: "Keep alive (seconds)" %>
         </div>
 
       </div>
@@ -46,15 +46,15 @@
     <p>
 
     <div class="form-group">
-      <label class="control-label col-sm-6 text-primary" for="wg_ip_address">Public IP
-        Address:</label><label class="control-label col-sm-6 text-primary" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Private interface address:</label>
+      <label class="control-label col-sm-6 label-dynamic" for="wg_ip_address">Public IP
+        Address:</label><label class="control-label col-sm-6 label-dynamic" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Private interface address:</label>
       <div class="row">
         <div class="col-sm-6">
-          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
+          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control input-dynamic", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
         </div>
         <div class="col-sm-6">
           <% default_ip = @network_interface_info&.dig(:success) ? @network_interface_info[:ip_address] : "" %>
-          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", 
+          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control input-dynamic", 
                              value: default_ip,
                              placeholder: "Private interface IP (auto-detected)" %>
           <% if @network_interface_info&.dig(:success) %>
@@ -74,17 +74,17 @@
     <p>
 
     <div class="form-group">
-      <label class="control-label col-sm-6 text-primary" for="wg_interface_name">WG Interface name
-        </label><label class="control-label col-sm-6 text-primary" for="wg_forward_interface">&nbsp;&nbsp;&nbsp;Forward Interface</label>
+      <label class="control-label col-sm-6 label-dynamic" for="wg_interface_name">WG Interface name
+        </label><label class="control-label col-sm-6 label-dynamic" for="wg_forward_interface">&nbsp;&nbsp;&nbsp;Forward Interface</label>
       <div class="row">
 
         <div class="col-sm-6">
-          <%= form.text_field :wg_interface_name, id: "wg_interface_name", class: "form-control", placeholder: "wg0" %>
+          <%= form.text_field :wg_interface_name, id: "wg_interface_name", class: "form-control input-dynamic", placeholder: "wg0" %>
         </div>
 
         <div class="col-sm-6">
           <% default_interface = @network_interface_info&.dig(:success) ? @network_interface_info[:interface_name] : "" %>
-          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", 
+          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control input-dynamic", 
                              value: default_interface, 
                              placeholder: "Default gateway interface (auto-detected)" %>
           <% if @network_interface_info&.dig(:success) %>
@@ -101,34 +101,34 @@
     </div>
 
     <div class="form-group" data-controller="network-address">
-      <label class="control-label col-sm-6 text-primary" for="wg_ip_range">Client IP Network range ( It is /24)
-      </label><label class="control-label col-sm-6 text-primary" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Server VPN IP Address</label>
+      <label class="control-label col-sm-6 label-dynamic" for="wg_ip_range">Client IP Network range ( It is /24)
+      </label><label class="control-label col-sm-6 label-dynamic" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Server VPN IP Address</label>
       <div class="row">
 
         <div class="col-sm-6">
-          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0 (defaults to /24)", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
+          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control input-dynamic", placeholder: "10.42.5.0 (defaults to /24)", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
         </div>
 
         <div class="col-sm-6">
-          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control", placeholder: "10.42.5.1", data: { network_address_target: "serverIp" } %>
+          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control input-dynamic", placeholder: "10.42.5.1", data: { network_address_target: "serverIp" } %>
         </div>
       </div>
     </div>
     <p>
 
     <div class="form-group">
-      <label class="control-label col-sm-12 text-primary" for="wg_fqdn">Server FQDN (Fully Qualified Domain Name):</label>
+      <label class="control-label col-sm-12 label-dynamic" for="wg_fqdn">Server FQDN (Fully Qualified Domain Name):</label>
       <div class="col-sm-12">
-        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control", placeholder: "vpn.example.com", data: { fqdn_resolver_target: "fqdn", action: "input->fqdn-resolver#resolveFqdn" } %>
+        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control input-dynamic", placeholder: "vpn.example.com", data: { fqdn_resolver_target: "fqdn", action: "input->fqdn-resolver#resolveFqdn" } %>
         <small class="form-text text-muted">Enter a domain name to automatically resolve its IP address</small>
       </div>
     </div>
     <p>
 
     <div class="form-group">
-      <label class="control-label col-sm-12 text-primary" for="dns_servers">DNS Servers :</label>
+      <label class="control-label col-sm-12 label-dynamic" for="dns_servers">DNS Servers :</label>
       <div class="col-sm-12">
-        <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS Server(s) address" %>
+        <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control input-dynamic", placeholder: "Enter DNS Server(s) address" %>
       </div>
     </div>
     <p>
@@ -143,8 +143,8 @@
   <hr/>
 
 
-  <h4>Allowed Networks</h4>
-  <h6>These Network addresses are for internal routing for WireGuard. Also, when creating clients, these IP address
+  <h4 class="text-dynamic">Allowed Networks</h4>
+  <h6 class="text-dynamic">These Network addresses are for internal routing for WireGuard. Also, when creating clients, these IP address
     will
     be automatically added to peer configuration</h6>
 
@@ -173,7 +173,7 @@
         format):</label>
       <div class="row">
         <div class="col-sm-8">
-          <%= form.text_field :network_address, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
+          <%= form.text_field :network_address, id: "network_address", class: "form-control input-dynamic", placeholder: "X.X.X.X/YY" %>
         </div>
         <div class="col-sm-4">
           <%= form.submit "Add network address", class: "btn btn-primary", data: { turbo_confirm: "**DANGER ZONE** \n--------------------\nIt's possible that you will be required to re-configure all client devices before they can access this network address. \n\nPlease be careful, **click cancel** if you don't understand this action." } %>

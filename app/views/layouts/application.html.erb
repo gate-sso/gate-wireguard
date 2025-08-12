@@ -10,7 +10,9 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="dark-mode">
+    <%= render 'shared/navbar' %>
+
     <%= yield %>
   </body>
 </html>

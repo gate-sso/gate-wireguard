@@ -96,9 +96,9 @@
     </style>
   </head>
 
-  <body>
+  <body data-controller="dark-mode" class="admin-layout">
     <%= render 'shared/navbar' %>
-    <div class="container-md">
+    <div class="container-md main-content">
       <%= yield %>
     </div>
   </body>

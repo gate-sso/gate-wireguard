@@ -29,7 +29,7 @@ RSpec.describe WireguardConfigGenerator do
   describe '.generate_server_config' do
     it 'generates server configuration with proper defaults' do
       config = described_class.generate_server_config
-      
+
       expect(config[:port]).to eq(51_820)
       expect(config[:range]).to eq('10.42.5.0')
       expect(config[:interface_name]).to eq('wg0')
@@ -40,10 +40,10 @@ RSpec.describe WireguardConfigGenerator do
 
     it 'generates unique keys each time' do
       allow(Open3).to receive(:capture2).and_return(['unique_key_123', nil])
-      
+
       config1 = described_class.generate_server_config
       config2 = described_class.generate_server_config
-      
+
       expect(config1[:private_key]).to eq('unique_key_123')
       expect(config2[:private_key]).to eq('unique_key_123')
     end
@@ -57,14 +57,14 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'uses FQDN as endpoint' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = vpn.example.com:51820')
         expect(config).not_to include('Endpoint = 203.0.113.10:51820')
       end
 
       it 'includes all required sections' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('[Interface]')
         expect(config).to include('[Peer]')
         expect(config).to include('PrivateKey = client_private_key')
@@ -74,7 +74,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'includes configured DNS servers' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
       end
     end
@@ -82,7 +82,7 @@ RSpec.describe WireguardConfigGenerator do
     context 'without FQDN configured' do
       it 'uses IP address as endpoint' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = 203.0.113.10:51820')
         expect(config).not_to include('vpn.example.com')
       end
@@ -95,7 +95,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'uses custom DNS servers' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('DNS = 1.1.1.1, 1.0.0.1')
         expect(config).not_to include('DNS = 8.8.8.8, 8.8.4.4')
       end
@@ -108,7 +108,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'falls back to default DNS servers' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
       end
     end
@@ -120,7 +120,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'uses default DNS servers for empty string' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
       end
     end
@@ -133,7 +133,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'includes all network addresses in AllowedIPs' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('AllowedIPs = 192.168.1.0/24')
         expect(config).to include('AllowedIPs = 172.16.0.0/16')
         expect(config).to include('AllowedIPs = 10.42.5.254/32')
@@ -147,7 +147,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'includes PersistentKeepalive' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('PersistentKeepalive = 20')
       end
     end
@@ -159,7 +159,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'does not include PersistentKeepalive' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).not_to include('PersistentKeepalive')
       end
     end
@@ -176,7 +176,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'prioritizes FQDN over IP address' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = vpn.example.com:51820')
         expect(config).not_to include('Endpoint = 203.0.113.10:51820')
       end
@@ -192,7 +192,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'uses IP address when FQDN is nil' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = 203.0.113.10:51820')
       end
     end
@@ -207,7 +207,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'uses IP address when FQDN is empty string' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = 203.0.113.10:51820')
       end
     end
@@ -217,28 +217,28 @@ RSpec.describe WireguardConfigGenerator do
     it 'uses configured DNS when present' do
       vpn_configuration.update!(dns_servers: 'custom.dns.com, backup.dns.com')
       config = described_class.generate_client_config(vpn_device, vpn_configuration)
-      
+
       expect(config).to include('DNS = custom.dns.com, backup.dns.com')
     end
 
     it 'falls back to Google DNS when DNS is nil' do
       vpn_configuration.update!(dns_servers: nil)
       config = described_class.generate_client_config(vpn_device, vpn_configuration)
-      
+
       expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
     end
 
     it 'falls back to Google DNS when DNS is empty' do
       vpn_configuration.update!(dns_servers: '')
       config = described_class.generate_client_config(vpn_device, vpn_configuration)
-      
+
       expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
     end
 
     it 'falls back to Google DNS when DNS is whitespace only' do
       vpn_configuration.update!(dns_servers: '   ')
       config = described_class.generate_client_config(vpn_device, vpn_configuration)
-      
+
       expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
     end
   end
@@ -257,13 +257,13 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'generates complete professional configuration' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         # Check interface section
         expect(config).to include('[Interface]')
         expect(config).to include('PrivateKey = client_private_key')
         expect(config).to include('Address = 10.42.5.100/24')
         expect(config).to include('DNS = internal.dns.company.com, 8.8.8.8')
-        
+
         # Check peer section
         expect(config).to include('[Peer]')
         expect(config).to include('PublicKey = test_public_key')
@@ -286,7 +286,7 @@ RSpec.describe WireguardConfigGenerator do
 
       it 'generates basic IP-based configuration' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
-        
+
         expect(config).to include('Endpoint = 203.0.113.10:51820')
         expect(config).to include('DNS = 8.8.8.8, 8.8.4.4')
         expect(config).not_to include('PersistentKeepalive')

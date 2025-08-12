@@ -1,7 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe 'Admin FQDN Configuration', type: :request do
-  let(:admin_user) { User.create!(name: 'Test User', email: 'test@example.com', admin: true, provider: 'oauth', uid: '12345') }
+  let(:admin_user) {
+    User.create!(name: 'Test User', email: 'test@example.com', admin: true, provider: 'oauth', uid: '12345')
+  }
   let(:vpn_config) { VpnConfiguration.get_vpn_configuration }
 
   before do
@@ -14,7 +16,7 @@ RSpec.describe 'Admin FQDN Configuration', type: :request do
     it 'updates VPN configuration with wg_fqdn parameter' do
       # Set up session before making the request
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
-      
+
       patch "/admin/vpn_configuration/#{vpn_config.id}", params: {
         vpn_configuration: {
           wg_fqdn: 'vpn.newdomain.com',
@@ -32,7 +34,7 @@ RSpec.describe 'Admin FQDN Configuration', type: :request do
     it 'allows empty wg_fqdn while keeping other parameters' do
       # Set up session before making the request
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
-      
+
       patch "/admin/vpn_configuration/#{vpn_config.id}", params: {
         vpn_configuration: {
           wg_fqdn: '',
@@ -51,10 +53,10 @@ RSpec.describe 'Admin FQDN Configuration', type: :request do
     it 'preserves existing FQDN when not provided in update' do
       # Set up session before making the request
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
-      
+
       # First set an FQDN
       vpn_config.update!(wg_fqdn: 'existing.domain.com')
-      
+
       # Update other fields without touching FQDN
       patch "/admin/vpn_configuration/#{vpn_config.id}", params: {
         vpn_configuration: {
@@ -70,7 +72,8 @@ RSpec.describe 'Admin FQDN Configuration', type: :request do
     end
 
     it 'requires admin access' do
-      regular_user = User.create!(name: 'Regular User', email: 'user@example.com', admin: false, provider: 'oauth', uid: '67890')
+      regular_user = User.create!(name: 'Regular User', email: 'user@example.com', admin: false, provider: 'oauth',
+                                  uid: '67890')
       # Set up session for regular user
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: regular_user.id })
 
@@ -86,7 +89,7 @@ RSpec.describe 'Admin FQDN Configuration', type: :request do
     it 'handles invalid configuration data' do
       # Set up session before making the request
       allow_any_instance_of(ActionController::Base).to receive(:session).and_return({ user_id: admin_user.id })
-      
+
       patch "/admin/vpn_configuration/#{vpn_config.id}", params: {
         vpn_configuration: {
           wg_port: 'invalid_port'

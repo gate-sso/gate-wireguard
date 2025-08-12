@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe 'Network Address Auto-calculation', type: :feature do
   let(:admin_user) { User.create!(email: 'admin@example.com', name: 'Admin User', admin: true) }
-  
+
   before do
     allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(admin_user)
     VpnConfiguration.get_vpn_configuration # Ensure configuration exists
@@ -15,7 +15,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
       # Test the calculation logic directly since we don't use browser automation
       network_range = '10.42.5.0/24'
       expected_server_ip = '10.42.5.254'
-      
+
       # This would be handled by the JavaScript controller
       # Testing the underlying logic expectations
       expect(network_range).to include('/24')
@@ -27,7 +27,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
       input_network = '10.89.90.9'
       expected_corrected = '10.89.90.0'
       expected_server_ip = '10.89.90.254'
-      
+
       # These expectations would be handled by the JavaScript controller
       expect(input_network).to match(/^10\.89\.90\./)
       expect(expected_corrected).to eq('10.89.90.0')
@@ -37,7 +37,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
     it 'handles /16 networks correctly' do
       network_range = '192.168.0.0/16'
       expected_server_ip = '192.168.255.254'
-      
+
       expect(network_range).to include('/16')
       expect(expected_server_ip).to eq('192.168.255.254')
     end
@@ -45,7 +45,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
     it 'handles /30 networks correctly' do
       network_range = '172.16.1.0/30'
       expected_server_ip = '172.16.1.2'
-      
+
       expect(network_range).to include('/30')
       expect(expected_server_ip).to eq('172.16.1.2')
     end
@@ -54,7 +54,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
       input_network = '192.168.100.0'
       expected_default = '192.168.100.0/24'
       expected_server_ip = '192.168.100.254'
-      
+
       expect(input_network).not_to include('/')
       expect(expected_default).to eq('192.168.100.0/24')
       expect(expected_server_ip).to eq('192.168.100.254')
@@ -64,7 +64,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
       it 'handles /31 networks' do
         network_range = '10.0.0.0/31'
         expected_server_ip = '10.0.0.0'
-        
+
         expect(network_range).to include('/31')
         expect(expected_server_ip).to eq('10.0.0.0')
       end
@@ -72,7 +72,7 @@ RSpec.describe 'Network Address Auto-calculation', type: :feature do
       it 'handles /32 networks' do
         network_range = '10.0.0.1/32'
         expected_server_ip = '10.0.0.1'
-        
+
         expect(network_range).to include('/32')
         expect(expected_server_ip).to eq('10.0.0.1')
       end

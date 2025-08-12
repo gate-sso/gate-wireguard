@@ -31,9 +31,12 @@ RSpec.describe VpnConfiguration, type: :model do
     context 'when no configuration exists' do
       it 'creates a new configuration' do
         # Mock system calls that might be used by WireguardConfigGenerator
-        allow(Open3).to receive(:capture2).with('wg genkey').and_return(['test_private_key', '', double(success?: true)])
-        allow(Open3).to receive(:capture2).with('wg pubkey', stdin_data: 'test_private_key').and_return(['test_public_key', '', double(success?: true)])
-        
+        allow(Open3).to receive(:capture2).with('wg genkey').and_return(['test_private_key', '',
+                                                                         double(success?: true)])
+        allow(Open3).to receive(:capture2).with('wg pubkey',
+                                                stdin_data: 'test_private_key').and_return(['test_public_key', '',
+                                                                                            double(success?: true)])
+
         expect(VpnConfiguration.count).to eq(0)
         config = VpnConfiguration.get_vpn_configuration
         expect(VpnConfiguration.count).to eq(1)
@@ -42,9 +45,12 @@ RSpec.describe VpnConfiguration, type: :model do
 
       it 'sets default values' do
         # Mock system calls that might be used by NetworkInterfaceHelper
-        allow(Open3).to receive(:capture2).with('wg genkey').and_return(['test_private_key', '', double(success?: true)])
-        allow(Open3).to receive(:capture2).with('wg pubkey', stdin_data: 'test_private_key').and_return(['test_public_key', '', double(success?: true)])
-        
+        allow(Open3).to receive(:capture2).with('wg genkey').and_return(['test_private_key', '',
+                                                                         double(success?: true)])
+        allow(Open3).to receive(:capture2).with('wg pubkey',
+                                                stdin_data: 'test_private_key').and_return(['test_public_key', '',
+                                                                                            double(success?: true)])
+
         config = VpnConfiguration.get_vpn_configuration
         expect(config.wg_port).to eq('51820')
         expect(config.wg_ip_range).to eq('10.42.5.0')
@@ -55,14 +61,14 @@ RSpec.describe VpnConfiguration, type: :model do
     end
 
     context 'when configuration exists' do
-      let!(:existing_config) { 
+      let!(:existing_config) {
         VpnConfiguration.create!(
-          wg_port: '51820', 
+          wg_port: '51820',
           wg_ip_range: '10.42.5.0',
           wg_private_key: 'test_private_key',
           wg_public_key: 'test_public_key',
           wg_ip_address: '192.168.1.1'
-        ) 
+        )
       }
 
       it 'returns existing configuration' do
@@ -74,14 +80,14 @@ RSpec.describe VpnConfiguration, type: :model do
   end
 
   describe 'wg_fqdn functionality' do
-    let!(:config) { 
+    let!(:config) {
       VpnConfiguration.create!(
-        wg_fqdn: 'vpn.example.com', 
+        wg_fqdn: 'vpn.example.com',
         wg_ip_address: '203.0.113.10',
         wg_port: '51820',
         wg_private_key: 'test_private_key',
         wg_public_key: 'test_public_key'
-      ) 
+      )
     }
 
     it 'saves wg_fqdn correctly' do

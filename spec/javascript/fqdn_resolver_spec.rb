@@ -10,7 +10,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'contains the expected controller class and methods' do
       controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
       content = File.read(controller_path)
-      
+
       expect(content).to include('export default class extends Controller')
       expect(content).to include('static targets = ["fqdn", "publicIp"]')
       expect(content).to include('resolveFqdn')
@@ -22,7 +22,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'includes DNS over HTTPS functionality' do
       controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
       content = File.read(controller_path)
-      
+
       expect(content).to include('cloudflare-dns.com/dns-query')
       expect(content).to include('application/dns-json')
     end
@@ -30,7 +30,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'includes proper error handling and validation' do
       controller_path = Rails.root.join('app', 'javascript', 'controllers', 'fqdn_resolver_controller.js')
       content = File.read(controller_path)
-      
+
       expect(content).to include('showError')
       expect(content).to include('showSuccess')
       expect(content).to include('showLoading')
@@ -42,14 +42,14 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'allows setting and getting wg_fqdn attribute' do
       config = VpnConfiguration.new
       config.wg_fqdn = 'test.example.com'
-      
+
       expect(config.wg_fqdn).to eq('test.example.com')
     end
 
     it 'allows setting and getting wg_ip_address attribute' do
       config = VpnConfiguration.new
       config.wg_ip_address = '192.168.1.1'
-      
+
       expect(config.wg_ip_address).to eq('192.168.1.1')
     end
 
@@ -57,7 +57,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
       config = VpnConfiguration.new
       config.wg_fqdn = 'vpn.company.com'
       config.wg_ip_address = '203.0.113.10'
-      
+
       expect(config.wg_fqdn).to eq('vpn.company.com')
       expect(config.wg_ip_address).to eq('203.0.113.10')
     end
@@ -67,7 +67,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'verifies admin view template includes FQDN resolver controller' do
       template_path = Rails.root.join('app', 'views', 'admin', 'vpn_configurations.html.erb')
       content = File.read(template_path)
-      
+
       expect(content).to include('controller: "fqdn-resolver"')
       expect(content).to include('fqdn_resolver_target: "fqdn"')
       expect(content).to include('fqdn_resolver_target: "publicIp"')
@@ -77,7 +77,7 @@ RSpec.describe 'FQDN Resolver JavaScript Controller' do
     it 'includes helpful user guidance text' do
       template_path = Rails.root.join('app', 'views', 'admin', 'vpn_configurations.html.erb')
       content = File.read(template_path)
-      
+
       expect(content).to include('Enter a domain name to automatically resolve its IP address')
     end
   end

@@ -23,7 +23,7 @@ class VpnDevicesController < ApplicationController
     @vpn_device = VpnDevice.find(params[:id])
     @vpn_configuration = VpnConfiguration.first
     config_content = WireguardConfigGenerator.generate_client_config(@vpn_device, @vpn_configuration)
-    
+
     # Generate filename based on wg_fqdn or fallback to IP address
     if @vpn_configuration.wg_fqdn.present?
       filename = "#{@vpn_configuration.wg_fqdn}.conf"
@@ -34,7 +34,7 @@ class VpnDevicesController < ApplicationController
       # Fallback to original filename if neither is available
       filename = 'gate_vpn_config.conf'
     end
-    
+
     send_data config_content, filename: filename
   end
 

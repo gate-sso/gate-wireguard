@@ -10,7 +10,7 @@ RSpec.describe 'FQDN Resolution' do
       config.wg_ip_range = '10.8.0.0'
       config.wg_private_key = 'test_private_key'
       config.wg_public_key = 'test_public_key'
-      
+
       expect(config.save).to be_truthy
       expect(config.wg_fqdn).to eq('vpn.example.com')
       expect(config.wg_ip_address).to eq('93.184.216.34')

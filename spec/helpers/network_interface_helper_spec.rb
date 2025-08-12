@@ -101,10 +101,10 @@ RSpec.describe NetworkInterfaceHelper do
   describe '.is_default_gateway_interface?' do
     it 'returns true for the default gateway interface' do
       allow(described_class).to receive(:get_default_gateway_interface).and_return({
-        interface_name: 'eth0',
-        ip_address: '192.168.1.100',
-        success: true
-      })
+                                                                                     interface_name: 'eth0',
+                                                                                     ip_address: '192.168.1.100',
+                                                                                     success: true
+                                                                                   })
 
       expect(described_class.is_default_gateway_interface?('eth0')).to be true
       expect(described_class.is_default_gateway_interface?('wlan0')).to be false
@@ -112,9 +112,9 @@ RSpec.describe NetworkInterfaceHelper do
 
     it 'returns false when default gateway detection fails' do
       allow(described_class).to receive(:get_default_gateway_interface).and_return({
-        error: 'No default route found',
-        success: false
-      })
+                                                                                     error: 'No default route found',
+                                                                                     success: false
+                                                                                   })
 
       expect(described_class.is_default_gateway_interface?('eth0')).to be false
     end

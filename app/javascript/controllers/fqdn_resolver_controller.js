@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["fqdn", "publicIp"]
-  
+
   connect() {
     console.log("FQDN resolver controller connected")
     this.debounceTimeout = null
@@ -28,7 +28,7 @@ export default class extends Controller {
 
   async performDnsResolution() {
     const fqdn = this.fqdnTarget.value.trim()
-    
+
     if (!fqdn) {
       this.publicIpTarget.value = ""
       this.clearMessages()
@@ -44,7 +44,7 @@ export default class extends Controller {
     try {
       this.showLoading()
       const ipAddress = await this.lookupDns(fqdn)
-      
+
       if (ipAddress) {
         this.publicIpTarget.value = ipAddress
         this.showSuccess(`Resolved ${fqdn} to ${ipAddress}`)
@@ -63,7 +63,7 @@ export default class extends Controller {
     // Use a public DNS over HTTPS service for resolution
     // We'll use Cloudflare's DNS over HTTPS API
     const dohUrl = `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(fqdn)}&type=A`
-    
+
     try {
       const response = await fetch(dohUrl, {
         method: 'GET',
@@ -77,7 +77,7 @@ export default class extends Controller {
       }
 
       const data = await response.json()
-      
+
       // Check if we got any A records
       if (data.Answer && data.Answer.length > 0) {
         // Find the first A record (IPv4)
@@ -86,7 +86,7 @@ export default class extends Controller {
           return aRecord.data
         }
       }
-      
+
       return null
     } catch (error) {
       console.error("DNS over HTTPS lookup failed:", error)
@@ -120,15 +120,15 @@ export default class extends Controller {
   showMessage(message, type) {
     // Remove any existing message
     this.clearMessages()
-    
+
     // Create message element
     const messageDiv = document.createElement("div")
     messageDiv.className = `alert alert-${type === "error" ? "danger" : "success"} mt-2 fqdn-resolver-message`
     messageDiv.textContent = message
-    
+
     // Add message after the FQDN input
     this.fqdnTarget.parentNode.appendChild(messageDiv)
-    
+
     // Auto-remove success messages after 3 seconds
     if (type === "success") {
       setTimeout(() => this.clearMessages(), 3000)

@@ -26,10 +26,10 @@ class AdminController < ApplicationController
     if current_user.admin?
       @network_address = NetworkAddress.new
       @vpn_configuration = VpnConfiguration.get_vpn_configuration
-      
+
       # Get network interface information for auto-population
       @network_interface_info = NetworkInterfaceHelper.get_default_gateway_interface
-      
+
     else
       redirect_to root_path
     end

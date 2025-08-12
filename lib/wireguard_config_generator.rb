@@ -25,7 +25,7 @@ class WireguardConfigGenerator
       config = "[Interface]\n"
       config += "PrivateKey = #{client.private_key}\n"
       config += "Address = #{client.ip_allocation.ip_address}/24\n"
-      
+
       # Use configured DNS servers, or default to Google DNS if none are set
       dns_servers = vpn_configuration.dns_servers.present? ? vpn_configuration.dns_servers : '8.8.8.8, 8.8.4.4'
       config += "DNS = #{dns_servers}\n\n"

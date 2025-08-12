@@ -1,1 +1,0 @@
-Configuration file not found: /home/ajey/workspace/gate-wireguard/.local/ruby/3.3.0/gems/rubocop-rails-2.32.0/rubocop.yml

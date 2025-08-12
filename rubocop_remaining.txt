@@ -1,3 +1,0 @@
-rubocop-performance extension supports plugin, specify `plugins: rubocop-performance` instead of `require: rubocop-performance` in /home/ajey/workspace/gate-wireguard/.rubocop.yml.
-For more information, see https://docs.rubocop.org/rubocop/plugin_migration_guide.html.
-Configuration file not found: /home/ajey/workspace/gate-wireguard/.local/ruby/3.3.0/gems/rubocop-rspec-3.6.0/rubocop.yml

@@ -1,0 +1,76 @@
+...FF..
+
+Failures:
+
+  1) Admin Backup System GET /admin/backups/download when user is admin downloads backup as JSON file
+     Failure/Error: app_version: Rails.application.config.version || 'unknown'
+
+     NoMethodError:
+       undefined method `version' for an instance of Rails::Application::Configuration
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/railtie/configuration.rb:109:in `method_missing'
+     # ./app/controllers/admin/backups_controller.rb:58:in `generate_backup_data'
+     # ./app/controllers/admin/backups_controller.rb:19:in `download'
+     # ./.local/ruby/3.3.0/gems/turbo-rails-2.0.16/lib/turbo-rails.rb:24:in `with_request_id'
+     # ./.local/ruby/3.3.0/gems/turbo-rails-2.0.16/app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+     # ./.local/ruby/3.3.0/gems/actiontext-8.0.2/lib/action_text/rendering.rb:25:in `with_renderer'
+     # ./.local/ruby/3.3.0/gems/actiontext-8.0.2/lib/action_text/engine.rb:71:in `block (4 levels) in <class:Engine>'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/engine/lazy_route_set.rb:68:in `call'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/strategy.rb:202:in `call!'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/strategy.rb:169:in `call'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/builder.rb:44:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/tempfile_reaper.rb:20:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/etag.rb:29:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/conditional_get.rb:31:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/head.rb:15:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-session-2.1.1/lib/rack/session/abstract/id.rb:274:in `context'
+     # ./.local/ruby/3.3.0/gems/rack-session-2.1.1/lib/rack/session/abstract/id.rb:268:in `call'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/rack/logger.rb:41:in `call_app'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/rack/logger.rb:29:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/method_override.rb:28:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/runtime.rb:24:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/sendfile.rb:114:in `call'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/engine.rb:535:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-test-2.2.0/lib/rack/test.rb:360:in `process_request'
+     # ./.local/ruby/3.3.0/gems/rack-test-2.2.0/lib/rack/test.rb:153:in `request'
+     # ./spec/requests/admin_backup_spec.rb:58:in `block (4 levels) in <top (required)>'
+
+  2) Admin Backup System GET /admin/backups/download when user is admin includes system data in backup
+     Failure/Error: app_version: Rails.application.config.version || 'unknown'
+
+     NoMethodError:
+       undefined method `version' for an instance of Rails::Application::Configuration
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/railtie/configuration.rb:109:in `method_missing'
+     # ./app/controllers/admin/backups_controller.rb:58:in `generate_backup_data'
+     # ./app/controllers/admin/backups_controller.rb:19:in `download'
+     # ./.local/ruby/3.3.0/gems/turbo-rails-2.0.16/lib/turbo-rails.rb:24:in `with_request_id'
+     # ./.local/ruby/3.3.0/gems/turbo-rails-2.0.16/app/controllers/concerns/turbo/request_id_tracking.rb:10:in `turbo_tracking_request_id'
+     # ./.local/ruby/3.3.0/gems/actiontext-8.0.2/lib/action_text/rendering.rb:25:in `with_renderer'
+     # ./.local/ruby/3.3.0/gems/actiontext-8.0.2/lib/action_text/engine.rb:71:in `block (4 levels) in <class:Engine>'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/engine/lazy_route_set.rb:68:in `call'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/strategy.rb:202:in `call!'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/strategy.rb:169:in `call'
+     # ./.local/ruby/3.3.0/gems/omniauth-2.1.3/lib/omniauth/builder.rb:44:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/tempfile_reaper.rb:20:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/etag.rb:29:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/conditional_get.rb:31:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/head.rb:15:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-session-2.1.1/lib/rack/session/abstract/id.rb:274:in `context'
+     # ./.local/ruby/3.3.0/gems/rack-session-2.1.1/lib/rack/session/abstract/id.rb:268:in `call'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/rack/logger.rb:41:in `call_app'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/rack/logger.rb:29:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/method_override.rb:28:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/runtime.rb:24:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-3.1.16/lib/rack/sendfile.rb:114:in `call'
+     # ./.local/ruby/3.3.0/gems/railties-8.0.2/lib/rails/engine.rb:535:in `call'
+     # ./.local/ruby/3.3.0/gems/rack-test-2.2.0/lib/rack/test.rb:360:in `process_request'
+     # ./.local/ruby/3.3.0/gems/rack-test-2.2.0/lib/rack/test.rb:153:in `request'
+     # ./spec/requests/admin_backup_spec.rb:66:in `block (4 levels) in <top (required)>'
+
+Finished in 0.09191 seconds (files took 0.43943 seconds to load)
+7 examples, 2 failures
+
+Failed examples:
+
+rspec ./spec/requests/admin_backup_spec.rb:57 # Admin Backup System GET /admin/backups/download when user is admin downloads backup as JSON file
+rspec ./spec/requests/admin_backup_spec.rb:65 # Admin Backup System GET /admin/backups/download when user is admin includes system data in backup
+

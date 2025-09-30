@@ -21,6 +21,11 @@ Rails.application.routes.draw do
   get 'admin/vpn_configurations'
   patch 'admin/vpn_configuration/:id', to: 'admin#update_vpn_configuration', as: 'update_vpn_configuration'
 
+  # Backup routes
+  get 'admin/backups', to: 'admin/backups#index', as: 'admin_backups'
+  get 'admin/backups/download', to: 'admin/backups#download', as: 'admin_backup_download'
+  post 'admin/backups/restore', to: 'admin/backups#restore', as: 'admin_backup_restore'
+
   post 'admin/:id/network_address', to: 'admin#add_network_address', as: 'add_network_address'
   delete 'admin/network_address/:id', to: 'admin#remove_network_address', as: 'remove_network_address'
 

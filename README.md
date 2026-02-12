@@ -101,6 +101,8 @@ SECRET_KEY_BASE=your_generated_secret
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+
+
 # Production Settings
 RAILS_SERVE_STATIC_FILES=true
 RAILS_LOG_TO_STDOUT=true

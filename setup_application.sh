@@ -544,6 +544,8 @@ SECRET_KEY_BASE=$(cd "$app_dir" && sudo -u "$APP_USER" bash -c 'export PATH="$HO
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 
+
+
 # Production specific settings
 RAILS_SERVE_STATIC_FILES=true
 RAILS_LOG_TO_STDOUT=true

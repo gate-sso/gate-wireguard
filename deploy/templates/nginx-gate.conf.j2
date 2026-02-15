@@ -1,0 +1,72 @@
+upstream gate_wireguard {
+  server 127.0.0.1:{{ puma_port }};
+}
+
+{% if ssl_cert_exists is defined and ssl_cert_exists %}
+server {
+  listen 80;
+  server_name {{ domain }};
+  return 301 https://$host$request_uri;
+}
+
+server {
+  listen 443 ssl;
+  server_name {{ domain }};
+
+  ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_ciphers HIGH:!aNULL:!MD5;
+
+  root {{ app_dir }}/public;
+  client_max_body_size 10M;
+
+  location /assets/ {
+    expires max;
+    gzip_static on;
+    add_header Cache-Control public;
+  }
+
+  location / {
+    try_files $uri @app;
+  }
+
+  location @app {
+    proxy_pass http://gate_wireguard;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-Ssl on;
+    proxy_redirect off;
+  }
+}
+{% else %}
+server {
+  listen 80;
+  server_name {{ domain }};
+
+  root {{ app_dir }}/public;
+  client_max_body_size 10M;
+
+  location /assets/ {
+    expires max;
+    gzip_static on;
+    add_header Cache-Control public;
+  }
+
+  location / {
+    try_files $uri @app;
+  }
+
+  location @app {
+    proxy_pass http://gate_wireguard;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Ssl off;
+    proxy_redirect off;
+  }
+}
+{% endif %}

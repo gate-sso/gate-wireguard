@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/ajey/workspace/gate-wireguard log --oneline -20)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(shellcheck:*)",
+      "Bash(ansible-playbook:*)",
+      "Bash(brew install:*)"
+    ]
+  }
+}

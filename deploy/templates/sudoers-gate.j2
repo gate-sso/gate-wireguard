@@ -1,0 +1,4 @@
+# Gate-WireGuard: allow app user to manage WireGuard without password
+{{ app_user }} ALL=(root) NOPASSWD: /usr/bin/wg-quick *
+{{ app_user }} ALL=(root) NOPASSWD: /usr/bin/wg show *
+{{ app_user }} ALL=(root) NOPASSWD: /usr/bin/wg syncconf *

@@ -5,209 +5,40 @@
 Gate-WireGuard is self sign up oauth enabled VPN server providing WireGuard as backend for client connections. it's Web-UI and configuration management
 tool for wireguard server. It automatically reloads the configuration when new devices are added, and also provides a way to manage the devices.
 
-# Production Setup
+# Production Deployment
 
-Gate-WireGuard provides automated setup scripts for production deployment on Ubuntu/Debian systems. The setup process follows a three-stage approach: Database → WireGuard → Application.
+Deploy to a fresh Ubuntu 22.04/24.04 server from your local machine using Ansible.
 
-## Quick Start
-
-For a complete production deployment, simply run:
+**Prerequisites:** Ansible installed locally (`brew install ansible` or `pip install ansible`), root SSH access to the server.
 
 ```bash
-./setup.sh
+# First install (prompts for domain, OAuth credentials, etc.)
+./deploy/install_gate.sh vpn.example.com
+
+# Update app code only (git pull + bundle + assets + migrate + restart)
+./deploy/install_gate.sh vpn.example.com --tags update
+
+# Re-configure settings
+./deploy/install_gate.sh vpn.example.com --configure
+
+# Fix SSL after DNS propagation
+./deploy/install_gate.sh vpn.example.com --tags ssl
+
+# Preview changes without applying
+./deploy/install_gate.sh vpn.example.com --diff --check
 ```
 
-This will guide you through the entire setup process with interactive prompts.
+**What gets installed:** Ruby 3.3.4 (rbenv), Node 20, MySQL, Redis, Nginx, WireGuard, Let's Encrypt SSL, systemd services for Puma and WireGuard config watcher.
 
-## Setup Components
+**After deploy:** Sign in via Google OAuth, configure WireGuard network settings in the admin panel, then add VPN devices.
 
-### 1. Database Configuration
-
-The setup script provides two database options:
-
-**Option A: Install MySQL Locally**
-- Automatically installs and configures MySQL server
-- Creates production database and user with provided credentials
-- Configures proper security settings
-
-**Option B: Use Existing MySQL Server**
-- Connects to your existing MySQL server
-- Verifies connection before proceeding
-- Creates production database if it doesn't exist
-
-**Interactive Setup:**
-```bash
-# You'll be prompted for:
-- Database choice (local/remote)
-- MySQL username and password
-- Database name (defaults to gate_wireguard_production)
-- Server address (for remote MySQL)
-```
-
-### 2. User Management
-
-**Application User Configuration:**
-- Install as current user (default)
-- Or specify a different user (creates if doesn't exist)
-- Handles proper file ownership and permissions
-- Sets up Ruby environment for the specified user
-
-### 3. Production Environment Setup
-
-**What Gets Installed:**
-- ✅ MySQL database (local or remote connection verified)
-- ✅ WireGuard VPN server with configuration watcher
-- ✅ Ruby environment (rbenv + Ruby 3.3.4)
-- ✅ Rails application in production mode
-- ✅ Redis cache server
-- ✅ Node.js and asset compilation tools
-- ✅ Nginx web server
-
-## Individual Component Setup
-
-You can also run individual components:
-
-```bash
-# Database configuration only
-./setup.sh --database-only
-
-# WireGuard infrastructure only
-./setup.sh --wireguard-only
-
-# Rails application only
-./setup.sh --application-only
-```
-
-## Production Configuration
-
-### Environment Variables
-
-The setup creates a production `.env` file with:
-
-```bash
-# Rails Environment
-RAILS_ENV=production
-
-# Database Configuration (auto-configured)
-DATABASE_URL=mysql2://username:password@host/database_name
-
-# Redis Configuration
-REDIS_URL=redis://localhost:6379/0
-
-# Secret Key Base (auto-generated)
-SECRET_KEY_BASE=your_generated_secret
-
-# Google OAuth (configure these manually)
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# Production Settings
-RAILS_SERVE_STATIC_FILES=true
-RAILS_LOG_TO_STDOUT=true
-```
-
-### Required Manual Configuration
-
-After setup completion, you'll need to configure:
-
-1. **Google OAuth Credentials**
-   - Create OAuth app in Google Cloud Console
-   - Update `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`
-
-2. **SSL Certificates**
-   - Configure SSL certificates for HTTPS
-   - Update Nginx configuration
-
-3. **Domain Configuration**
-   - Point your domain to the server
-   - Configure Nginx virtual host
-
-## Service Management
-
-### Starting Services
-
-```bash
-# Check service status
-sudo systemctl status wg-quick@wg0              # WireGuard
-sudo systemctl status wireguard-conf-watcher    # Config watcher
-sudo systemctl status mysql                     # Database
-sudo systemctl status redis-server              # Cache
-sudo systemctl status nginx                     # Web server
-
-# Start Rails application (production)
-sudo -u [app_user] bash -c 'cd /path/to/app && bundle exec rails server -e production'
-```
-
-### Configuration Files
-
-- **WireGuard**: `/etc/wireguard/wg0.conf`
-- **Application**: `/path/to/app/.env`
-- **Nginx**: `/etc/nginx/sites-available/gate-wireguard`
-
-## Security Considerations
-
-- Environment file permissions set to 600 (secure)
-- Application runs under dedicated user (if specified)
-- Database connections use dedicated credentials
-- Firewall rules configured for WireGuard (port 51820)
-
-## Troubleshooting
-
-### Database Connection Issues
-```bash
-# Test MySQL connection
-mysql -h host -u username -p database_name
-```
-
-### Service Status
-```bash
-# Check all services
-sudo systemctl list-units --state=active | grep -E "(mysql|redis|nginx|wg-quick|wireguard)"
-```
-
-### Application Logs
-```bash
-# Rails logs
-tail -f /path/to/app/log/production.log
-
-# System logs
-sudo journalctl -u wg-quick@wg0 -f
-sudo journalctl -u wireguard-conf-watcher -f
-```
-
-## Post-Setup Steps
-
-1. **Configure WireGuard Network Settings**
-   - Access the web interface
-   - Set up your public endpoint
-   - Configure private IP ranges
-   - Save and generate configuration
-
-2. **Add VPN Devices**
-   - Sign in with Google OAuth
-   - Add devices through the web interface
-   - Download configuration files for clients
-
-3. **Set Up Monitoring**
-   - Configure log rotation
-   - Set up system monitoring
-   - Configure backup strategies
+Server config (with secrets) is stored in `deploy/servers/<host>.yml` (gitignored).
 
 ---
 
 # Development Setup
 
-For local development, use the development setup process below:
-
-## Development
-
-1. Checkout gate-wireguard, and run the following commands to get it running
-
-```bash
-scripts/rails_setup.sh
-```
-
-1. Checkout gate-wireguard, and run the following commands to get it running
+1. Checkout gate-wireguard and run the setup script:
 
 ```bash
 scripts/rails_setup.sh
@@ -247,40 +78,13 @@ bundle exec srb typecheck --lsp
 
 ---
 
-### Deployment Summary
+### Stack
 
-- Ruby version - 3.0.2p107
-- System dependencies
+- Ruby 3.3.4, Rails 8.0.2, MySQL, Redis
+- Bootstrap 5.3.3, Stimulus.js, Hotwire Turbo
+- Node 20, Yarn 4
 
-  - mysql header
-  - nodejs
-  - install gems - rails and bundler
-
-- Configuration
-
-  - database configuration
-
-- Database creation
-
-  - mysql command as given above
-
-- Database initialization
-
-  - rails db:create db:migrate
-
-- How to run the test suite
-
-  - rspec
-
-- Services (job queues, cache servers, search engines, etc.)
-
-  - docker-compose up
-
-- Deployment instructions - You can setup gate-wireguard with or without docker, with docker, it's just docker-compose, without docker, please follow the steps below
-  - checkout latest tar, run ./setup_production.sh
-  - run ./configure_production.sh (this will create database etc)
-
-#### Useful commands
+### Useful commands
 
 If you are doing local development and you need to sync the file to remote box as they change, following command can be useful for running rails server that automatically gets new files
 

@@ -1,0 +1,15 @@
+[Unit]
+Description=WireGuard Configuration Watcher
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/etc/wireguard/wg_conf_watcher.sh
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=wireguard-watcher
+
+[Install]
+WantedBy=multi-user.target

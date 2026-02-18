@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_12_210038) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_18_132627) do
   create_table "dns_records", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "host_name"
     t.string "ip_address"
@@ -44,6 +44,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_12_210038) do
     t.datetime "updated_at", null: false
     t.boolean "admin"
     t.text "profile_picture_url"
+    t.boolean "active", default: false, null: false
   end
 
   create_table "vpn_configurations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

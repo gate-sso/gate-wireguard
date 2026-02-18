@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   get 'profile_image', to: 'profile_images#show', as: 'profile_image'
 
   get 'admin/users'
+  patch 'admin/users/:id/toggle_admin', to: 'admin#toggle_admin', as: 'toggle_admin'
+  patch 'admin/users/:id/toggle_active', to: 'admin#toggle_active', as: 'toggle_active'
   get 'admin/vpn_configurations'
   patch 'admin/vpn_configuration/:id', to: 'admin#update_vpn_configuration', as: 'update_vpn_configuration'
 

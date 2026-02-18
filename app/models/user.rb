@@ -9,7 +9,10 @@ class User < ApplicationRecord
       new_user.profile_picture_url = process_profile_picture_url(auth.info.image)
       new_user.provider = auth.provider
       new_user.uid = auth.uid
-      new_user.admin = User.none?
+      if ENV['ADMIN_USER_EMAIL'].present? && auth.info.email == ENV['ADMIN_USER_EMAIL']
+        new_user.admin = true
+        new_user.active = true
+      end
     end
 
     # Update profile picture for existing users

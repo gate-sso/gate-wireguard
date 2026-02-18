@@ -3,6 +3,7 @@
         <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Active</th>
             <th>Admin</th>
         </tr>
     </thead>
@@ -12,11 +13,30 @@
                 <td><%= user.name %></td>
                 <td><%= user.email %></td>
                 <td>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" <%= 'checked' if user.admin? %>
-                        <%= 'disabled' if current_user == user %>>
-                    </div>
-                    </div>
+                    <% if user == current_user %>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked disabled>
+                        </div>
+                    <% else %>
+                        <%= button_to toggle_active_path(user), method: :patch, class: 'd-inline' do %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" <%= 'checked' if user.active? %> onclick="this.closest('form').requestSubmit()" style="pointer-events: none;">
+                            </div>
+                        <% end %>
+                    <% end %>
+                </td>
+                <td>
+                    <% if user == current_user %>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked disabled>
+                        </div>
+                    <% else %>
+                        <%= button_to toggle_admin_path(user), method: :patch, class: 'd-inline' do %>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" <%= 'checked' if user.admin? %> onclick="this.closest('form').requestSubmit()" style="pointer-events: none;">
+                            </div>
+                        <% end %>
+                    <% end %>
                 </td>
             </tr>
         <% end %>

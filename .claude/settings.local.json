@@ -6,7 +6,12 @@
       "Bash(chmod:*)",
       "Bash(shellcheck:*)",
       "Bash(ansible-playbook:*)",
-      "Bash(brew install:*)"
+      "Bash(brew install:*)",
+      "Bash(limactl list:*)",
+      "Bash(limactl start:*)",
+      "Bash(limactl stop:*)",
+      "Bash(ssh:*)",
+      "Bash(limactl shell:*)"
     ]
   }
 }

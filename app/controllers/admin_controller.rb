@@ -22,6 +22,36 @@ class AdminController < ApplicationController
     end
   end
 
+  def toggle_admin
+    unless current_user.admin?
+      redirect_to root_path
+      return
+    end
+
+    user = User.find(params[:id])
+    if user == current_user
+      redirect_to admin_users_path, alert: 'You cannot change your own admin status.'
+      return
+    end
+    user.update(admin: !user.admin?)
+    redirect_to admin_users_path
+  end
+
+  def toggle_active
+    unless current_user.admin?
+      redirect_to root_path
+      return
+    end
+
+    user = User.find(params[:id])
+    if user == current_user
+      redirect_to admin_users_path, alert: 'You cannot deactivate your own account.'
+      return
+    end
+    user.update(active: !user.active?)
+    redirect_to admin_users_path
+  end
+
   def vpn_configurations
     if current_user.admin?
       @network_address = NetworkAddress.new

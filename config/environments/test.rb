@@ -63,4 +63,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Don't raise on missing CSS assets (compiled via cssbundling-rails, not available in test)
+  config.assets.check_precompiled_asset = false
+  config.assets.unknown_asset_fallback = true
 end

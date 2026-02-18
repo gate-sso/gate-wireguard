@@ -16,6 +16,9 @@ GATE_DATABASE=gate_wireguard_production
 GATE_DATABASE_USER=gate_wireguard
 GATE_DATABASE_PASSWORD=
 
+# Email of the first admin user (auto-activated and granted admin on first login)
+ADMIN_USER_EMAIL=
+
 # Rails settings
 RAILS_SERVE_STATIC_FILES=true
 RAILS_MAX_THREADS=5

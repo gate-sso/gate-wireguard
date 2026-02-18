@@ -139,7 +139,8 @@ GEM
       net-smtp
     marcel (1.0.4)
     mini_mime (1.1.5)
-    minitest (5.25.5)
+    mini_portile2 (2.8.9)
+    minitest (5.27.0)
     msgpack (1.8.0)
     multi_xml (0.7.2)
       bigdecimal (~> 3.1)
@@ -157,7 +158,12 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.7.4)
+    nokogiri (1.18.9)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.18.9-aarch64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.18.9-arm64-darwin)
       racc (~> 1.4)
     oauth2 (2.0.12)
       faraday (>= 0.17.3, < 4.0)
@@ -253,10 +259,10 @@ GEM
     reline (0.6.2)
       io-console (~> 0.5)
     rexml (3.4.1)
-    rqrcode (3.1.0)
+    rqrcode (3.2.0)
       chunky_png (~> 1.0)
       rqrcode_core (~> 2.0)
-    rqrcode_core (2.0.0)
+    rqrcode_core (2.1.0)
     rspec-core (3.13.5)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -318,6 +324,7 @@ GEM
       sorbet-static (= 0.5.12354)
     sorbet-runtime (0.5.12354)
     sorbet-static (0.5.12354-aarch64-linux)
+    sorbet-static (0.5.12354-universal-darwin)
     sorbet-static-and-runtime (0.5.12354)
       sorbet (= 0.5.12354)
       sorbet-runtime (= 0.5.12354)
@@ -360,7 +367,7 @@ GEM
       concurrent-ruby (~> 1.0)
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
-    unicode-emoji (4.0.4)
+    unicode-emoji (4.2.0)
     uri (1.0.3)
     useragent (0.16.11)
     version_gem (1.1.8)
@@ -381,6 +388,7 @@ GEM
 
 PLATFORMS
   aarch64-linux
+  arm64-darwin-25
 
 DEPENDENCIES
   bootsnap

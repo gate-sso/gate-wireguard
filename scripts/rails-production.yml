@@ -4,7 +4,7 @@
   become: yes
   vars:
     app_name: "gate-wireguard"
-    # deploy_user, deploy_password, puma_port, env_file are passed via --extra-vars
+    # deploy_user, puma_port, env_file are passed via --extra-vars
     home_path: "/home/{{ deploy_user }}"
     app_path: "{{ home_path }}/{{ app_name }}"
     gem_home: "{{ home_path }}/.ruby"
@@ -37,7 +37,7 @@
 
     - name: Clone gate-wireguard repository
       ansible.builtin.git:
-        repo: "https://github.com/ajeygore/gate-wireguard.git"
+        repo: "https://github.com/gate-sso/gate-wireguard.git"
         dest: "{{ app_path }}"
         version: main
         accept_hostkey: yes

@@ -1,0 +1,379 @@
+---
+- name: System setup for Gate-WireGuard
+  hosts: all
+  become: yes
+  vars:
+    # deploy_user, deploy_password are passed via --extra-vars
+    home_path: "/home/{{ deploy_user }}"
+    ruby_version: "4.0.1"
+    ruby_major_minor: "4.0"
+    node_version: "24.13.1"
+    nvm_version: "0.40.4"
+    gem_home: "{{ home_path }}/.ruby"
+    wg_conf_group: wg_conf
+    wg_port: 51820
+
+  tasks:
+    # ----------------------------------------------------------------
+    # 1. Create deploy user
+    # ----------------------------------------------------------------
+    - name: Create deploy user
+      ansible.builtin.user:
+        name: "{{ deploy_user }}"
+        shell: /bin/bash
+        create_home: yes
+        password: "{{ deploy_password | password_hash('sha512') }}"
+        groups: sudo
+        append: yes
+
+    - name: Grant passwordless sudo to deploy user
+      ansible.builtin.copy:
+        dest: "/etc/sudoers.d/{{ deploy_user }}"
+        content: "{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        mode: "0440"
+        validate: "visudo -cf %s"
+
+    # ----------------------------------------------------------------
+    # 2. Install system packages
+    # ----------------------------------------------------------------
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Install system dependencies
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - wget
+          - rsync
+          - git
+          - build-essential
+          - pkg-config
+          - libssl-dev
+          - libreadline-dev
+          - zlib1g-dev
+          - libffi-dev
+          - libffi8
+          - libyaml-dev
+          - libmysqlclient-dev
+          - libvips
+          - openssh-server
+          - net-tools
+          - redis-server
+          - redis-tools
+          - inotify-tools
+          - ufw
+          - acl
+        state: present
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    # ----------------------------------------------------------------
+    # 3. Install Rust (needed for Ruby YJIT)
+    # ----------------------------------------------------------------
+    - name: Check if Rust is installed
+      ansible.builtin.command: "{{ home_path }}/.cargo/bin/rustc --version"
+      become_user: "{{ deploy_user }}"
+      register: rust_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install Rust via rustup
+      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      become_user: "{{ deploy_user }}"
+      when: rust_check.rc != 0
+
+    # ----------------------------------------------------------------
+    # 4. Install Ruby from source
+    # ----------------------------------------------------------------
+    - name: Check if Ruby {{ ruby_version }} is installed
+      ansible.builtin.command: /usr/local/bin/ruby -v
+      register: ruby_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install Ruby {{ ruby_version }} from source
+      when: ruby_check.rc != 0 or ruby_version not in (ruby_check.stdout | default(''))
+      block:
+        - name: Download Ruby {{ ruby_version }}
+          ansible.builtin.get_url:
+            url: "https://cache.ruby-lang.org/pub/ruby/{{ ruby_major_minor }}/ruby-{{ ruby_version }}.tar.gz"
+            dest: "/tmp/ruby-{{ ruby_version }}.tar.gz"
+
+        - name: Extract Ruby source
+          ansible.builtin.unarchive:
+            src: "/tmp/ruby-{{ ruby_version }}.tar.gz"
+            dest: /tmp
+            remote_src: yes
+
+        - name: Configure Ruby
+          ansible.builtin.command:
+            cmd: ./configure --disable-install-rdoc --enable-yjit --with-libffi-dir=/usr/lib/x86_64-linux-gnu
+            chdir: "/tmp/ruby-{{ ruby_version }}"
+          environment:
+            PATH: "{{ home_path }}/.cargo/bin:{{ ansible_facts['env']['PATH'] }}"
+
+        - name: Build Ruby
+          community.general.make:
+            chdir: "/tmp/ruby-{{ ruby_version }}"
+          environment:
+            PATH: "{{ home_path }}/.cargo/bin:{{ ansible_facts['env']['PATH'] }}"
+
+        - name: Install Ruby
+          community.general.make:
+            chdir: "/tmp/ruby-{{ ruby_version }}"
+            target: install
+          environment:
+            PATH: "{{ home_path }}/.cargo/bin:{{ ansible_facts['env']['PATH'] }}"
+
+        - name: Clean up Ruby source
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - "/tmp/ruby-{{ ruby_version }}.tar.gz"
+            - "/tmp/ruby-{{ ruby_version }}"
+
+    # ----------------------------------------------------------------
+    # 5. Configure GEM_HOME for deploy user
+    # ----------------------------------------------------------------
+    - name: Set GEM_HOME and PATH in .bashrc
+      ansible.builtin.blockinfile:
+        path: "{{ home_path }}/.bashrc"
+        marker: "# {mark} RUBY GEM CONFIG"
+        block: |
+          export GEM_HOME=~/.ruby/
+          export PATH="$PATH:~/.ruby/bin"
+        owner: "{{ deploy_user }}"
+
+    # ----------------------------------------------------------------
+    # 6. Install NVM and Node.js
+    # ----------------------------------------------------------------
+    - name: Check if NVM is installed
+      ansible.builtin.stat:
+        path: "{{ home_path }}/.nvm/nvm.sh"
+      register: nvm_stat
+
+    - name: Install NVM
+      ansible.builtin.shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh | bash
+      become_user: "{{ deploy_user }}"
+      when: not nvm_stat.stat.exists
+
+    - name: Install Node.js {{ node_version }}
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        nvm install {{ node_version }}
+      become_user: "{{ deploy_user }}"
+      args:
+        executable: /bin/bash
+
+    - name: Install Yarn globally
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        npm install yarn -g
+      become_user: "{{ deploy_user }}"
+      args:
+        executable: /bin/bash
+
+    # ----------------------------------------------------------------
+    # 7. Install MySQL server
+    # ----------------------------------------------------------------
+    - name: Install MySQL packages
+      ansible.builtin.apt:
+        name:
+          - mysql-server
+          - mysql-client
+          - python3-mysqldb
+        state: present
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Start and enable MySQL
+      ansible.builtin.systemd:
+        name: mysql
+        enabled: yes
+        state: started
+
+    # ----------------------------------------------------------------
+    # 8. WireGuard setup
+    # ----------------------------------------------------------------
+    - name: Install WireGuard packages
+      ansible.builtin.apt:
+        name:
+          - wireguard
+          - wireguard-tools
+        state: present
+
+    - name: Create wg_conf group
+      ansible.builtin.group:
+        name: "{{ wg_conf_group }}"
+        state: present
+
+    - name: Add deploy user to wg_conf group
+      ansible.builtin.user:
+        name: "{{ deploy_user }}"
+        groups: "{{ wg_conf_group }}"
+        append: yes
+
+    - name: Ensure /etc/wireguard directory
+      ansible.builtin.file:
+        path: /etc/wireguard
+        state: directory
+        owner: root
+        group: "{{ wg_conf_group }}"
+        mode: "0775"
+
+    - name: Deploy WireGuard watcher script
+      ansible.builtin.copy:
+        dest: /etc/wireguard/wg_conf_watcher.sh
+        owner: root
+        group: "{{ wg_conf_group }}"
+        mode: "0755"
+        content: |
+          #!/bin/bash
+          # WireGuard configuration watcher
+          # Watches wg0.conf for changes and reloads WireGuard
+
+          INTERFACE_NAME="wg0"
+          CONFIG_FILE="/etc/wireguard/${INTERFACE_NAME}.conf"
+          SERVICE_NAME="wg-quick@${INTERFACE_NAME}"
+
+          log() {
+            echo "$(date '+%Y-%m-%d %H:%M:%S') [wg-watcher] $*"
+          }
+
+          # Wait for config file to exist (it won't until admin configures via web UI)
+          while [ ! -f "$CONFIG_FILE" ]; do
+            log "Waiting for ${CONFIG_FILE} to be created..."
+            sleep 10
+          done
+
+          log "Watching ${CONFIG_FILE} for changes..."
+
+          # Ensure WireGuard interface is up
+          if ! systemctl is-active --quiet "$SERVICE_NAME"; then
+            log "Starting ${SERVICE_NAME}..."
+            systemctl start "$SERVICE_NAME" || log "Warning: Failed to start ${SERVICE_NAME}"
+          fi
+
+          inotifywait -m -e modify "$CONFIG_FILE" |
+          while read -r directory events filename; do
+            log "Detected change in ${CONFIG_FILE}, reloading ${SERVICE_NAME}..."
+            if ! systemctl reload "$SERVICE_NAME" 2>/dev/null; then
+              log "Reload failed, attempting restart..."
+              systemctl restart "$SERVICE_NAME" || log "Error: Failed to restart ${SERVICE_NAME}"
+            fi
+            log "Reload complete."
+          done
+      notify: Restart WireGuard watcher
+
+    - name: Deploy WireGuard watcher systemd service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/wireguard-watcher.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=WireGuard Configuration Watcher
+          After=network.target
+
+          [Service]
+          Type=simple
+          ExecStart=/etc/wireguard/wg_conf_watcher.sh
+          Restart=on-failure
+          RestartSec=5
+          StandardOutput=journal
+          StandardError=journal
+          SyslogIdentifier=wireguard-watcher
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart WireGuard watcher
+
+    - name: Enable and start WireGuard watcher
+      ansible.builtin.systemd:
+        name: wireguard-watcher
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+    # ----------------------------------------------------------------
+    # 9. Enable IPv4 forwarding
+    # ----------------------------------------------------------------
+    - name: Enable IPv4 forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    # ----------------------------------------------------------------
+    # 10. Deploy sudoers for WireGuard commands
+    # ----------------------------------------------------------------
+    - name: Deploy sudoers for WireGuard commands
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/gate-wireguard
+        mode: "0440"
+        validate: "visudo -cf %s"
+        content: |
+          # Gate-WireGuard: allow deploy user to manage WireGuard without password
+          {{ deploy_user }} ALL=(root) NOPASSWD: /usr/bin/wg-quick *
+          {{ deploy_user }} ALL=(root) NOPASSWD: /usr/bin/wg show *
+          {{ deploy_user }} ALL=(root) NOPASSWD: /usr/bin/wg syncconf *
+
+    # ----------------------------------------------------------------
+    # 11. Configure UFW firewall
+    # ----------------------------------------------------------------
+    - name: Allow SSH (port 22)
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Allow HTTP (port 80)
+      community.general.ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Allow HTTPS (port 443)
+      community.general.ufw:
+        rule: allow
+        port: "443"
+        proto: tcp
+
+    - name: Allow WireGuard (port {{ wg_port }}/udp)
+      community.general.ufw:
+        rule: allow
+        port: "{{ wg_port }}"
+        proto: udp
+
+    - name: Set UFW default deny incoming
+      community.general.ufw:
+        default: deny
+        direction: incoming
+
+    - name: Set UFW default allow outgoing
+      community.general.ufw:
+        default: allow
+        direction: outgoing
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+
+  handlers:
+    - name: Restart WireGuard watcher
+      ansible.builtin.systemd:
+        name: wireguard-watcher
+        state: restarted
+        daemon_reload: yes

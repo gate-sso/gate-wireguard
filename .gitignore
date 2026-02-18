@@ -92,3 +92,6 @@ yarn-debug.log*
 
 # Deploy server configs (contain secrets)
 deploy/servers/
+
+# Scripts env file (contains secrets)
+scripts/files/env

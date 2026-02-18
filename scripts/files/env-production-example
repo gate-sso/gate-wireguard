@@ -1,0 +1,21 @@
+# copy this file to env and use that as envfile when executing rails-production.sh
+# env file in folder is added to .gitignore
+# Google OAuth Credentials
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+
+# Redis connection
+GATE_REDIS_HOST=127.0.0.1
+GATE_REDIS_PORT=6379
+
+# DNS zone for Gate DNS records
+GATE_DNS_ZONE=
+
+# MySQL database credentials
+GATE_DATABASE=gate_wireguard_production
+GATE_DATABASE_USER=gate_wireguard
+GATE_DATABASE_PASSWORD=
+
+# Rails settings
+RAILS_SERVE_STATIC_FILES=true
+RAILS_MAX_THREADS=5

@@ -13,7 +13,7 @@ Gate-WireGuard is a Rails 8.0.2 web application for managing WireGuard VPN serve
 ### Development
 
 ```bash
-# Start MySQL and Redis containers
+# Start MySQL and Redis containers (MySQL on 3306, Redis on 16379->6379)
 docker compose up db redis -d
 
 # Database setup
@@ -43,7 +43,13 @@ bundle exec rubocop        # check
 bundle exec rubocop -A     # auto-correct
 ```
 
-RuboCop config: max line length 120, method length 20, ABC size 30. ERB views and `lib/` are excluded from linting.
+RuboCop config: max line length 120, method length 20, ABC size 30. ERB views and `lib/` are excluded from linting. Also uses `rubocop-rspec` and `rubocop-rspec_rails` plugins.
+
+### Type Checking (Sorbet)
+
+```bash
+bundle exec srb typecheck --lsp    # requires watchman installed on system
+```
 
 ## Architecture
 
@@ -66,7 +72,7 @@ VpnConfiguration (singleton) --has_many--> NetworkAddress
 
 ### Config Generation
 
-`lib/wireguard_config_generator.rb` generates both server and client WireGuard configs. Controllers use `after_action :update_wireguard_config` to regenerate the server config file whenever devices or VPN settings change.
+`lib/wireguard_config_generator.rb` generates both server and client WireGuard configs. Controllers use `after_action :update_wireguard_config` to regenerate the server config file whenever devices or VPN settings change. Key generation requires the `wg` CLI tool installed on the host (uses `wg genkey` and `wg pubkey` via `Open3`). Generated server configs are written to `config/wireguard/`.
 
 ### Key Controllers
 
@@ -82,3 +88,7 @@ Bootstrap 5.3.3 with custom SCSS (`app/assets/stylesheets/`), compiled via `cssb
 ### Environment Variables
 
 See `.env.sample` for required vars: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GATE_REDIS_HOST`, `GATE_REDIS_PORT`, `GATE_DNS_ZONE`. Production additionally needs `GATE_DATABASE`, `GATE_DATABASE_USER`, `GATE_DATABASE_PASSWORD`.
+
+### Deployment
+
+Production deploys use Ansible via `./deploy/install_gate.sh <hostname>`. See `deploy/` directory and `README.md` for full options including `--tags update` (code-only update), `--tags ssl` (fix SSL), and `--configure` (re-configure settings). Server config with secrets is stored in `deploy/servers/<host>.yml` (gitignored).

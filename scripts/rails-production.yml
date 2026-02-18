@@ -1,0 +1,269 @@
+---
+- name: Deploy Gate-WireGuard Rails application
+  hosts: all
+  become: yes
+  vars:
+    app_name: "gate-wireguard"
+    # deploy_user, deploy_password, puma_port, env_file are passed via --extra-vars
+    home_path: "/home/{{ deploy_user }}"
+    app_path: "{{ home_path }}/{{ app_name }}"
+    gem_home: "{{ home_path }}/.ruby"
+    wg_conf_group: wg_conf
+
+  tasks:
+    # ----------------------------------------------------------------
+    # 1. Clone / update application repository
+    # ----------------------------------------------------------------
+    - name: Check if app directory exists
+      ansible.builtin.stat:
+        path: "{{ app_path }}"
+      register: app_dir
+
+    - name: Rotate old backups (keep max 5)
+      ansible.builtin.shell: |
+        for i in 4 3 2 1; do
+          src="{{ app_path }}.bak.${i}"
+          dst="{{ app_path }}.bak.$((i+1))"
+          [ -d "$src" ] && mv "$src" "$dst"
+        done
+        # Remove the 6th (oldest) if it was pushed out
+        rm -rf "{{ app_path }}.bak.6"
+      when: app_dir.stat.exists
+
+    - name: Backup current app directory
+      ansible.builtin.command:
+        cmd: "mv {{ app_path }} {{ app_path }}.bak.1"
+      when: app_dir.stat.exists
+
+    - name: Clone gate-wireguard repository
+      ansible.builtin.git:
+        repo: "https://github.com/ajeygore/gate-wireguard.git"
+        dest: "{{ app_path }}"
+        version: main
+        accept_hostkey: yes
+      become_user: "{{ deploy_user }}"
+
+    - name: Ensure deploy user owns application directory
+      ansible.builtin.file:
+        path: "{{ app_path }}"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        recurse: yes
+
+    # ----------------------------------------------------------------
+    # 2. Install Bundler and app gems
+    # ----------------------------------------------------------------
+    - name: Install Bundler gem
+      community.general.gem:
+        name: bundler
+        state: present
+      environment:
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    - name: Run bundle install
+      ansible.builtin.command:
+        cmd: bundle install
+        chdir: "{{ app_path }}"
+      become_user: "{{ deploy_user }}"
+      environment:
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    # ----------------------------------------------------------------
+    # 3. Install Yarn dependencies
+    # ----------------------------------------------------------------
+    - name: Install Yarn dependencies
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        yarn install
+      args:
+        chdir: "{{ app_path }}"
+        executable: /bin/bash
+      become_user: "{{ deploy_user }}"
+
+    # ----------------------------------------------------------------
+    # 4. Deploy .env file and generate SECRET_KEY_BASE
+    # ----------------------------------------------------------------
+    - name: Copy .env file to app directory
+      ansible.builtin.copy:
+        src: "{{ env_file }}"
+        dest: "{{ app_path }}/.env"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+
+    - name: Check if persistent SECRET_KEY_BASE file exists
+      ansible.builtin.stat:
+        path: "{{ home_path }}/.secret_key_base"
+      register: secret_key_file
+
+    - name: Generate persistent SECRET_KEY_BASE file
+      ansible.builtin.shell: |
+        openssl rand -hex 64 > {{ home_path }}/.secret_key_base
+        chmod 0600 {{ home_path }}/.secret_key_base
+        chown {{ deploy_user }}:{{ deploy_user }} {{ home_path }}/.secret_key_base
+      when: not secret_key_file.stat.exists
+
+    - name: Read SECRET_KEY_BASE from persistent file
+      ansible.builtin.command: cat {{ home_path }}/.secret_key_base
+      register: secret_key_base_raw
+      changed_when: false
+
+    - name: Set SECRET_KEY_BASE fact
+      ansible.builtin.set_fact:
+        secret_key_base: "{{ secret_key_base_raw.stdout | trim }}"
+
+    # ----------------------------------------------------------------
+    # 5. Create MySQL database and user
+    # ----------------------------------------------------------------
+    - name: Read database name from .env
+      ansible.builtin.shell: grep '^GATE_DATABASE=' {{ app_path }}/.env | cut -d= -f2
+      register: db_name_raw
+      changed_when: false
+
+    - name: Read database user from .env
+      ansible.builtin.shell: grep '^GATE_DATABASE_USER=' {{ app_path }}/.env | cut -d= -f2
+      register: db_user_raw
+      changed_when: false
+
+    - name: Read database password from .env
+      ansible.builtin.shell: grep '^GATE_DATABASE_PASSWORD=' {{ app_path }}/.env | cut -d= -f2
+      register: db_pass_raw
+      changed_when: false
+
+    - name: Set database facts
+      ansible.builtin.set_fact:
+        db_name: "{{ db_name_raw.stdout | trim }}"
+        db_user: "{{ db_user_raw.stdout | trim }}"
+        db_pass: "{{ db_pass_raw.stdout | trim }}"
+
+    - name: Create MySQL database
+      community.mysql.mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create MySQL user
+      community.mysql.mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_pass }}"
+        priv: "{{ db_name }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    # ----------------------------------------------------------------
+    # 6. Run database migrations
+    # ----------------------------------------------------------------
+    - name: Run database migrations
+      ansible.builtin.command:
+        cmd: bundle exec rails db:migrate
+        chdir: "{{ app_path }}"
+      become_user: "{{ deploy_user }}"
+      environment:
+        RAILS_ENV: production
+        SECRET_KEY_BASE: "{{ secret_key_base }}"
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    # ----------------------------------------------------------------
+    # 7. Precompile assets
+    # ----------------------------------------------------------------
+    - name: Precompile assets
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        bundle exec rails assets:precompile
+      args:
+        chdir: "{{ app_path }}"
+        executable: /bin/bash
+      become_user: "{{ deploy_user }}"
+      environment:
+        RAILS_ENV: production
+        SECRET_KEY_BASE: "{{ secret_key_base }}"
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    # ----------------------------------------------------------------
+    # 8. Configure Puma
+    # ----------------------------------------------------------------
+    - name: Create Puma configuration file
+      ansible.builtin.copy:
+        dest: "{{ app_path }}/config/puma.rb"
+        owner: "{{ deploy_user }}"
+        content: |
+          workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+          threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }
+          threads threads_count, threads_count
+          preload_app!
+          port ENV.fetch("PORT") { {{ puma_port }} }
+          environment ENV.fetch("RAILS_ENV") { "production" }
+          on_worker_boot do
+            ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+          end
+
+    # ----------------------------------------------------------------
+    # 9. Symlink config/wireguard to /etc/wireguard
+    # ----------------------------------------------------------------
+    - name: Remove config/wireguard directory if it exists
+      ansible.builtin.file:
+        path: "{{ app_path }}/config/wireguard"
+        state: absent
+
+    - name: Symlink config/wireguard to /etc/wireguard
+      ansible.builtin.file:
+        src: /etc/wireguard
+        dest: "{{ app_path }}/config/wireguard"
+        state: link
+        owner: "{{ deploy_user }}"
+        group: "{{ wg_conf_group }}"
+        force: yes
+
+    # ----------------------------------------------------------------
+    # 10. Create systemd service
+    # ----------------------------------------------------------------
+    - name: Create systemd service for Puma
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/gate_wireguard.service
+        content: |
+          [Unit]
+          Description=Gate-WireGuard (Puma)
+          After=network.target mysql.service redis-server.service
+          Requires=mysql.service redis-server.service
+
+          [Service]
+          Type=simple
+          User={{ deploy_user }}
+          Group={{ deploy_user }}
+          WorkingDirectory={{ app_path }}
+          EnvironmentFile={{ app_path }}/.env
+          Environment=SECRET_KEY_BASE={{ secret_key_base }}
+          Environment=RAILS_ENV=production
+          Environment=GEM_HOME={{ gem_home }}
+          Environment=PATH={{ gem_home }}/bin:/usr/local/bin:/usr/bin:/bin
+          ExecStart=/usr/local/bin/bundle exec puma -C {{ app_path }}/config/puma.rb
+          Restart=always
+          RestartSec=5
+          StandardOutput=append:{{ app_path }}/log/puma.log
+          StandardError=append:{{ app_path }}/log/puma.log
+          SyslogIdentifier=gate-wireguard
+
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart Puma
+
+    - name: Enable and start Puma
+      ansible.builtin.systemd:
+        name: gate_wireguard
+        enabled: yes
+        state: started
+        daemon_reload: yes
+
+  handlers:
+    - name: Restart Puma
+      ansible.builtin.systemd:
+        name: gate_wireguard
+        state: restarted
+        daemon_reload: yes

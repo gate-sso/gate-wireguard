@@ -2,7 +2,7 @@
 
 class AdminController < ApplicationController
   before_action :require_login
-  # before_action :set_vpn_configuration, only: %i[ show update edit ]
+  before_action :require_admin, except: [:index]
 
   layout 'admin'
   after_action :update_wireguard_config, only: %i[update_vpn_configuration add_network_address remove_network_address]
@@ -15,19 +15,37 @@ class AdminController < ApplicationController
   end
 
   def users
-    if current_user.admin?
-      @users = User.all
-    else
-      redirect_to root_path
-    end
+    @users = User.all
   end
 
-  def toggle_admin
-    unless current_user.admin?
-      redirect_to root_path
+  def add_user
+    email = params[:email]&.strip&.downcase
+    if email.blank?
+      redirect_to admin_users_path, alert: 'Email is required.'
       return
     end
 
+    if User.exists?(email: email)
+      redirect_to admin_users_path, alert: 'A user with this email already exists.'
+      return
+    end
+
+    User.create!(email: email, active: true)
+    redirect_to admin_users_path, notice: "User #{email} has been added and pre-authorized."
+  end
+
+  def destroy_user
+    user = User.find(params[:id])
+    if user == current_user
+      redirect_to admin_users_path, alert: 'You cannot delete your own account.'
+      return
+    end
+
+    user.destroy!
+    redirect_to admin_users_path, notice: "User #{user.email} has been removed."
+  end
+
+  def toggle_admin
     user = User.find(params[:id])
     if user == current_user
       redirect_to admin_users_path, alert: 'You cannot change your own admin status.'
@@ -38,11 +56,6 @@ class AdminController < ApplicationController
   end
 
   def toggle_active
-    unless current_user.admin?
-      redirect_to root_path
-      return
-    end
-
     user = User.find(params[:id])
     if user == current_user
       redirect_to admin_users_path, alert: 'You cannot deactivate your own account.'
@@ -53,24 +66,12 @@ class AdminController < ApplicationController
   end
 
   def vpn_configurations
-    if current_user.admin?
-      @network_address = NetworkAddress.new
-      @vpn_configuration = VpnConfiguration.get_vpn_configuration
-
-      # Get network interface information for auto-population
-      @network_interface_info = NetworkInterfaceHelper.default_gateway_interface
-
-    else
-      redirect_to root_path
-    end
+    @network_address = NetworkAddress.new
+    @vpn_configuration = VpnConfiguration.get_vpn_configuration
+    @network_interface_info = NetworkInterfaceHelper.default_gateway_interface
   end
 
   def update_vpn_configuration
-    unless current_user.admin?
-      redirect_to root_path
-      return
-    end
-
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
       if vpn_configuration_params[:wg_ip_range]
@@ -88,11 +89,6 @@ class AdminController < ApplicationController
   end
 
   def add_network_address
-    unless current_user.admin?
-      redirect_to root_path
-      return
-    end
-
     @vpn_configuration = VpnConfiguration.find(params[:id])
     @network_address = NetworkAddress.new
     @network_address.network_address = params[:network_address]
@@ -110,11 +106,6 @@ class AdminController < ApplicationController
   end
 
   def remove_network_address
-    unless current_user.admin?
-      redirect_to root_path
-      return
-    end
-
     @network_address = NetworkAddress.find(params[:id])
     @network_address.destroy!
     respond_to do |format|
@@ -125,12 +116,14 @@ class AdminController < ApplicationController
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
+  def require_admin
+    redirect_to root_path unless current_user.admin?
+  end
+
   def set_vpn_configuration
     @vpn_configuration = VpnConfiguration.find(params[:id])
   end
 
-  # Only allow a list of trusted parameters through.
   def vpn_configuration_params
     params.expect(vpn_configuration: %i[
                     wg_ip_address dns_servers wg_port wg_ip_range

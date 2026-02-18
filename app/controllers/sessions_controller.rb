@@ -3,6 +3,11 @@
 class SessionsController < ApplicationController
   def create
     @user = User.from_omniauth(request.env['omniauth.auth'])
+    if @user.nil?
+      reset_session
+      redirect_to login_path, alert: 'Your account has not been authorized. Please contact an administrator.'
+      return
+    end
     unless @user.active?
       reset_session
       redirect_to login_path, alert: 'Your account is pending approval. Please contact an administrator.'

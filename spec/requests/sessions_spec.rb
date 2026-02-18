@@ -21,33 +21,38 @@ RSpec.describe 'Sessions', type: :request do
   end
 
   describe 'GET /auth/google_oauth2/callback' do
-    context 'when user is active' do
+    context 'when user is pre-authorized and active' do
       it 'logs in and redirects to root' do
-        User.create!(
-          provider: 'google_oauth2', uid: '123456',
-          email: 'user@example.com', name: 'Test User', active: true
-        )
+        User.create!(email: 'user@example.com', active: true)
 
         get '/auth/google_oauth2/callback'
         expect(response).to redirect_to(root_path)
       end
     end
 
-    context 'when user is not active' do
+    context 'when user is pre-authorized but inactive' do
+      it 'redirects to login with pending approval message' do
+        User.create!(email: 'user@example.com', active: false)
+
+        get '/auth/google_oauth2/callback'
+        expect(response).to redirect_to(login_path)
+        expect(flash[:alert]).to include('pending approval')
+      end
+    end
+
+    context 'when user email is not in the system' do
       it 'redirects to login' do
         get '/auth/google_oauth2/callback'
         expect(response).to redirect_to(login_path)
       end
 
-      it 'sets a pending approval flash message' do
+      it 'sets an unauthorized flash message' do
         get '/auth/google_oauth2/callback'
-        expect(flash[:alert]).to include('pending approval')
+        expect(flash[:alert]).to include('not been authorized')
       end
 
-      it 'does not set session user_id' do
-        get '/auth/google_oauth2/callback'
-        user = User.find_by(email: 'user@example.com')
-        expect(controller.session[:user_id]).not_to eq(user.id)
+      it 'does not create a user record' do
+        expect { get '/auth/google_oauth2/callback' }.not_to change(User, :count)
       end
     end
 

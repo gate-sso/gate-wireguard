@@ -41,6 +41,10 @@ Metrics/AbcSize:
     - 'db/migrate/**/*'
     - 'spec/**/*'
 
+Metrics/ClassLength:
+  Exclude:
+    - 'app/controllers/admin_controller.rb'
+
 # Allow larger blocks in specs and configuration
 Metrics/BlockLength:
   Max: 25

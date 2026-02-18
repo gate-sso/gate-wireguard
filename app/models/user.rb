@@ -3,30 +3,32 @@
 class User < ApplicationRecord
   has_many :vpn_devices, dependent: :destroy
   def self.from_omniauth(auth)
-    user = where(provider: auth.provider, uid: auth.uid).first_or_create do |new_user|
-      new_user.email = auth.info.email
-      new_user.name = auth.info.name
-      new_user.profile_picture_url = process_profile_picture_url(auth.info.image)
-      new_user.provider = auth.provider
-      new_user.uid = auth.uid
-      if ENV['ADMIN_USER_EMAIL'].present? && auth.info.email == ENV['ADMIN_USER_EMAIL']
-        new_user.admin = true
-        new_user.active = true
-      end
-    end
+    user = find_for_omniauth(auth) || auto_create_admin(auth)
+    return nil unless user
 
-    # Update profile picture for existing users
-    if user.persisted?
-      processed_url = process_profile_picture_url(auth.info.image)
-      if user.profile_picture_url != processed_url
-        user.update(
-          name: auth.info.name,
-          profile_picture_url: processed_url
-        )
-      end
-    end
-
+    update_omniauth_fields(user, auth)
     user
+  end
+
+  def self.find_for_omniauth(auth)
+    find_by(email: auth.info.email) || find_by(provider: auth.provider, uid: auth.uid)
+  end
+
+  def self.auto_create_admin(auth)
+    return nil unless ENV['ADMIN_USER_EMAIL'].present? && auth.info.email == ENV['ADMIN_USER_EMAIL']
+
+    create!(
+      email: auth.info.email, name: auth.info.name,
+      profile_picture_url: process_profile_picture_url(auth.info.image),
+      provider: auth.provider, uid: auth.uid, admin: true, active: true
+    )
+  end
+
+  def self.update_omniauth_fields(user, auth)
+    user.update(
+      provider: auth.provider, uid: auth.uid,
+      name: auth.info.name, profile_picture_url: process_profile_picture_url(auth.info.image)
+    )
   end
 
   def self.process_profile_picture_url(image_url)

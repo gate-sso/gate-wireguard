@@ -13,7 +13,8 @@
       "Bash(ssh:*)",
       "Bash(limactl shell:*)",
       "Bash(yarn build:css:*)",
-      "Bash(limactl show-ssh:*)"
+      "Bash(limactl show-ssh:*)",
+      "Bash(bundle exec rspec:*)"
     ]
   }
 }

@@ -360,6 +360,7 @@ GEM
       yard-sorbet
     thor (1.4.0)
     timeout (0.4.3)
+    tsort (0.2.0)
     turbo-rails (2.0.16)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
@@ -415,6 +416,7 @@ DEPENDENCIES
   sprockets-rails
   stimulus-rails
   tapioca
+  tsort
   turbo-rails
   tzinfo-data
   web-console

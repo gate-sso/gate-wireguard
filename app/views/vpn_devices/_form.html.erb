@@ -1,9 +1,8 @@
 <%= form_with(model: vpn_device) do |form| %>
   <% if vpn_device.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(vpn_device.errors.count, "error") %> prohibited this vpn_device from being saved:</h2>
-
-      <ul>
+    <div class="alert alert-danger mb-3">
+      <h6 class="alert-heading mb-2"><%= pluralize(vpn_device.errors.count, "error") %> prohibited this device from being saved:</h6>
+      <ul class="mb-0">
         <% vpn_device.errors.each do |error| %>
           <li><%= error.full_message %></li>
         <% end %>
@@ -11,27 +10,19 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :user_id, style: "display: block" %>
-    <%= form.collection_select :user_id, User.all, :id, :name %>
-  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <%= form.label :user_id, "User", class: "form-label" %>
+      <%= form.collection_select :user_id, User.all, :id, :name, {}, { class: "form-select" } %>
+    </div>
 
-  <div>
-    <%= form.label :description, style: "display: block" %>
-    <%= form.text_field :description %>
-  </div>
+    <div class="col-md-6">
+      <%= form.label :description, "Description", class: "form-label" %>
+      <%= form.text_field :description, class: "form-control", placeholder: "e.g. MacBook Pro, iPhone" %>
+    </div>
 
-  <div>
-    <%= form.label :private_key, style: "display: block" %>
-    <%= form.text_field :private_key %>
-  </div>
-
-  <div>
-    <%= form.label :public_key, style: "display: block" %>
-    <%= form.text_field :public_key %>
-  </div>
-
-  <div>
-    <%= form.submit %>
+    <div class="col-12">
+      <%= form.submit "Create Device", class: "btn btn-primary" %>
+    </div>
   </div>
 <% end %>

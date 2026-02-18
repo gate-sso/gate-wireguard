@@ -1,187 +1,151 @@
-<div class="container col-sm-8 card card-dynamic p-4 mt-4">
-  <h2 class="text-dynamic">WireGuard Configuration</h2>
-  <h6 class="text-dynamic">WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
-    minimal and fast. It is a VPN protocol that is very easy to setup and use. It is also very secure and fast. You can
-    read more about WireGuard <a href="https://www.wireguard.com/" class="text-primary">here</a></h6>
-  <hr class="bg-dynamic">
-
-  <h6 class="text-dynamic">Please <b class="text-danger">click here</b> to download server config.</h6>
-  <h5 class="text-dynamic">We automatically rewrite configuration if you update Port, IP Range or Server public IP address.</h5>
-  <div class="text-danger">You will be required to re-configure all client devices on update, please be careful,
-    don't do it if you don't understand
+<div class="page-header">
+  <div>
+    <h3>VPN Configuration</h3>
+    <div class="page-header-subtitle">WireGuard server settings</div>
   </div>
-  <hr class="bg-dynamic">
-
-  <%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { class: "form-horizontal", data: { controller: "fqdn-resolver" } } do |form| %>
-    <div class="form-group">
-      <label class="control-label label-dynamic col-sm-6 font-weight-bold" for="wg_private_key">Private
-        Key:</label><label class="control-label col-sm-6 label-dynamic" for="wg_public_key">&nbsp;&nbsp;&nbsp;Public
-      Key:</label>
-      <div class="row">
-
-        <div class="col-sm-6">
-          <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control input-dynamic", disabled: true, placeholder: "Enter private key" %>
-        </div>
-        <div class="col-sm-6">
-          <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control input-dynamic", disabled: true, placeholder: "Enter public key" %>
-        </div>
-      </div>
-
-    </div>
-    <p>
-    <div class="form-group">
-      <label class="control-label label-dynamic col-sm-6 font-weight-bold" for="wg_port">WireGuard Port
-        (UDP):</label><label class="control-label col-sm-6 label-dynamic" for="wg_keep_alive">&nbsp;&nbsp;&nbsp;Connection Keep Alive (Seconds)
-      </label>
-      <div class="row">
-        <div class="col-sm-6">
-          <%= form.text_field :wg_port, id: "wg_port", class: "form-control input-dynamic", placeholder: "WireGuard port (UDP)" %>
-        </div>
-        <div class="col-sm-6">
-          <%= form.text_field :wg_keep_alive, id: "wg_keep_alive", class: "form-control input-dynamic", placeholder: "Keep alive (seconds)" %>
-        </div>
-
-      </div>
-    </div>
-    <p>
-
-    <div class="form-group">
-      <label class="control-label col-sm-6 label-dynamic" for="wg_ip_address">Public IP
-        Address:</label><label class="control-label col-sm-6 label-dynamic" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Private interface address:</label>
-      <div class="row">
-        <div class="col-sm-6">
-          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control input-dynamic", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
-        </div>
-        <div class="col-sm-6">
-          <% default_ip = @network_interface_info&.dig(:success) ? @network_interface_info[:ip_address] : "" %>
-          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control input-dynamic", 
-                             value: default_ip,
-                             placeholder: "Private interface IP (auto-detected)" %>
-          <% if @network_interface_info&.dig(:success) %>
-            <small class="form-text text-success">
-              ✅ Auto-detected: <%= @network_interface_info[:ip_address] %>
-            </small>
-          <% elsif @network_interface_info&.dig(:error) %>
-            <small class="form-text text-warning">
-              ⚠️ Could not auto-detect IP address
-            </small>
-          <% end %>
-        </div>
-
-
-      </div>
-    </div>
-    <p>
-
-    <div class="form-group">
-      <label class="control-label col-sm-6 label-dynamic" for="wg_interface_name">WG Interface name
-        </label><label class="control-label col-sm-6 label-dynamic" for="wg_forward_interface">&nbsp;&nbsp;&nbsp;Forward Interface</label>
-      <div class="row">
-
-        <div class="col-sm-6">
-          <%= form.text_field :wg_interface_name, id: "wg_interface_name", class: "form-control input-dynamic", placeholder: "wg0" %>
-        </div>
-
-        <div class="col-sm-6">
-          <% default_interface = @network_interface_info&.dig(:success) ? @network_interface_info[:interface_name] : "" %>
-          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control input-dynamic", 
-                             value: default_interface, 
-                             placeholder: "Default gateway interface (auto-detected)" %>
-          <% if @network_interface_info&.dig(:success) %>
-            <small class="form-text text-success">
-              ✅ Auto-detected: <%= @network_interface_info[:interface_name] %>
-            </small>
-          <% elsif @network_interface_info&.dig(:error) %>
-            <small class="form-text text-warning">
-              ⚠️ Could not auto-detect: <%= @network_interface_info[:error] %>
-            </small>
-          <% end %>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group" data-controller="network-address">
-      <label class="control-label col-sm-6 label-dynamic" for="wg_ip_range">Client IP Network range ( It is /24)
-      </label><label class="control-label col-sm-6 label-dynamic" for="wg_listen_address">&nbsp;&nbsp;&nbsp;Server VPN IP Address</label>
-      <div class="row">
-
-        <div class="col-sm-6">
-          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control input-dynamic", placeholder: "10.42.5.0 (defaults to /24)", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
-        </div>
-
-        <div class="col-sm-6">
-          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control input-dynamic", placeholder: "10.42.5.1", data: { network_address_target: "serverIp" } %>
-        </div>
-      </div>
-    </div>
-    <p>
-
-    <div class="form-group">
-      <label class="control-label col-sm-12 label-dynamic" for="wg_fqdn">Server FQDN (Fully Qualified Domain Name):</label>
-      <div class="col-sm-12">
-        <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control input-dynamic", placeholder: "vpn.example.com", data: { fqdn_resolver_target: "fqdn", action: "input->fqdn-resolver#resolveFqdn" } %>
-        <small class="form-text text-muted">Enter a domain name to automatically resolve its IP address</small>
-      </div>
-    </div>
-    <p>
-
-    <div class="form-group">
-      <label class="control-label col-sm-12 label-dynamic" for="dns_servers">DNS Servers :</label>
-      <div class="col-sm-12">
-        <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control input-dynamic", placeholder: "Enter DNS Server(s) address" %>
-      </div>
-    </div>
-    <p>
-
-    <div class="form-group">
-      <div class="col-sm-10">
-        <%= form.submit "Save & Generate configuration", data: { turbo_method: :delete, turbo_confirm: "**DANGER ZONE** \n--------------------\nAre you sure? Clients may not be able to connect to vpn service.\n\nIt's possible that you will be required to re-configure all client devices. \n\nPlease be careful, **click cancel** if you don't understand this action." }, class: "btn btn-primary" %>
-      </div>
-    </div>
-  <% end %>
-
-  <hr/>
-
-
-  <h4 class="text-dynamic">Allowed Networks</h4>
-  <h6 class="text-dynamic">These Network addresses are for internal routing for WireGuard. Also, when creating clients, these IP address
-    will
-    be automatically added to peer configuration</h6>
-
-
-  <table class="table table-striped table-dynamic">
-    <thead class="thead-dynamic">
-    <tr>
-      <th>Address</th>
-      <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <% @vpn_configuration.network_addresses.each do |network_address| %>
-      <tr>
-        <td><%= network_address.network_address %></td>
-        <td><%= link_to 'Delete', remove_network_address_path(network_address.id), data: { turbo_method: :delete, turbo_confirm: "**DANGER ZONE** \n--------------------\nAre you sure? Clients will not be able to connect to this network range.It's possible that you will be required to re-configure all client devices. \n\nPlease be careful, **click cancel** if you don't understand this action." }, class: 'btn btn-danger btn-sm' %></td>
-      </tr>
-
-    <% end %>
-    </tbody>
-  </table>
-
-  <%= form_with model: @network_address, url: add_network_address_path(@vpn_configuration), local: true do |form| %>
-    <div class="form-group">
-      <label class="control-label col-sm-8" for="network_address">Network Address (in Address/Netmask
-        format):</label>
-      <div class="row">
-        <div class="col-sm-8">
-          <%= form.text_field :network_address, id: "network_address", class: "form-control input-dynamic", placeholder: "X.X.X.X/YY" %>
-        </div>
-        <div class="col-sm-4">
-          <%= form.submit "Add network address", class: "btn btn-primary", data: { turbo_confirm: "**DANGER ZONE** \n--------------------\nIt's possible that you will be required to re-configure all client devices before they can access this network address. \n\nPlease be careful, **click cancel** if you don't understand this action." } %>
-        </div>
-      </div>
-    </div>
-    <p>
-  <% end %>
 </div>
 
+<div class="alert alert-warning mb-4">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  Changing server settings may require reconfiguring all client devices. Proceed with care.
+</div>
 
+<%= form_with model: @vpn_configuration, url: update_vpn_configuration_path(@vpn_configuration), local: true, html: { data: { controller: "fqdn-resolver" } } do |form| %>
+
+  <%# Server Identity %>
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Server Identity</h5></div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="wg_private_key">Private Key</label>
+          <%= form.text_field :wg_private_key, id: "wg_private_key", class: "form-control font-mono", disabled: true, placeholder: "Auto-generated" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_public_key">Public Key</label>
+          <%= form.text_field :wg_public_key, id: "wg_public_key", class: "form-control font-mono", disabled: true, placeholder: "Auto-generated" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_fqdn">Server FQDN</label>
+          <%= form.text_field :wg_fqdn, id: "wg_fqdn", class: "form-control", placeholder: "vpn.example.com", data: { fqdn_resolver_target: "fqdn", action: "input->fqdn-resolver#resolveFqdn" } %>
+          <small class="form-text text-muted">Enter a domain name to automatically resolve its IP address</small>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_ip_address">Public IP Address</label>
+          <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Network Settings %>
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Network Settings</h5></div>
+    <div class="card-body" data-controller="network-address">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="wg_ip_range">Client IP Range (/24)</label>
+          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="server_vpn_ip_address">Server VPN IP Address</label>
+          <%= form.text_field :server_vpn_ip_address, id: "server_vpn_ip_address", class: "form-control", placeholder: "10.42.5.1", data: { network_address_target: "serverIp" } %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_listen_address">Private Interface Address</label>
+          <% default_ip = @network_interface_info&.dig(:success) ? @network_interface_info[:ip_address] : "" %>
+          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", value: default_ip, placeholder: "Private interface IP (auto-detected)" %>
+          <% if @network_interface_info&.dig(:success) %>
+            <small class="form-text text-success">Auto-detected: <%= @network_interface_info[:ip_address] %></small>
+          <% elsif @network_interface_info&.dig(:error) %>
+            <small class="form-text text-warning">Could not auto-detect IP address</small>
+          <% end %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="dns_servers">DNS Servers</label>
+          <%= form.text_field :dns_servers, id: "dns_servers", class: "form-control", placeholder: "Enter DNS server(s) address" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Interface Settings %>
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Interface Settings</h5></div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="wg_port">WireGuard Port (UDP)</label>
+          <%= form.text_field :wg_port, id: "wg_port", class: "form-control", placeholder: "51820" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_keep_alive">Keep Alive (Seconds)</label>
+          <%= form.text_field :wg_keep_alive, id: "wg_keep_alive", class: "form-control", placeholder: "25" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_interface_name">WG Interface Name</label>
+          <%= form.text_field :wg_interface_name, id: "wg_interface_name", class: "form-control", placeholder: "wg0" %>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="wg_forward_interface">Forward Interface</label>
+          <% default_interface = @network_interface_info&.dig(:success) ? @network_interface_info[:interface_name] : "" %>
+          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", value: default_interface, placeholder: "Default gateway interface (auto-detected)" %>
+          <% if @network_interface_info&.dig(:success) %>
+            <small class="form-text text-success">Auto-detected: <%= @network_interface_info[:interface_name] %></small>
+          <% elsif @network_interface_info&.dig(:error) %>
+            <small class="form-text text-warning">Could not auto-detect: <%= @network_interface_info[:error] %></small>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <%= form.submit "Save & Generate Configuration", data: { turbo_method: :delete, turbo_confirm: "Changing server configuration may require reconfiguring all client devices.\n\nAre you sure you want to proceed?" }, class: "btn btn-primary" %>
+  </div>
+<% end %>
+
+<%# Allowed Networks %>
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="mb-0">Allowed Networks</h5>
+  </div>
+  <div class="card-body">
+    <p class="text-muted mb-3">Network addresses for internal routing. These are added to peer configurations automatically.</p>
+
+    <% if @vpn_configuration.network_addresses.any? %>
+      <div class="table-responsive mb-3">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @vpn_configuration.network_addresses.each do |network_address| %>
+              <tr>
+                <td><code><%= network_address.network_address %></code></td>
+                <td class="text-end">
+                  <%= link_to 'Delete', remove_network_address_path(network_address.id), data: { turbo_method: :delete, turbo_confirm: "Remove this network address? Client devices may need reconfiguration." }, class: 'btn btn-outline-danger btn-sm' %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <%= form_with model: @network_address, url: add_network_address_path(@vpn_configuration), local: true do |form| %>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label" for="network_address">Network Address (CIDR format)</label>
+          <%= form.text_field :network_address, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
+        </div>
+        <div class="col-md-4">
+          <%= form.submit "Add Network Address", class: "btn btn-primary w-100", data: { turbo_confirm: "Adding a network address may require client reconfiguration. Continue?" } %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

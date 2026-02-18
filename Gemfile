@@ -83,3 +83,6 @@ gem 'omniauth-google-oauth2'
 
 gem 'redis'
 gem 'rqrcode'
+
+# Required as explicit dependency starting from Ruby 4.1
+gem 'tsort'

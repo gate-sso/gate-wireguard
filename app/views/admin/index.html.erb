@@ -1,28 +1,60 @@
+<div class="page-header">
+  <div>
+    <h3>Dashboard</h3>
+    <div class="page-header-subtitle">Welcome back, <%= @current_user.name %></div>
+  </div>
+</div>
 
-<% if @current_user.vpn_devices.empty? %>
-  <div class="container my-5">
-    <div class="bg-body-tertiary p-5 rounded">
-      <div class="col-sm-8 py-5 mx-auto">
-        <h3 class="fw-normal">You don't have any devices</h3>
-        <p>Let's get started.</p>
-        <p>
-          <a class="btn btn-primary" href="/vpn_devices/new" role="button">Let's add a device</a>
-        </p>
+<% if @current_user.admin? %>
+  <div class="row g-3 mb-4">
+    <div class="col-sm-4">
+      <div class="card stat-card">
+        <div class="stat-value text-primary"><%= User.count %></div>
+        <div class="stat-label">Users</div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card stat-card">
+        <div class="stat-value text-success"><%= VpnDevice.count %></div>
+        <div class="stat-label">Devices</div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card stat-card">
+        <div class="stat-value text-info"><%= VpnDevice.where.not(description: [nil, '']).count %></div>
+        <div class="stat-label">Active Devices</div>
       </div>
     </div>
   </div>
-<% else %>
 
-  <div class="border-primary rounded-3">
-    <h2>WireGuard Configuration</h2>
-    <h6>WireGuard is a modern VPN protocol with state-of-the-art formally verified cryptography while being extremely
-      minimal and fast. It is a VPN protocol that is very easy to setup and use. It is also very secure and fast. You can
-      read more about WireGuard <a href="https://www.wireguard.com/">here</a></h6>
-
+  <div class="card p-4 mb-4">
+    <h5 class="mb-3">Quick Actions</h5>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="/admin/users" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Manage Users</a>
+      <a href="/vpn_devices" class="btn btn-outline-primary btn-sm"><i class="bi bi-router"></i> All Devices</a>
+      <a href="/admin/vpn_configurations" class="btn btn-outline-primary btn-sm"><i class="bi bi-gear"></i> VPN Config</a>
+      <a href="/admin/backups" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-check"></i> Backups</a>
+    </div>
   </div>
-  <hr>
-
-  <h4>Hello! <%= @current_user.name %>, Your VPN Devices</h4>
-<%= render 'vpn_devices/vpn_devices', vpn_devices: @current_user.vpn_devices %>
 <% end %>
 
+<% if @current_user.vpn_devices.any? %>
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Your Devices</h5>
+      <a href="/vpn_devices/new" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Device</a>
+    </div>
+    <div class="card-body p-0">
+      <%= render 'vpn_devices/vpn_devices', vpn_devices: @current_user.vpn_devices %>
+    </div>
+  </div>
+<% else %>
+  <div class="card">
+    <div class="empty-state">
+      <i class="bi bi-router text-muted"></i>
+      <h5>No devices yet</h5>
+      <p>Create your first VPN device to get started with secure network access.</p>
+      <a href="/vpn_devices/new" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add a Device</a>
+    </div>
+  </div>
+<% end %>

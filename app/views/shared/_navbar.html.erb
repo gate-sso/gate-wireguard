@@ -1,83 +1,65 @@
-<nav class="navbar navbar-expand-md fixed-top navbar-dynamic">
+<nav class="navbar navbar-expand-md fixed-top">
   <div class="container-sm">
-    <a class="navbar-brand text-dynamic" href="/">
-      <i class="bi bi-shield-lock-fill me-2"></i>
-      GATE
+    <a class="navbar-brand" href="/">
+      <i class="bi bi-shield-lock-fill me-2"></i>GATE
     </a>
-    <button
-      class="navbar-toggler navbar-toggler-dynamic"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarCollapse"
-      aria-controls="navbarCollapse"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
+            aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarCollapse">
-
       <ul class="navbar-nav me-auto mb-2 mb-md-0">
         <% if current_user&.admin? %>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic active d-flex align-items-center gap-2" aria-current="page" href="/admin/users">
-              <i class="bi bi-people-fill"></i>
-              <span>Users</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path == '/admin/users' %>" href="/admin/users">
+              <i class="bi bi-people-fill"></i><span>Users</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic d-flex align-items-center gap-2" href="/vpn_devices">
-              <i class="bi bi-router-fill"></i>
-              <span>Devices</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path == '/vpn_devices' && !params[:nodes] %>" href="/vpn_devices">
+              <i class="bi bi-router-fill"></i><span>Devices</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic d-flex align-items-center gap-2" href="/vpn_devices?nodes=true">
-              <i class="bi bi-diagram-3-fill"></i>
-              <span>Nodes</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if params[:nodes] %>" href="/vpn_devices?nodes=true">
+              <i class="bi bi-diagram-3-fill"></i><span>Nodes</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic d-flex align-items-center gap-2" href="/admin/vpn_configurations">
-              <i class="bi bi-gear-fill"></i>
-              <span>Configuration</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path == '/admin/vpn_configurations' %>" href="/admin/vpn_configurations">
+              <i class="bi bi-gear-fill"></i><span>Configuration</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic d-flex align-items-center gap-2" href="/admin/backups">
-              <i class="bi bi-shield-check"></i>
-              <span>Backup</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path.start_with?('/admin/backups') %>" href="/admin/backups">
+              <i class="bi bi-shield-check"></i><span>Backup</span>
             </a>
           </li>
-        <% end %>
-        
-        <% unless current_user %>
+        <% elsif current_user %>
           <li class="nav-item">
-            <a class="nav-link nav-link-dynamic d-flex align-items-center gap-2" href="/login">
-              <i class="bi bi-box-arrow-in-right"></i>
-              <span>Login</span>
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path == '/my_devices' %>" href="/my_devices">
+              <i class="bi bi-router"></i><span>My Devices</span>
+            </a>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="/login">
+              <i class="bi bi-box-arrow-in-right"></i><span>Login</span>
             </a>
           </li>
         <% end %>
       </ul>
-      
-      <!-- Right side controls -->
-      <div class="ms-auto d-flex align-items-center gap-3">
+
+      <div class="ms-auto d-flex align-items-center gap-2">
         <% if current_user %>
-          <!-- Profile Dropdown -->
           <div class="dropdown">
-            <button class="btn btn-link dropdown-toggle d-flex align-items-center gap-2 p-1" 
-                    type="button" 
-                    id="profileDropdown"
-                    data-bs-toggle="dropdown" 
-                    aria-expanded="false"
-                    style="border: none; text-decoration: none;">
+            <button class="btn btn-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none border-0"
+                    type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
               <div class="rounded-circle overflow-hidden" style="width: 32px; height: 32px;">
                 <% if current_user.profile_picture_url.present? %>
-                  <img src="<%= profile_image_path %>" 
-                       alt="<%= current_user.name || current_user.email %>" 
-                       class="w-100 h-100" 
-                       style="object-fit: cover;">
+                  <img src="<%= profile_image_path %>" alt="<%= current_user.name || current_user.email %>"
+                       class="w-100 h-100" style="object-fit: cover;">
                 <% else %>
                   <div class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 0.8rem;">
                     <%= (current_user.name || current_user.email).first.upcase %>
@@ -86,102 +68,36 @@
               </div>
             </button>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-              <li><h6 class="dropdown-header">
-                <div class="d-flex flex-column">
-                  <span><%= current_user.name || current_user.email %></span>
-                  <% if current_user.admin? %>
-                    <small class="text-primary">
-                      <i class="bi bi-shield-fill-check"></i> Administrator
-                    </small>
-                  <% else %>
-                    <small class="text-muted">User</small>
-                  <% end %>
-                </div>
-              </h6></li>
+              <li>
+                <h6 class="dropdown-header">
+                  <div class="d-flex flex-column">
+                    <span><%= current_user.name || current_user.email %></span>
+                    <% if current_user.admin? %>
+                      <small class="text-primary"><i class="bi bi-shield-fill-check"></i> Administrator</small>
+                    <% else %>
+                      <small class="text-muted">User</small>
+                    <% end %>
+                  </div>
+                </h6>
+              </li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="/my_devices">
-                <i class="bi bi-router me-2"></i>My Devices
-              </a></li>
+              <li>
+                <a class="dropdown-item" href="/my_devices">
+                  <i class="bi bi-router me-2"></i>My Devices
+                </a>
+              </li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="/logout" data-turbo="false">
-                <i class="bi bi-box-arrow-right me-2"></i>Logout
-              </a></li>
+              <li>
+                <a class="dropdown-item text-danger" href="/logout" data-turbo="false">
+                  <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+              </li>
             </ul>
           </div>
         <% end %>
-        
-        <!-- Dark Mode Toggle -->
-        <div class="d-flex align-items-center">
-          <%= render 'shared/dark_mode_toggle' %>
-        </div>
+
+        <%= render 'shared/dark_mode_toggle' %>
       </div>
     </div>
   </div>
 </nav>
-
-<style>
-  .navbar-brand {
-    font-weight: 600;
-    font-size: 1.25rem;
-  }
-  
-  .nav-link {
-    transition: all 0.2s ease;
-    border-radius: 6px;
-    margin: 0 2px;
-  }
-  
-  .nav-link:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-  }
-  
-  /* Profile dropdown styling */
-  .dropdown-menu {
-    border-radius: 12px;
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    min-width: 220px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-  }
-  
-  .dropdown-item {
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease;
-  }
-  
-  .dropdown-item:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
-  }
-  
-  .dropdown-header {
-    border-radius: 8px;
-    background-color: rgba(var(--bs-primary-rgb), 0.05);
-    padding: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .dropdown-toggle::after {
-    display: none;
-  }
-  
-  .dropdown-toggle:focus {
-    box-shadow: none;
-  }
-  
-  /* Dark mode dropdown styling */
-  [data-bs-theme="dark"] .dropdown-menu {
-    background-color: rgba(30, 41, 59, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-  }
-  
-  [data-bs-theme="dark"] .dropdown-header {
-    background-color: rgba(99, 102, 241, 0.15);
-  }
-  
-  [data-bs-theme="dark"] .dropdown-item:hover {
-    background-color: rgba(99, 102, 241, 0.2);
-  }
-</style>

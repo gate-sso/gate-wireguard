@@ -11,7 +11,9 @@
       "Bash(limactl start:*)",
       "Bash(limactl stop:*)",
       "Bash(ssh:*)",
-      "Bash(limactl shell:*)"
+      "Bash(limactl shell:*)",
+      "Bash(yarn build:css:*)",
+      "Bash(limactl show-ssh:*)"
     ]
   }
 }

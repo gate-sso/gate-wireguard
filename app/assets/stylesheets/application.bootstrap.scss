@@ -1,726 +1,576 @@
-// Import Bootstrap with custom variables
+// Import Bootstrap
 @import "bootstrap/scss/bootstrap";
 
-// Import Inter font family for modern enterprise UI
+// Import Inter font
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-// Modern CSS Custom Properties for enterprise theming
+// ============================================================
+// CSS Custom Properties — Light mode (default)
+// ============================================================
 :root {
-  // Typography scale with Inter font family
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  // Font weights optimized for professional readability
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  
-  // Professional color palette
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;
-  --color-text-primary: #1e293b;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Courier New', monospace;
+
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-bg-muted: #f1f5f9;
+  --color-text: #1e293b;
   --color-text-secondary: #64748b;
   --color-text-muted: #94a3b8;
-  
-  // Professional spacing scale
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  
-  // Subtle border radius for enterprise feel
-  --border-radius-sm: 6px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-  
-  // Professional shadows
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  --color-border: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
-// Professional dark mode with dimmer, softer colors
+// ============================================================
+// CSS Custom Properties — Dark mode
+// ============================================================
 [data-bs-theme="dark"] {
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-text-primary: rgba(226, 232, 240, 0.9); // Dimmed text
-  --color-text-secondary: rgba(203, 213, 225, 0.8); // Dimmed secondary text
-  --color-text-muted: rgba(148, 163, 184, 0.7); // More dimmed muted text
-  
-  // Lighter font weights for better dark mode aesthetics
-  body { 
-    font-weight: var(--font-weight-light);
-    color: var(--color-text-primary);
-  }
-  
-  h1, h2, h3, h4, h5, h6 { 
-    font-weight: var(--font-weight-medium);
-    color: rgba(241, 245, 249, 0.95);
-  }
-  
-  .fw-bold { font-weight: var(--font-weight-semibold) !important; }
-  .fw-semibold { font-weight: var(--font-weight-medium) !important; }
-  
-  // Dimmer text colors for better aesthetics
-  .text-muted {
-    color: var(--color-text-muted) !important;
-    font-weight: var(--font-weight-light);
-  }
-  
-  .text-secondary {
-    color: var(--color-text-secondary) !important;
-    font-weight: var(--font-weight-light);
-  }
-  
-  // Professional shadows in dark mode
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.25);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
+  --color-bg: #0f172a;
+  --color-bg-subtle: #1e293b;
+  --color-bg-muted: #334155;
+  --color-text: #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-border: #334155;
+  --color-border-subtle: #1e293b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-// Global typography improvements
+// ============================================================
+// Typography
+// ============================================================
 body {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-normal);
+  font-family: var(--font-sans);
+  font-weight: 400;
   line-height: 1.6;
   letter-spacing: -0.01em;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
-// Professional heading styles
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-sans);
+  font-weight: 600;
   line-height: 1.3;
-  letter-spacing: -0.025em;
-  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
 }
 
-// Enhanced button styles with better dark mode colors and icon support
+[data-bs-theme="dark"] {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+  }
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+// ============================================================
+// Buttons — flat, no gradients
+// ============================================================
 .btn {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-md);
-  padding: 0.75rem 1.5rem;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: opacity 0.15s ease, box-shadow 0.15s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  opacity: 0.85;
 }
 
 .btn:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+  opacity: 0.75;
 }
 
-// Improved button colors for dark mode - more subtle and aesthetic
 .btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background-color: #3b82f6;
   border-color: #3b82f6;
-  color: white;
-}
-
-[data-bs-theme="dark"] .btn-primary {
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.8), rgba(67, 56, 202, 0.8));
-  border-color: rgba(79, 70, 229, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
-}
-
-[data-bs-theme="dark"] .btn-primary:hover {
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.9), rgba(67, 56, 202, 0.9));
-  border-color: rgba(79, 70, 229, 0.8);
-  color: white;
+  color: #fff;
 }
 
 .btn-success {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background-color: #10b981;
   border-color: #10b981;
-}
-
-[data-bs-theme="dark"] .btn-success {
-  background: linear-gradient(135deg, rgba(6, 95, 70, 0.8), rgba(4, 120, 87, 0.8));
-  border-color: rgba(6, 95, 70, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
-}
-
-[data-bs-theme="dark"] .btn-success:hover {
-  background: linear-gradient(135deg, rgba(6, 95, 70, 0.9), rgba(4, 120, 87, 0.9));
-  border-color: rgba(6, 95, 70, 0.8);
+  color: #fff;
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background-color: #ef4444;
   border-color: #ef4444;
-}
-
-[data-bs-theme="dark"] .btn-danger {
-  background: linear-gradient(135deg, rgba(127, 29, 29, 0.8), rgba(153, 27, 27, 0.8));
-  border-color: rgba(127, 29, 29, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
-}
-
-[data-bs-theme="dark"] .btn-danger:hover {
-  background: linear-gradient(135deg, rgba(127, 29, 29, 0.9), rgba(153, 27, 27, 0.9));
-  border-color: rgba(127, 29, 29, 0.8);
+  color: #fff;
 }
 
 .btn-warning {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background-color: #f59e0b;
   border-color: #f59e0b;
-  color: white;
-}
-
-[data-bs-theme="dark"] .btn-warning {
-  background: linear-gradient(135deg, rgba(146, 64, 14, 0.8), rgba(180, 83, 9, 0.8));
-  border-color: rgba(146, 64, 14, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
-}
-
-[data-bs-theme="dark"] .btn-warning:hover {
-  background: linear-gradient(135deg, rgba(146, 64, 14, 0.9), rgba(180, 83, 9, 0.9));
-  border-color: rgba(146, 64, 14, 0.8);
+  color: #fff;
 }
 
 .btn-info {
-  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  background-color: #06b6d4;
   border-color: #06b6d4;
-}
-
-[data-bs-theme="dark"] .btn-info {
-  background: linear-gradient(135deg, rgba(22, 78, 99, 0.8), rgba(21, 94, 117, 0.8));
-  border-color: rgba(22, 78, 99, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
-}
-
-[data-bs-theme="dark"] .btn-info:hover {
-  background: linear-gradient(135deg, rgba(22, 78, 99, 0.9), rgba(21, 94, 117, 0.9));
-  border-color: rgba(22, 78, 99, 0.8);
+  color: #fff;
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
+  background-color: #6b7280;
   border-color: #6b7280;
+  color: #fff;
 }
 
-[data-bs-theme="dark"] .btn-secondary {
-  background: linear-gradient(135deg, rgba(55, 65, 81, 0.8), rgba(75, 85, 99, 0.8));
-  border-color: rgba(55, 65, 81, 0.6);
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: var(--font-weight-light);
-  backdrop-filter: blur(10px);
+[data-bs-theme="dark"] {
+  .btn-primary {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+  }
+  .btn-success {
+    background-color: #059669;
+    border-color: #059669;
+  }
+  .btn-danger {
+    background-color: #dc2626;
+    border-color: #dc2626;
+  }
+  .btn-warning {
+    background-color: #d97706;
+    border-color: #d97706;
+  }
+  .btn-info {
+    background-color: #0891b2;
+    border-color: #0891b2;
+  }
+  .btn-secondary {
+    background-color: #4b5563;
+    border-color: #4b5563;
+  }
 }
 
-[data-bs-theme="dark"] .btn-secondary:hover {
-  background: linear-gradient(135deg, rgba(55, 65, 81, 0.9), rgba(75, 85, 99, 0.9));
-  border-color: rgba(55, 65, 81, 0.8);
-}
+// Button icon sizing
+.btn i, .btn svg { font-size: 1rem; flex-shrink: 0; }
+.btn-sm i, .btn-sm svg { font-size: 0.875rem; }
+.btn-lg i, .btn-lg svg { font-size: 1.1rem; }
 
-// Professional card styles with improved dark mode
+// ============================================================
+// Cards — 1px border, no shadow by default, shadow on hover
+// ============================================================
 .card {
-  border-radius: var(--border-radius-lg);
-  border: 1px solid rgba(var(--bs-border-color-rgb), 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+  background-color: var(--color-bg);
+  transition: box-shadow 0.15s ease;
+}
+
+.card:hover {
   box-shadow: var(--shadow-md);
-  background-color: var(--color-bg-primary);
+}
+
+.card-header {
+  background-color: var(--color-bg-subtle);
+  border-bottom: 1px solid var(--color-border);
 }
 
 [data-bs-theme="dark"] .card {
-  background-color: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-bg-subtle);
+  border-color: var(--color-border);
 }
 
-[data-bs-theme="dark"] .card-body {
-  color: var(--color-text-primary);
+[data-bs-theme="dark"] .card-header {
+  background-color: var(--color-bg-muted);
+  border-bottom-color: var(--color-border);
 }
 
-[data-bs-theme="dark"] .card-title {
-  color: rgba(241, 245, 249, 0.95);
-  font-weight: var(--font-weight-medium);
+// ============================================================
+// Forms
+// ============================================================
+.form-control, .form-select {
+  font-family: var(--font-sans);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-[data-bs-theme="dark"] .card-text {
+.form-control:focus, .form-select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 0.375rem;
+}
+
+// ============================================================
+// Tables — clean, no uppercase headers
+// ============================================================
+.table {
+  font-family: var(--font-sans);
+  --bs-table-border-color: var(--color-border);
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.875rem;
   color: var(--color-text-secondary);
-  font-weight: var(--font-weight-light);
+  border-bottom: 1px solid var(--color-border);
 }
 
-// Enhanced form controls
-.form-control {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-normal);
-  border-radius: var(--border-radius-md);
-  border: 1.5px solid rgba(var(--bs-border-color-rgb), 0.15);
-  padding: 0.75rem 1rem;
-  transition: all 0.2s ease;
+.table td {
+  vertical-align: middle;
+  color: var(--color-text);
 }
 
-.form-control:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
+[data-bs-theme="dark"] {
+  .table th { font-weight: 500; }
+  .table-striped > tbody > tr:nth-of-type(odd) > td {
+    background-color: rgba(30, 41, 59, 0.3);
+  }
+  .table-hover > tbody > tr:hover > td {
+    background-color: rgba(30, 41, 59, 0.5);
+  }
 }
 
-// Professional navigation with improved dark mode
+// ============================================================
+// Alerts
+// ============================================================
+.alert {
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+}
+
+// ============================================================
+// Badges
+// ============================================================
+.badge {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+}
+
+// ============================================================
+// Navbar — solid background, no blur
+// ============================================================
 .navbar {
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(var(--bs-border-color-rgb), 0.1);
-  background-color: rgba(var(--color-bg-primary), 0.95);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
 }
 
 [data-bs-theme="dark"] .navbar {
-  background-color: rgba(15, 23, 42, 0.95);
-  border-bottom-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--color-bg-subtle);
+  border-bottom-color: var(--color-border);
 }
 
-[data-bs-theme="dark"] .navbar-brand,
-[data-bs-theme="dark"] .nav-link {
-  color: var(--color-text-primary) !important;
-  font-weight: var(--font-weight-light);
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.25rem;
 }
 
-[data-bs-theme="dark"] .navbar-brand:hover,
-[data-bs-theme="dark"] .nav-link:hover {
-  color: rgba(255, 255, 255, 0.95) !important;
+.nav-link {
+  transition: background-color 0.15s ease;
+  border-radius: var(--radius-sm);
+  margin: 0 2px;
 }
 
-// Icon utilities for buttons and UI elements
-.btn i,
-.btn svg {
-  font-size: 1rem;
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
+.nav-link:hover {
+  background-color: var(--color-bg-muted);
 }
 
-.btn-lg i,
-.btn-lg svg {
-  font-size: 1.1rem;
-  width: 1.1rem;
-  height: 1.1rem;
+.nav-link.active {
+  background-color: var(--color-bg-muted);
+  font-weight: 500;
 }
 
-.btn-sm i,
-.btn-sm svg {
-  font-size: 0.875rem;
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-// Icon spacing utilities
-.icon-start {
-  margin-right: 0.5rem;
-}
-
-.icon-end {
-  margin-left: 0.5rem;
-}
-
-// Enhanced table styles with improved dark mode
-.table {
-  font-family: var(--font-family-sans);
-  font-size: 0.95rem;
-}
-
-.table th {
-  font-weight: var(--font-weight-semibold);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  border-bottom: 2px solid rgba(var(--bs-border-color-rgb), 0.15);
-}
-
-[data-bs-theme="dark"] .table {
-  color: var(--color-text-primary);
-}
-
-[data-bs-theme="dark"] .table th {
-  color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
-}
-
-[data-bs-theme="dark"] .table td {
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-light);
-}
-
-[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
-  background-color: rgba(30, 41, 59, 0.3);
-}
-
-[data-bs-theme="dark"] .table-hover > tbody > tr:hover > td {
-  background-color: rgba(30, 41, 59, 0.5);
-}
-
-// Professional alert styles
-.alert {
-  border-radius: var(--border-radius-md);
-  border: 1px solid rgba(var(--bs-border-color-rgb), 0.15);
-  font-family: var(--font-family-sans);
-}
-
-// Enhanced badge styles
-.badge {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-sm);
-  padding: 0.35em 0.65em;
-}
-
-// Responsive typography
-@media (max-width: 768px) {
-  body {
-    font-size: 0.95rem;
-  }
-  
-  h1, .h1 { font-size: 2rem; }
-  h2, .h2 { font-size: 1.75rem; }
-  h3, .h3 { font-size: 1.5rem; }
-}
-
-// Print styles
-@media print {
-  body {
-    font-family: 'Times New Roman', serif;
-    color: #000;
-    background: #fff;
-  }
-  
-  .btn, .navbar, .alert {
-    display: none !important;
-  }
-}
-
-// Accessibility improvements
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-// High contrast mode support
-@media (prefers-contrast: high) {
-  .card {
-    border: 2px solid var(--color-text-primary);
-  }
-  
-  .btn {
-    border: 2px solid currentColor;
-  }
-}
-
-// Focus management
-:focus-visible {
-  outline: 2px solid var(--bs-primary);
-  outline-offset: 2px;
-}
-
-// Professional utility classes
-.shadow-professional {
+// Dropdown
+.dropdown-menu {
+  border-radius: var(--radius-lg);
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
   box-shadow: var(--shadow-lg);
 }
 
-.border-subtle {
-  border: 1px solid rgba(var(--bs-border-color-rgb), 0.1);
+.dropdown-item {
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  transition: background-color 0.15s ease;
 }
 
-.bg-subtle {
-  background-color: var(--color-bg-secondary);
+.dropdown-item:hover {
+  background-color: var(--color-bg-muted);
 }
 
-// Modern container max-widths
-.container-professional {
-  max-width: min(1200px, 90vw);
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 4vw, 2rem);
+.dropdown-header {
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-subtle);
+  padding: 0.75rem;
+  margin-bottom: 0.25rem;
 }
 
-// Global typography improvements
-body {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-normal);
-  line-height: 1.6;
-  letter-spacing: -0.01em;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-}
+.dropdown-toggle::after { display: none; }
+.dropdown-toggle:focus { box-shadow: none; }
 
-// Enhanced heading styles
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-  color: var(--color-text-primary);
-}
-
-// Modern button styles
-.btn {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-md);
-  padding: 0.75rem 1.5rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.btn:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
-}
-
-// Card improvements
-.card {
-  border-radius: var(--border-radius-lg);
-  border: 1px solid rgba(var(--bs-border-color-rgb), 0.1);
-  box-shadow: var(--shadow-md);
-  background-color: var(--color-bg-primary);
-}
-
-// Form control enhancements
-.form-control {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-normal);
-  border-radius: var(--border-radius-md);
-  border: 1.5px solid rgba(var(--bs-border-color-rgb), 0.2);
-  padding: 0.75rem 1rem;
-  transition: all 0.2s ease;
-}
-
-.form-control:focus {
-  border-color: var(--bs-primary);
-  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), 0.1);
-}
-
-// Geeky cyber elements
-.text-cyber {
-  background: linear-gradient(45deg, #6366f1, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
-  font-family: var(--font-family-mono);
-}
-
-// Terminal-like elements
-.font-mono {
-  font-family: var(--font-family-mono) !important;
-  font-feature-settings: "liga" 1, "calt" 1;
-  font-weight: var(--font-weight-normal);
-}
-
-[data-bs-theme="dark"] .font-mono {
-  font-weight: var(--font-weight-light);
-}
-
-// Login page specific dark mode improvements
 [data-bs-theme="dark"] {
-  .btn-auth span {
-    color: #e2e8f0 !important;
-    font-weight: var(--font-weight-light);
+  .dropdown-menu {
+    background-color: var(--color-bg-subtle);
+    border-color: var(--color-border);
   }
-  
-  .terminal-prompt {
-    color: #34d399;
-    text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+  .dropdown-item:hover {
+    background-color: var(--color-bg-muted);
   }
-  
-  .typing-animation {
-    color: #22d3ee;
-    text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
-  }
-  
-  .status-line small {
-    font-weight: var(--font-weight-light);
-  }
-  
-  .text-success {
-    color: #34d399 !important;
-  }
-  
-  .text-info {
-    color: #22d3ee !important;
-  }
-  
-  .text-warning {
-    color: #fbbf24 !important;
-  }
-  
-  .text-muted {
-    color: #94a3b8 !important;
-    font-weight: var(--font-weight-light);
-  }
-  
-  .text-primary {
-    color: #6366f1 !important;
+  .dropdown-header {
+    background-color: var(--color-bg-muted);
   }
 }
 
-// Code syntax highlighting classes
-.syntax-keyword { color: #c792ea; font-weight: var(--font-weight-medium); }
-.syntax-string { color: #c3e88d; }
-.syntax-number { color: #f78c6c; }
-.syntax-comment { color: #697098; font-style: italic; }
-.syntax-function { color: #82aaff; font-weight: var(--font-weight-medium); }
-.syntax-variable { color: #eeffff; }
-
-// Terminal-style components
-.terminal-window {
-  background: #0d1117;
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
-  font-family: var(--font-family-mono);
-}
-
-.terminal-header {
-  background: #21262d;
-  padding: 12px 16px;
-  border-bottom: 1px solid #30363d;
+// ============================================================
+// Page header utility
+// ============================================================
+.page-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+
+  h2, h3, h4 {
+    margin-bottom: 0;
+  }
+
+  .page-header-subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
 }
 
-.terminal-dot {
-  width: 12px;
-  height: 12px;
+// ============================================================
+// Empty state
+// ============================================================
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+
+  i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  h5 {
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: var(--color-text-muted);
+    max-width: 28rem;
+    margin: 0 auto 1.5rem;
+  }
+}
+
+// ============================================================
+// Stat cards (dashboard)
+// ============================================================
+.stat-card {
+  text-align: center;
+  padding: 1.5rem;
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+}
+
+// ============================================================
+// Config row (device show page)
+// ============================================================
+.config-row {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: 0.5rem;
+
+  .config-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    min-width: 10rem;
+    color: var(--color-text-secondary);
+  }
+
+  .config-value {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+// Copy button
+.copy-btn {
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.copy-btn:hover {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+  color: #fff;
+}
+
+// ============================================================
+// Login page
+// ============================================================
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-bg-subtle);
+}
+
+[data-bs-theme="dark"] .login-container {
+  background-color: var(--color-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--radius-lg);
+}
+
+.login-separator {
+  height: 1px;
+  background: var(--color-border);
+  margin: 1.5rem 0;
+}
+
+.btn-google {
+  background-color: #fff;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-google:hover {
+  background-color: var(--color-bg-subtle);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text);
+}
+
+[data-bs-theme="dark"] .btn-google {
+  background-color: var(--color-bg-muted);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-bs-theme="dark"] .btn-google:hover {
+  background-color: var(--color-bg-subtle);
+}
+
+.security-badge {
+  background: var(--color-bg-muted);
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+// ============================================================
+// QR code container (keep white bg in dark mode)
+// ============================================================
+.qr-container {
+  background: #fff;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: inline-block;
+}
+
+[data-bs-theme="dark"] .qr-container {
+  background: #fff;
+}
+
+// ============================================================
+// Dark mode toggle button
+// ============================================================
+.btn-dark-toggle {
   border-radius: 50%;
-  background: #f85149;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
-.terminal-dot:nth-child(2) { background: #f1e05a; }
-.terminal-dot:nth-child(3) { background: #28a745; }
-
-.terminal-body {
-  padding: 16px;
-  background: #0d1117;
-  color: #c9d1d9;
-  font-family: var(--font-family-mono);
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: var(--font-weight-light);
+// ============================================================
+// Admin layout body padding for fixed navbar
+// ============================================================
+.admin-layout {
+  padding-top: 4.5rem;
 }
 
-// Glitch effect for cyber elements
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
-}
-
-.glitch:hover {
-  animation: glitch 0.3s linear infinite;
-}
-
-// Matrix-style background utility
-.matrix-bg {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(34, 211, 238, 0.03) 2px,
-    rgba(34, 211, 238, 0.03) 4px
-  );
-}
-
-// Navigation improvements
-.navbar {
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(var(--bs-border-color-rgb), 0.1);
-}
-
-// Table enhancements
-.table {
-  font-family: var(--font-family-sans);
-  font-size: 0.95rem;
-}
-
-.table th {
-  font-weight: var(--font-weight-semibold);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-secondary);
-  border-bottom: 2px solid rgba(var(--bs-border-color-rgb), 0.2);
-}
-
-// Alert improvements
-.alert {
-  border-radius: var(--border-radius-md);
-  border: 1px solid rgba(var(--bs-border-color-rgb), 0.2);
-  font-family: var(--font-family-sans);
-}
-
-// Badge enhancements
-.badge {
-  font-family: var(--font-family-sans);
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-sm);
-  padding: 0.35em 0.65em;
-}
-
-// Responsive typography adjustments
+// ============================================================
+// Responsive
+// ============================================================
 @media (max-width: 768px) {
-  body {
-    font-size: 0.95rem;
+  body { font-size: 0.95rem; }
+  h1, .h1 { font-size: 1.75rem; }
+  h2, .h2 { font-size: 1.5rem; }
+  h3, .h3 { font-size: 1.25rem; }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
-  
-  h1, .h1 { font-size: 2rem; }
-  h2, .h2 { font-size: 1.75rem; }
-  h3, .h3 { font-size: 1.5rem; }
+
+  .config-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+
+    .config-label { min-width: auto; }
+  }
 }
 
-// Print styles
-@media print {
-  body {
-    font-family: 'Times New Roman', serif;
-    color: #000;
-    background: #fff;
-  }
-  
-  .btn, .navbar, .alert {
-    display: none !important;
-  }
-}
-
-// Accessibility improvements
+// ============================================================
+// Accessibility
+// ============================================================
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -729,31 +579,19 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-// High contrast mode support
 @media (prefers-contrast: high) {
-  .card {
-    border: 2px solid var(--color-text-primary);
-  }
-  
-  .btn {
-    border: 2px solid currentColor;
-  }
+  .card { border: 2px solid var(--color-text); }
+  .btn { border: 2px solid currentColor; }
 }
 
-// Focus management
 :focus-visible {
   outline: 2px solid var(--bs-primary);
   outline-offset: 2px;
 }
 
-// Utility classes for modern spacing
-.p-fluid { padding: clamp(1rem, 4vw, 2rem); }
-.m-fluid { margin: clamp(1rem, 4vw, 2rem); }
-.gap-fluid { gap: clamp(0.5rem, 2vw, 1rem); }
-
-// Modern container max-widths
-.container-modern {
-  max-width: min(1200px, 90vw);
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 4vw, 2rem);
+// ============================================================
+// Print
+// ============================================================
+@media print {
+  .btn, .navbar, .alert { display: none !important; }
 }

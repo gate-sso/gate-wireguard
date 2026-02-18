@@ -1,10 +1,17 @@
-<h1>New vpn device</h1>
+<div class="page-header">
+  <div>
+    <h3>New Device</h3>
+    <div class="page-header-subtitle">Add a new VPN device</div>
+  </div>
+  <div class="d-flex gap-2">
+    <%= link_to my_devices_path, class: 'btn btn-outline-secondary btn-sm' do %>
+      <i class="bi bi-arrow-left"></i> My Devices
+    <% end %>
+  </div>
+</div>
 
-<%= render "form", vpn_device: @vpn_device %>
-
-<br>
-
-<div>
-  <%= link_to "Back to my devices", my_devices_path, class: 'btn btn-secondary' %>
-  <%= link_to "Back to all devices", vpn_devices_path, class: 'btn btn-outline-secondary' %>
+<div class="card">
+  <div class="card-body">
+    <%= render "form", vpn_device: @vpn_device %>
+  </div>
 </div>

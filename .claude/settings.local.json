@@ -21,7 +21,9 @@
       "Bash(npx yarn build:css:*)",
       "Bash(corepack enable:*)",
       "Bash(corepack install:*)",
-      "Bash(npm exec:*)"
+      "Bash(npm exec:*)",
+      "Bash(curl:*)",
+      "Bash(dig:*)"
     ]
   }
 }

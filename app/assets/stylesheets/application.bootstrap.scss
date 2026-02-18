@@ -1,6 +1,10 @@
 // Import Bootstrap
 @import "bootstrap/scss/bootstrap";
 
+// Import Bootstrap Icons (font dir relative to compiled CSS output in app/assets/builds/)
+$bootstrap-icons-font-dir: "./fonts";
+@import "bootstrap-icons/font/bootstrap-icons";
+
 // Import Inter font
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 

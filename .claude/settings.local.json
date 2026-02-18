@@ -14,7 +14,14 @@
       "Bash(limactl shell:*)",
       "Bash(yarn build:css:*)",
       "Bash(limactl show-ssh:*)",
-      "Bash(bundle exec rspec:*)"
+      "Bash(bundle exec rspec:*)",
+      "Bash(ansible:*)",
+      "Bash(pip3 show:*)",
+      "Bash(ansible-galaxy collection:*)",
+      "Bash(npx yarn build:css:*)",
+      "Bash(corepack enable:*)",
+      "Bash(corepack install:*)",
+      "Bash(npm exec:*)"
     ]
   }
 }

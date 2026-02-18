@@ -1,0 +1,35 @@
+#!/bin/bash
+# WireGuard configuration watcher
+# Watches wg0.conf for changes and reloads WireGuard
+
+INTERFACE_NAME="wg0"
+CONFIG_FILE="/etc/wireguard/${INTERFACE_NAME}.conf"
+SERVICE_NAME="wg-quick@${INTERFACE_NAME}"
+
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') [wg-watcher] $*"
+}
+
+# Wait for config file to exist (it won't until admin configures via web UI)
+while [ ! -f "$CONFIG_FILE" ]; do
+  log "Waiting for ${CONFIG_FILE} to be created..."
+  sleep 10
+done
+
+log "Watching ${CONFIG_FILE} for changes..."
+
+# Ensure WireGuard interface is up
+if ! systemctl is-active --quiet "$SERVICE_NAME"; then
+  log "Starting ${SERVICE_NAME}..."
+  systemctl start "$SERVICE_NAME" || log "Warning: Failed to start ${SERVICE_NAME}"
+fi
+
+inotifywait -m -e modify "$CONFIG_FILE" |
+while read -r directory events filename; do
+  log "Detected change in ${CONFIG_FILE}, reloading ${SERVICE_NAME}..."
+  if ! systemctl reload "$SERVICE_NAME" 2>/dev/null; then
+    log "Reload failed, attempting restart..."
+    systemctl restart "$SERVICE_NAME" || log "Error: Failed to restart ${SERVICE_NAME}"
+  fi
+  log "Reload complete."
+done

@@ -1,0 +1,353 @@
+---
+- name: Deploy Gate-WireGuard
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  vars:
+    app_user: deploy
+    app_dir: /home/{{ app_user }}/gate-wireguard
+    ruby_version: "3.3.4"
+    node_major_version: "20"
+    wg_conf_group: wg_conf
+    puma_port: 3000
+    wg_port: 51820
+    # These should be passed as extra vars or via inventory
+    domain: "{{ inventory_hostname }}"
+    google_client_id: ""
+    google_client_secret: ""
+    hosted_domains: ""
+    gate_dns_zone: ""
+    gate_database: "gate_wireguard_production"
+    gate_database_user: "gate"
+    gate_database_password: ""
+    secret_key_base: ""
+
+  handlers:
+    - name: reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: restart puma
+      systemd:
+        name: gate-wireguard
+        state: restarted
+
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+    - name: restart wireguard-watcher
+      systemd:
+        name: wireguard-watcher
+        state: restarted
+
+  tasks:
+    - name: Create deploy user
+      user:
+        name: "{{ app_user }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        create_home: yes
+
+    - name: Create wg_conf group
+      group:
+        name: "{{ wg_conf_group }}"
+        state: present
+
+    - name: Add deploy user to wg_conf group
+      user:
+        name: "{{ app_user }}"
+        groups: "{{ wg_conf_group }}"
+        append: yes
+
+    - name: Install system dependencies
+      apt:
+        name:
+          - build-essential
+          - git
+          - curl
+          - libssl-dev
+          - libreadline-dev
+          - zlib1g-dev
+          - libyaml-dev
+          - libxml2-dev
+          - libxslt1-dev
+          - libcurl4-openssl-dev
+          - libffi-dev
+          - libmysqlclient-dev
+          - libvips
+          - nginx
+          - redis-server
+          - ufw
+          - inotify-tools
+          - logrotate
+          - acl
+          - mysql-server
+          - wireguard
+          - wireguard-tools
+        state: present
+        update_cache: yes
+
+    - name: Enable IPv4 forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    # Ruby setup with rbenv
+    - name: Check if rbenv is installed
+      stat:
+        path: "/home/{{ app_user }}/.rbenv"
+      register: rbenv_dir
+
+    - name: Install rbenv
+      become_user: "{{ app_user }}"
+      shell: curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+      args:
+        creates: "/home/{{ app_user }}/.rbenv/bin/rbenv"
+      when: not rbenv_dir.stat.exists
+
+    - name: Configure rbenv in bashrc
+      become_user: "{{ app_user }}"
+      blockinfile:
+        path: "/home/{{ app_user }}/.bashrc"
+        marker: "# {mark} RBENV MANAGED BLOCK"
+        block: |
+          export PATH="$HOME/.rbenv/bin:$PATH"
+          eval "$(rbenv init - bash)"
+
+    - name: Install Ruby {{ ruby_version }}
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        rbenv install {{ ruby_version }}
+        rbenv global {{ ruby_version }}
+      args:
+        creates: "/home/{{ app_user }}/.rbenv/versions/{{ ruby_version }}"
+
+    - name: Install bundler
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        gem install bundler
+      args:
+        creates: "/home/{{ app_user }}/.rbenv/versions/{{ ruby_version }}/bin/bundler"
+
+    # Node.js setup
+    - name: Install Node.js
+      shell: curl -fsSL https://deb.nodesource.com/setup_{{ node_major_version }}.x | bash - && apt-get install -y nodejs
+
+    - name: Enable corepack
+      shell: corepack enable
+
+    # Application deployment
+    - name: Create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+
+    - name: Copy repository to server
+      synchronize:
+        src: "../"
+        dest: "{{ app_dir }}"
+        recursive: yes
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=log"
+          - "--exclude=tmp"
+          - "--exclude=node_modules"
+          - "--exclude=public/assets"
+      become_user: "{{ app_user }}"
+
+    - name: Create application subdirectories
+      file:
+        path: "{{ app_dir }}/{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+      loop:
+        - log
+        - tmp/pids
+        - tmp/cache
+        - tmp/sockets
+        - storage
+
+    - name: Deploy .env file
+      template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0600"
+      notify: restart puma
+
+    - name: Bundle install
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        bundle config set --local deployment true
+        bundle config set --local without 'development test'
+        bundle install
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Yarn install
+      become_user: "{{ app_user }}"
+      shell: yarn install
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Precompile assets
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bundle exec rails assets:precompile
+      args:
+        chdir: "{{ app_dir }}"
+
+    # Database setup
+    - name: Create MySQL database
+      mysql_db:
+        name: "{{ gate_database }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create MySQL user
+      mysql_user:
+        name: "{{ gate_database_user }}"
+        password: "{{ gate_database_password }}"
+        priv: "{{ gate_database }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Run database migrations
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        RAILS_ENV=production bundle exec rails db:prepare
+      args:
+        chdir: "{{ app_dir }}"
+
+    # WireGuard and systemd services
+    - name: Ensure /etc/wireguard directory
+      file:
+        path: /etc/wireguard
+        state: directory
+        owner: root
+        group: "{{ wg_conf_group }}"
+        mode: "0775"
+
+    - name: Symlink config/wireguard to /etc/wireguard
+      file:
+        src: /etc/wireguard
+        dest: "{{ app_dir }}/config/wireguard"
+        state: link
+        owner: "{{ app_user }}"
+        group: "{{ wg_conf_group }}"
+        force: yes
+
+    - name: Deploy WireGuard watcher script
+      template:
+        src: templates/wg_conf_watcher.sh.j2
+        dest: /etc/wireguard/wg_conf_watcher.sh
+        owner: root
+        group: "{{ wg_conf_group }}"
+        mode: "0755"
+      notify: restart wireguard-watcher
+
+    - name: Deploy WireGuard watcher systemd unit
+      template:
+        src: templates/wireguard-watcher.service.j2
+        dest: /etc/systemd/system/wireguard-watcher.service
+      notify: reload systemd
+
+    - name: Deploy puma systemd unit
+      template:
+        src: templates/gate-wireguard.service.j2
+        dest: /etc/systemd/system/gate-wireguard.service
+      notify: reload systemd
+
+    - name: Enable and start services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - mysql
+        - redis-server
+        - gate-wireguard
+        - wireguard-watcher
+        - nginx
+
+    # Nginx setup
+    - name: Deploy nginx configuration
+      template:
+        src: templates/nginx-gate.conf.j2
+        dest: /etc/nginx/sites-available/gate-wireguard
+      notify: reload nginx
+
+    - name: Enable nginx site
+      file:
+        src: /etc/nginx/sites-available/gate-wireguard
+        dest: /etc/nginx/sites-enabled/gate-wireguard
+        state: link
+      notify: reload nginx
+
+    - name: Remove default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: reload nginx
+
+    - name: Deploy sudoers file
+      template:
+        src: templates/sudoers.j2
+        dest: /etc/sudoers.d/gate-wireguard
+        mode: "0440"
+        validate: "visudo -cf %s"
+
+    - name: Deploy logrotate configuration
+      copy:
+        content: |
+          {{ app_dir }}/log/*.log {
+            daily
+            missingok
+            rotate 14
+            compress
+            delaycompress
+            notifempty
+            copytruncate
+          }
+        dest: /etc/logrotate.d/gate-wireguard
+
+    # Firewall
+    - name: Allow SSH, HTTP, HTTPS, and WireGuard
+      ufw:
+        rule: allow
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+      loop:
+        - { port: "22", proto: "tcp" }
+        - { port: "80", proto: "tcp" }
+        - { port: "443", proto: "tcp" }
+        - { port: "{{ wg_port }}", proto: "udp" }
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming

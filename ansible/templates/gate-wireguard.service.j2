@@ -1,0 +1,20 @@
+[Unit]
+Description=Gate-WireGuard (Puma)
+After=network.target mysql.service redis-server.service
+Requires=mysql.service redis-server.service
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_dir }}
+EnvironmentFile={{ app_dir }}/.env
+ExecStart=/home/{{ app_user }}/.rbenv/shims/bundle exec puma -C config/puma.rb -b tcp://127.0.0.1:{{ puma_port }}
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:{{ app_dir }}/log/puma.log
+StandardError=append:{{ app_dir }}/log/puma.log
+SyslogIdentifier=gate-wireguard
+
+[Install]
+WantedBy=multi-user.target

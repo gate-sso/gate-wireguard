@@ -23,7 +23,8 @@
       "Bash(corepack install:*)",
       "Bash(npm exec:*)",
       "Bash(curl:*)",
-      "Bash(dig:*)"
+      "Bash(dig:*)",
+      "Bash(git remote set-url:*)"
     ]
   }
 }

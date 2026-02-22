@@ -2,6 +2,16 @@
 
 class User < ApplicationRecord
   has_many :vpn_devices, dependent: :destroy
+
+  def self.api_system_user
+    find_or_create_by!(provider: 'api', uid: 'api-system') do |u|
+      u.name = 'API System'
+      u.email = 'api@gate.clawstation.ai'
+      u.admin = false
+      u.active = true
+    end
+  end
+
   def self.from_omniauth(auth)
     user = find_for_omniauth(auth) || auto_create_admin(auth)
     return nil unless user

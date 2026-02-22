@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_000001) do
   create_table "api_keys", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "last_used_at"
@@ -44,21 +44,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_000002) do
     t.datetime "updated_at", null: false
     t.bigint "vpn_configuration_id", null: false
     t.index ["vpn_configuration_id"], name: "index_network_addresses_on_vpn_configuration_id"
-  end
-
-  create_table "peers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.string "dns"
-    t.string "name", limit: 100, null: false
-    t.text "private_key", null: false
-    t.string "public_key", null: false
-    t.datetime "removed_at"
-    t.datetime "updated_at", null: false
-    t.string "vpn_ip", limit: 45, null: false
-    t.index ["name"], name: "index_peers_on_name", unique: true
-    t.index ["public_key"], name: "index_peers_on_public_key", unique: true
-    t.index ["removed_at"], name: "index_peers_on_removed_at"
-    t.index ["vpn_ip"], name: "index_peers_on_vpn_ip", unique: true
   end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

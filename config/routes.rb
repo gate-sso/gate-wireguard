@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  # API endpoints for ClawStation integration
+  # API endpoints for programmatic device provisioning
   namespace :api do
     namespace :v1 do
-      resources :peers, only: %i[index show create destroy]
+      resources :devices, only: %i[index show create destroy]
     end
   end
 

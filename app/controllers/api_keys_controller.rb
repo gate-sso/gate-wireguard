@@ -4,6 +4,8 @@ class ApiKeysController < ApplicationController
   before_action :require_login
   before_action :require_admin
 
+  layout 'admin'
+
   def index
     @api_keys = ApiKey.order(created_at: :desc)
   end

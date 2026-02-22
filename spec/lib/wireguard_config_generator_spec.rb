@@ -136,7 +136,7 @@ RSpec.describe WireguardConfigGenerator do
 
         expect(config).to include('AllowedIPs = 192.168.1.0/24')
         expect(config).to include('AllowedIPs = 172.16.0.0/16')
-        expect(config).to include('AllowedIPs = 10.42.5.254/32')
+        expect(config).to include('AllowedIPs = 10.42.5.0/24')
       end
     end
 
@@ -268,7 +268,7 @@ RSpec.describe WireguardConfigGenerator do
         expect(config).to include('[Peer]')
         expect(config).to include('PublicKey = test_public_key')
         expect(config).to include('Endpoint = corporate-vpn.company.com:51820')
-        expect(config).to include('AllowedIPs = 10.42.5.254/32')
+        expect(config).to include('AllowedIPs = 10.42.5.0/24')
         expect(config).to include('AllowedIPs = 10.0.0.0/8')
         expect(config).to include('AllowedIPs = 172.16.0.0/12')
         expect(config).to include('PersistentKeepalive = 20')

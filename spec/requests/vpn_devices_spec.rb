@@ -29,6 +29,7 @@ RSpec.describe 'VpnDevices' do
           wg_private_key: 'server_private_key',
           wg_public_key: 'server_public_key',
           wg_port: '51820',
+          wg_ip_range: '10.42.5.0/24',
           server_vpn_ip_address: '10.42.5.254'
         )
       end
@@ -58,6 +59,7 @@ RSpec.describe 'VpnDevices' do
           wg_private_key: 'server_private_key',
           wg_public_key: 'server_public_key',
           wg_port: '51820',
+          wg_ip_range: '10.42.5.0/24',
           server_vpn_ip_address: '10.42.5.254'
         )
       end
@@ -96,6 +98,7 @@ RSpec.describe 'VpnDevices' do
           wg_private_key: 'server_private_key',
           wg_public_key: 'server_public_key',
           wg_port: '51820',
+          wg_ip_range: '10.42.5.0/24',
           server_vpn_ip_address: '10.42.5.254'
         )
       end
@@ -116,6 +119,7 @@ RSpec.describe 'VpnDevices' do
           wg_private_key: 'server_private_key',
           wg_public_key: 'server_public_key',
           wg_port: '51820',
+          wg_ip_range: '10.42.5.0/24',
           server_vpn_ip_address: '10.42.5.254'
         )
       end

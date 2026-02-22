@@ -35,7 +35,7 @@ class WireguardConfigGenerator
       # Use wg_fqdn if available, otherwise fall back to wg_ip_address
       endpoint = vpn_configuration.wg_fqdn.present? ? vpn_configuration.wg_fqdn : vpn_configuration.wg_ip_address
       config += "Endpoint = #{endpoint}:#{vpn_configuration.wg_port}\n"
-      config += "AllowedIPs = #{vpn_configuration.server_vpn_ip_address}/32\n"
+      config += "AllowedIPs = #{vpn_subnet(vpn_configuration)}\n"
       vpn_configuration.network_addresses.each do |ip_address|
         config += "AllowedIPs = #{ip_address.network_address}\n"
       end
@@ -71,7 +71,9 @@ class WireguardConfigGenerator
       config = "[Interface]\n"
       config += "PrivateKey = #{vpn_configuration.wg_private_key}\n"
       config += "ListenPort = #{vpn_configuration.wg_port}\n"
-      config += "Address = #{vpn_configuration.server_vpn_ip_address}/24 \n\n"
+      config += "Address = #{vpn_configuration.server_vpn_ip_address}/24\n"
+      config += "PostUp = iptables -A FORWARD -i #{vpn_configuration.wg_interface_name} -o #{vpn_configuration.wg_interface_name} -j ACCEPT\n"
+      config += "PostDown = iptables -D FORWARD -i #{vpn_configuration.wg_interface_name} -o #{vpn_configuration.wg_interface_name} -j ACCEPT\n\n"
 
       VpnDevice.all.each do |client|
         config += generate_peer_config(client, vpn_configuration)
@@ -81,6 +83,11 @@ class WireguardConfigGenerator
     end
 
     private
+
+    def vpn_subnet(vpn_configuration)
+      base = vpn_configuration.wg_ip_range.split('/').first.split('.')[0..2].join('.')
+      "#{base}.0/24"
+    end
 
     def generate_peer_config(client, vpn_configuration)
       peer_config = "# User: #{client.user.name}, Device: #{client.description}\n"

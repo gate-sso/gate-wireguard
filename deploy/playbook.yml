@@ -282,6 +282,12 @@
         proto: udp
       tags: [wireguard]
 
+    - name: Allow WireGuard peer-to-peer forwarding via UFW
+      command: ufw route allow in on wg0 out on wg0
+      register: ufw_route_result
+      changed_when: "'Rule added' in ufw_route_result.stdout"
+      tags: [wireguard]
+
     - name: Enable UFW with default deny
       ufw:
         state: enabled

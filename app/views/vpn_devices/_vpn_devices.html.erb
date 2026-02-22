@@ -37,7 +37,7 @@
 
 <% if vpn_devices_require_updates.empty? %>
   <div class="p-3">
-    <%= link_to new_vpn_device_path, data: { turbo: false }, class: "btn btn-primary btn-sm" do %>
+    <%= button_to vpn_devices_path, class: "btn btn-primary btn-sm" do %>
       <i class="bi bi-plus-lg"></i> Add a VPN Device
     <% end %>
   </div>

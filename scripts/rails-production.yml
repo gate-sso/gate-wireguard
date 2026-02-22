@@ -51,40 +51,8 @@
         recurse: yes
 
     # ----------------------------------------------------------------
-    # 2. Install Bundler and app gems
-    # ----------------------------------------------------------------
-    - name: Install Bundler gem
-      community.general.gem:
-        name: bundler
-        state: present
-      environment:
-        GEM_HOME: "{{ gem_home }}"
-        PATH: "{{ gem_home }}/bin:{{ ansible_facts['env']['PATH'] }}"
-
-    - name: Run bundle install
-      ansible.builtin.command:
-        cmd: bundle install
-        chdir: "{{ app_path }}"
-      become_user: "{{ deploy_user }}"
-      environment:
-        GEM_HOME: "{{ gem_home }}"
-        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
-
-    # ----------------------------------------------------------------
-    # 3. Install Yarn dependencies
-    # ----------------------------------------------------------------
-    - name: Install Yarn dependencies
-      ansible.builtin.shell: |
-        export NVM_DIR="{{ home_path }}/.nvm"
-        . "$NVM_DIR/nvm.sh"
-        yarn install
-      args:
-        chdir: "{{ app_path }}"
-        executable: /bin/bash
-      become_user: "{{ deploy_user }}"
-
-    # ----------------------------------------------------------------
-    # 4. Deploy .env file and generate SECRET_KEY_BASE
+    # 2. Deploy .env file and generate SECRET_KEY_BASE
+    #    (must happen before bundle/yarn so env is available)
     # ----------------------------------------------------------------
     - name: Copy .env file to app directory
       ansible.builtin.copy:
@@ -105,15 +73,61 @@
         chmod 0600 {{ home_path }}/.secret_key_base
         chown {{ deploy_user }}:{{ deploy_user }} {{ home_path }}/.secret_key_base
       when: not secret_key_file.stat.exists
+      no_log: true
 
     - name: Read SECRET_KEY_BASE from persistent file
       ansible.builtin.command: cat {{ home_path }}/.secret_key_base
       register: secret_key_base_raw
       changed_when: false
+      no_log: true
 
     - name: Set SECRET_KEY_BASE fact
       ansible.builtin.set_fact:
         secret_key_base: "{{ secret_key_base_raw.stdout | trim }}"
+      no_log: true
+
+    - name: Append SECRET_KEY_BASE to .env file
+      ansible.builtin.lineinfile:
+        path: "{{ app_path }}/.env"
+        regexp: '^SECRET_KEY_BASE='
+        line: "SECRET_KEY_BASE={{ secret_key_base }}"
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0600"
+      no_log: true
+
+    # ----------------------------------------------------------------
+    # 3. Install Bundler and app gems
+    # ----------------------------------------------------------------
+    - name: Install Bundler gem
+      community.general.gem:
+        name: bundler
+        state: present
+      environment:
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    - name: Run bundle install
+      ansible.builtin.command:
+        cmd: bundle install
+        chdir: "{{ app_path }}"
+      become_user: "{{ deploy_user }}"
+      environment:
+        GEM_HOME: "{{ gem_home }}"
+        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+
+    # ----------------------------------------------------------------
+    # 4. Install Yarn dependencies
+    # ----------------------------------------------------------------
+    - name: Install Yarn dependencies
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        yarn install
+      args:
+        chdir: "{{ app_path }}"
+        executable: /bin/bash
+      become_user: "{{ deploy_user }}"
 
     # ----------------------------------------------------------------
     # 5. Create MySQL database and user
@@ -132,12 +146,14 @@
       ansible.builtin.shell: grep '^GATE_DATABASE_PASSWORD=' {{ app_path }}/.env | cut -d= -f2
       register: db_pass_raw
       changed_when: false
+      no_log: true
 
     - name: Set database facts
       ansible.builtin.set_fact:
         db_name: "{{ db_name_raw.stdout | trim }}"
         db_user: "{{ db_user_raw.stdout | trim }}"
         db_pass: "{{ db_pass_raw.stdout | trim }}"
+      no_log: true
 
     - name: Create MySQL database
       community.mysql.mysql_db:
@@ -153,6 +169,7 @@
         host: localhost
         state: present
         login_unix_socket: /var/run/mysqld/mysqld.sock
+      no_log: true
 
     # ----------------------------------------------------------------
     # 6. Run database migrations
@@ -205,8 +222,16 @@
           end
 
     # ----------------------------------------------------------------
-    # 9. Symlink config/wireguard to /etc/wireguard
+    # 9. Ensure log directory exists and symlink config/wireguard
     # ----------------------------------------------------------------
+    - name: Ensure log directory exists
+      ansible.builtin.file:
+        path: "{{ app_path }}/log"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+        mode: "0755"
+
     - name: Remove config/wireguard directory if it exists
       ansible.builtin.file:
         path: "{{ app_path }}/config/wireguard"
@@ -222,7 +247,7 @@
         force: yes
 
     # ----------------------------------------------------------------
-    # 10. Create systemd service
+    # 10. Create systemd service and restart Puma
     # ----------------------------------------------------------------
     - name: Create systemd service for Puma
       ansible.builtin.copy:
@@ -239,7 +264,6 @@
           Group={{ deploy_user }}
           WorkingDirectory={{ app_path }}
           EnvironmentFile={{ app_path }}/.env
-          Environment=SECRET_KEY_BASE={{ secret_key_base }}
           Environment=RAILS_ENV=production
           Environment=GEM_HOME={{ gem_home }}
           Environment=PATH={{ gem_home }}/bin:/usr/local/bin:/usr/bin:/bin
@@ -252,18 +276,10 @@
 
           [Install]
           WantedBy=multi-user.target
-      notify: Restart Puma
 
-    - name: Enable and start Puma
+    - name: Enable and restart Puma
       ansible.builtin.systemd:
         name: gate_wireguard
         enabled: yes
-        state: started
-        daemon_reload: yes
-
-  handlers:
-    - name: Restart Puma
-      ansible.builtin.systemd:
-        name: gate_wireguard
         state: restarted
         daemon_reload: yes

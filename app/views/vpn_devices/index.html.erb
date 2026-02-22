@@ -9,7 +9,7 @@
     <% end %>
   </div>
   <% if @user_devices_only && @vpn_devices.any? %>
-    <%= link_to new_vpn_device_path, class: 'btn btn-primary btn-sm' do %>
+    <%= button_to vpn_devices_path, class: 'btn btn-primary btn-sm' do %>
       <i class="bi bi-plus-lg"></i> Add Device
     <% end %>
   <% end %>
@@ -72,7 +72,7 @@
         <% end %>
       </p>
       <% if @user_devices_only %>
-        <%= link_to new_vpn_device_path, class: 'btn btn-primary' do %>
+        <%= button_to vpn_devices_path, class: 'btn btn-primary' do %>
           <i class="bi bi-plus-lg"></i> Create Your First Device
         <% end %>
       <% end %>

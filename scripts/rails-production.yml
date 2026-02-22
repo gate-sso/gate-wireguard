@@ -43,6 +43,17 @@
         accept_hostkey: yes
       become_user: "{{ deploy_user }}"
 
+    - name: Create required tmp directories
+      ansible.builtin.file:
+        path: "{{ app_path }}/{{ item }}"
+        state: directory
+        owner: "{{ deploy_user }}"
+        group: "{{ deploy_user }}"
+      loop:
+        - tmp/pids
+        - tmp/cache
+        - tmp/sockets
+
     - name: Ensure deploy user owns application directory
       ansible.builtin.file:
         path: "{{ app_path }}"

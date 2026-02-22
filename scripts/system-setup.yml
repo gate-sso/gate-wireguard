@@ -25,6 +25,7 @@
         password: "{{ deploy_password | password_hash('sha512') }}"
         groups: sudo
         append: yes
+      no_log: true
 
     - name: Grant passwordless sudo to deploy user
       ansible.builtin.copy:
@@ -166,6 +167,18 @@
       become_user: "{{ deploy_user }}"
       when: not nvm_stat.stat.exists
 
+    - name: Check if Node.js {{ node_version }} is installed
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        node --version
+      become_user: "{{ deploy_user }}"
+      args:
+        executable: /bin/bash
+      register: node_check
+      changed_when: false
+      failed_when: false
+
     - name: Install Node.js {{ node_version }}
       ansible.builtin.shell: |
         export NVM_DIR="{{ home_path }}/.nvm"
@@ -174,6 +187,19 @@
       become_user: "{{ deploy_user }}"
       args:
         executable: /bin/bash
+      when: node_check.rc != 0 or node_version not in (node_check.stdout | default(''))
+
+    - name: Check if Yarn is installed
+      ansible.builtin.shell: |
+        export NVM_DIR="{{ home_path }}/.nvm"
+        . "$NVM_DIR/nvm.sh"
+        yarn --version
+      become_user: "{{ deploy_user }}"
+      args:
+        executable: /bin/bash
+      register: yarn_check
+      changed_when: false
+      failed_when: false
 
     - name: Install Yarn globally
       ansible.builtin.shell: |
@@ -183,6 +209,7 @@
       become_user: "{{ deploy_user }}"
       args:
         executable: /bin/bash
+      when: yarn_check.rc != 0
 
     # ----------------------------------------------------------------
     # 7. Install MySQL server
@@ -230,7 +257,7 @@
         state: directory
         owner: root
         group: "{{ wg_conf_group }}"
-        mode: "0775"
+        mode: "0750"
 
     - name: Deploy WireGuard watcher script
       ansible.builtin.copy:
@@ -274,7 +301,6 @@
             fi
             log "Reload complete."
           done
-      notify: Restart WireGuard watcher
 
     - name: Deploy WireGuard watcher systemd service
       ansible.builtin.copy:
@@ -296,13 +322,12 @@
 
           [Install]
           WantedBy=multi-user.target
-      notify: Restart WireGuard watcher
 
-    - name: Enable and start WireGuard watcher
+    - name: Enable and restart WireGuard watcher
       ansible.builtin.systemd:
         name: wireguard-watcher
         enabled: yes
-        state: started
+        state: restarted
         daemon_reload: yes
 
     # ----------------------------------------------------------------
@@ -370,10 +395,3 @@
     - name: Enable UFW
       community.general.ufw:
         state: enabled
-
-  handlers:
-    - name: Restart WireGuard watcher
-      ansible.builtin.systemd:
-        name: wireguard-watcher
-        state: restarted
-        daemon_reload: yes

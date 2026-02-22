@@ -46,6 +46,7 @@ rsync -avz --delete \
   --exclude '.env' \
   --exclude 'config/master.key' \
   --exclude 'config/credentials.yml.enc' \
+  --exclude 'config/wireguard' \
   --exclude 'node_modules/' \
   --exclude 'public/assets/' \
   "${REPO_DIR}/" "${HOST}:${REMOTE_PATH}/"

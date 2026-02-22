@@ -14,7 +14,7 @@ corepack enable
 
 
 #need to source appropriate shell rc file
-if [ -n "$BASH_VERSION" ]; 
+if [ -n "$BASH_VERSION" ]; then
     echo 'export GEM_HOME=~/.ruby/' >> ~/.bashrc
     echo 'export PATH="$PATH:~/.ruby/bin"' >> ~/.bashrc
     source ~/.bashrc

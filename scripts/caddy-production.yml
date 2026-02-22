@@ -160,11 +160,11 @@
     # ----------------------------------------------------------------
     # 8. Enable and start Caddy
     # ----------------------------------------------------------------
-    - name: Enable and start Caddy
+    - name: Enable and restart Caddy
       ansible.builtin.systemd:
         name: caddy
         enabled: yes
-        state: started
+        state: restarted
         daemon_reload: yes
 
   handlers:

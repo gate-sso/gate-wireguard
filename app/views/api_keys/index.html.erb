@@ -1,50 +1,69 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2>API Keys</h2>
-  <%= link_to '+ New API Key', new_api_key_path, class: 'btn btn-primary' %>
+<div class="page-header">
+  <div>
+    <h3>API Keys</h3>
+    <div class="page-header-subtitle"><%= @api_keys.count %> keys</div>
+  </div>
+  <%= link_to new_api_key_path, class: 'btn btn-primary btn-sm' do %>
+    <i class="bi bi-plus-lg"></i> New API Key
+  <% end %>
 </div>
 
 <% if flash[:raw_token] %>
-  <div class="alert alert-warning">
-    <strong>New API Token (copy now!):</strong>
+  <div class="alert alert-warning alert-dismissible fade show">
+    <strong><i class="bi bi-exclamation-triangle"></i> New API Token (copy now!)</strong>
     <code class="d-block mt-2 p-2 bg-dark text-light rounded" style="word-break: break-all;"><%= flash[:raw_token] %></code>
     <small class="text-muted">This token will not be shown again.</small>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
 <% end %>
 
-<table class="table table-dark table-hover">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Status</th>
-      <th>Last Used</th>
-      <th>Created</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @api_keys.each do |key| %>
-      <tr>
-        <td><%= key.name %></td>
-        <td>
-          <% if key.active? %>
-            <span class="badge bg-success">Active</span>
-          <% else %>
-            <span class="badge bg-danger">Revoked</span>
+<div class="card">
+  <% if @api_keys.any? %>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Last Used</th>
+            <th>Created</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @api_keys.each do |key| %>
+            <tr>
+              <td><%= key.name %></td>
+              <td>
+                <% if key.active? %>
+                  <span class="badge bg-success">Active</span>
+                <% else %>
+                  <span class="badge bg-danger">Revoked</span>
+                <% end %>
+              </td>
+              <td><%= key.last_used_at&.strftime('%Y-%m-%d %H:%M') || 'Never' %></td>
+              <td><%= key.created_at.strftime('%Y-%m-%d %H:%M') %></td>
+              <td class="text-end">
+                <% if key.active? %>
+                  <%= button_to api_key_path(key), method: :delete, class: 'btn btn-outline-danger btn-sm',
+                      data: { turbo_confirm: 'Revoke this API key?' } do %>
+                    <i class="bi bi-x-circle"></i> Revoke
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
           <% end %>
-        </td>
-        <td><%= key.last_used_at&.strftime('%Y-%m-%d %H:%M') || 'Never' %></td>
-        <td><%= key.created_at.strftime('%Y-%m-%d %H:%M') %></td>
-        <td>
-          <% if key.active? %>
-            <%= button_to 'Revoke', api_key_path(key), method: :delete, class: 'btn btn-outline-danger btn-sm',
-                data: { turbo_confirm: 'Revoke this API key?' } %>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<% if @api_keys.empty? %>
-  <p class="text-muted">No API keys yet. Create one to allow ClawStation to manage WireGuard peers.</p>
-<% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <i class="bi bi-key"></i>
+      <h5>No API keys yet</h5>
+      <p>Create an API key to allow external services like ClawStation to manage WireGuard peers.</p>
+      <%= link_to new_api_key_path, class: 'btn btn-primary' do %>
+        <i class="bi bi-plus-lg"></i> Create Your First API Key
+      <% end %>
+    </div>
+  <% end %>
+</div>

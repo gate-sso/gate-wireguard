@@ -116,7 +116,7 @@
 
         - name: Configure Ruby
           ansible.builtin.command:
-            cmd: ./configure --disable-install-rdoc --enable-yjit --with-libffi-dir=/usr/lib/x86_64-linux-gnu
+            cmd: ./configure --disable-install-rdoc --enable-yjit
             chdir: "/tmp/ruby-{{ ruby_version }}"
           environment:
             PATH: "{{ home_path }}/.cargo/bin:{{ ansible_facts['env']['PATH'] }}"

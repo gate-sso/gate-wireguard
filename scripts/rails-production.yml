@@ -204,25 +204,7 @@
         PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
     # ----------------------------------------------------------------
-    # 8. Configure Puma
-    # ----------------------------------------------------------------
-    - name: Create Puma configuration file
-      ansible.builtin.copy:
-        dest: "{{ app_path }}/config/puma.rb"
-        owner: "{{ deploy_user }}"
-        content: |
-          workers ENV.fetch("WEB_CONCURRENCY") { 2 }
-          threads_count = ENV.fetch("RAILS_MAX_THREADS") { 5 }
-          threads threads_count, threads_count
-          preload_app!
-          port ENV.fetch("PORT") { {{ puma_port }} }
-          environment ENV.fetch("RAILS_ENV") { "production" }
-          on_worker_boot do
-            ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
-          end
-
-    # ----------------------------------------------------------------
-    # 9. Ensure log directory exists and symlink config/wireguard
+    # 8. Ensure log directory exists and symlink config/wireguard
     # ----------------------------------------------------------------
     - name: Ensure log directory exists
       ansible.builtin.file:

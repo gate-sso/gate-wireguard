@@ -1,6 +1,16 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  # API endpoints for ClawStation integration
+  namespace :api do
+    namespace :v1 do
+      resources :peers, only: %i[index show create destroy]
+    end
+  end
+
+  # API key management (admin only)
+  resources :api_keys, only: %i[index new create destroy]
+
   resources :configurations
   resources :vpn_devices
   get 'my_devices', to: 'vpn_devices#my_devices', as: 'my_devices'

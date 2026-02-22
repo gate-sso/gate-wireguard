@@ -10,68 +10,94 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_18_132627) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_000002) do
+  create_table "api_keys", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_used_at"
+    t.string "name", limit: 100, null: false
+    t.datetime "revoked_at"
+    t.string "token_digest", limit: 64, null: false
+    t.datetime "updated_at", null: false
+    t.index ["revoked_at"], name: "index_api_keys_on_revoked_at"
+    t.index ["token_digest"], name: "index_api_keys_on_token_digest", unique: true
+  end
+
   create_table "dns_records", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
     t.string "host_name"
     t.string "ip_address"
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id"
   end
 
   create_table "ip_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "vpn_device_id", null: false
-    t.string "ip_address"
     t.datetime "created_at", null: false
+    t.string "ip_address"
     t.datetime "updated_at", null: false
+    t.bigint "vpn_device_id", null: false
     t.index ["vpn_device_id"], name: "index_ip_allocations_on_vpn_device_id"
   end
 
   create_table "network_addresses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "vpn_configuration_id", null: false
-    t.string "network_address"
     t.datetime "created_at", null: false
+    t.string "network_address"
     t.datetime "updated_at", null: false
+    t.bigint "vpn_configuration_id", null: false
     t.index ["vpn_configuration_id"], name: "index_network_addresses_on_vpn_configuration_id"
   end
 
+  create_table "peers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "dns"
+    t.string "name", limit: 100, null: false
+    t.text "private_key", null: false
+    t.string "public_key", null: false
+    t.datetime "removed_at"
+    t.datetime "updated_at", null: false
+    t.string "vpn_ip", limit: 45, null: false
+    t.index ["name"], name: "index_peers_on_name", unique: true
+    t.index ["public_key"], name: "index_peers_on_public_key", unique: true
+    t.index ["removed_at"], name: "index_peers_on_removed_at"
+    t.index ["vpn_ip"], name: "index_peers_on_vpn_ip", unique: true
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "provider"
-    t.string "uid"
+    t.boolean "active", default: false, null: false
+    t.boolean "admin"
+    t.datetime "created_at", null: false
     t.string "email"
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "admin"
     t.text "profile_picture_url"
-    t.boolean "active", default: false, null: false
+    t.string "provider"
+    t.string "uid"
+    t.datetime "updated_at", null: false
   end
 
   create_table "vpn_configurations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "wg_private_key"
-    t.string "wg_public_key"
-    t.string "wg_ip_address"
-    t.string "wg_port"
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "dns_servers"
-    t.string "wg_ip_range"
-    t.string "wg_interface_name"
-    t.string "wg_keep_alive"
-    t.string "wg_listen_address"
     t.string "server_vpn_ip_address"
+    t.datetime "updated_at", null: false
     t.string "wg_forward_interface"
     t.string "wg_fqdn"
+    t.string "wg_interface_name"
+    t.string "wg_ip_address"
+    t.string "wg_ip_range"
+    t.string "wg_keep_alive"
+    t.string "wg_listen_address"
+    t.string "wg_port"
+    t.string "wg_private_key"
+    t.string "wg_public_key"
   end
 
   create_table "vpn_devices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
     t.string "description"
+    t.boolean "node"
     t.string "private_key"
     t.string "public_key"
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "node"
+    t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_vpn_devices_on_user_id"
   end
 

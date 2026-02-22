@@ -36,6 +36,11 @@
               <i class="bi bi-shield-check"></i><span>Backup</span>
             </a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path.start_with?('/api_keys') %>" href="/api_keys">
+              <i class="bi bi-key-fill"></i><span>API Keys</span>
+            </a>
+          </li>
         <% elsif current_user %>
           <li class="nav-item">
             <a class="nav-link d-flex align-items-center gap-2 <%= 'active' if request.path == '/my_devices' %>" href="/my_devices">

@@ -24,7 +24,10 @@
       "Bash(npm exec:*)",
       "Bash(curl:*)",
       "Bash(dig:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }

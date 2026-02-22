@@ -1,22 +1,26 @@
-<div class="page-header">
-  <div>
-    <h3>New API Key</h3>
-    <div class="page-header-subtitle">Create a key for external API access</div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-body">
-    <%= form_with(model: @api_key, url: api_keys_path) do |f| %>
-      <div class="mb-3">
-        <%= f.label :name, 'Key Name', class: 'form-label' %>
-        <%= f.text_field :name, class: 'form-control', placeholder: 'e.g. ClawStation Production', autofocus: true, style: 'max-width: 350px;' %>
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="page-header">
+      <div>
+        <h3>New API Key</h3>
+        <div class="page-header-subtitle">Create a key for external API access</div>
       </div>
+    </div>
 
-      <div class="d-flex gap-2">
-        <%= f.submit 'Create API Key', class: 'btn btn-primary' %>
-        <%= link_to 'Cancel', api_keys_path, class: 'btn btn-outline-secondary' %>
+    <div class="card">
+      <div class="card-body">
+        <%= form_with(model: @api_key, url: api_keys_path) do |f| %>
+          <div class="mb-3">
+            <%= f.label :name, 'Key Name', class: 'form-label' %>
+            <%= f.text_field :name, class: 'form-control', placeholder: 'e.g. ClawStation Production', autofocus: true %>
+          </div>
+
+          <div class="d-flex gap-2">
+            <%= f.submit 'Create API Key', class: 'btn btn-primary' %>
+            <%= link_to 'Cancel', api_keys_path, class: 'btn btn-outline-secondary' %>
+          </div>
+        <% end %>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>

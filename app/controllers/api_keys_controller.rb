@@ -8,10 +8,6 @@ class ApiKeysController < ApplicationController
     @api_keys = ApiKey.order(created_at: :desc)
   end
 
-  def new
-    @api_key = ApiKey.new
-  end
-
   def create
     @api_key = ApiKey.generate(name: params.dig(:api_key, :name).presence || 'Unnamed key')
 
@@ -19,7 +15,7 @@ class ApiKeysController < ApplicationController
       flash[:raw_token] = @api_key.raw_token
       redirect_to api_keys_path, notice: 'API key created. Copy the token now - it will not be shown again.'
     else
-      render :new, status: :unprocessable_content
+      redirect_to api_keys_path, alert: 'Failed to create API key.'
     end
   end
 

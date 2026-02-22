@@ -68,15 +68,6 @@ RSpec.describe 'ApiKeys' do
     end
   end
 
-  describe 'GET /api_keys/new' do
-    it 'renders the new key form for admins' do
-      sign_in(admin_user)
-      get '/api_keys/new'
-
-      expect(response).to have_http_status(:ok)
-    end
-  end
-
   describe 'POST /api_keys' do
     it 'creates a new API key and redirects' do
       sign_in(admin_user)

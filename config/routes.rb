@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   end
 
   # API key management (admin only)
-  resources :api_keys, only: %i[index new create destroy]
+  resources :api_keys, only: %i[index create destroy]
 
   resources :configurations
   resources :vpn_devices

@@ -514,18 +514,70 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 // ============================================================
-// QR code container (keep white bg in dark mode)
+// QR code modal (keep white bg in dark mode for SVG)
 // ============================================================
 .qr-container {
   background: #fff;
   padding: 1rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
   display: inline-block;
 }
 
 [data-bs-theme="dark"] .qr-container {
   background: #fff;
+}
+
+// ============================================================
+// Device list items (compact listing)
+// ============================================================
+.device-item {
+  border-bottom: 1px solid var(--color-border);
+  &:last-child { border-bottom: none; }
+}
+
+.device-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+
+.device-icon {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+
+.device-item-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0 1rem 0.75rem;
+}
+
+.device-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.device-detail-label {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 768px) {
+  .device-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .device-item-body {
+    flex-direction: column;
+    gap: 0.375rem;
+  }
 }
 
 // ============================================================

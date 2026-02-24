@@ -7,6 +7,8 @@
   vars:
     app_user: gate
     app_dir: /home/gate/gate-wireguard
+    backup_dir: /home/gate/backups
+    backup_keep: 5
     ruby_version: "3.3.4"
     node_major_version: "20"
     wg_conf_group: wg_conf
@@ -18,14 +20,9 @@
       systemd:
         daemon_reload: yes
 
-    - name: restart puma
+    - name: reload caddy
       systemd:
-        name: gate-wireguard
-        state: restarted
-
-    - name: reload nginx
-      systemd:
-        name: nginx
+        name: caddy
         state: reloaded
 
     - name: restart wireguard-watcher
@@ -59,7 +56,6 @@
           - libffi-dev
           - libmysqlclient-dev
           - libvips
-          - nginx
           - redis-server
           - ufw
           - inotify-tools
@@ -296,8 +292,269 @@
       tags: [wireguard]
 
     # =========================================================================
-    # Application code
+    # Caddy (reverse proxy with automatic HTTPS)
     # =========================================================================
+    - name: Install prerequisites for Caddy repo
+      apt:
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+          - curl
+        state: present
+        update_cache: yes
+      tags: [caddy]
+
+    - name: Add Caddy GPG key
+      shell: |
+        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+      tags: [caddy]
+
+    - name: Add Caddy apt repository
+      copy:
+        dest: /etc/apt/sources.list.d/caddy-stable.list
+        content: "deb [signed-by=/usr/share/keyrings/caddy-stable-archive-keyring.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main\n"
+        mode: "0644"
+      tags: [caddy]
+
+    - name: Install Caddy
+      apt:
+        name: caddy
+        state: present
+        update_cache: yes
+      tags: [caddy]
+
+    - name: Create Caddy log directory
+      file:
+        path: /var/log/caddy
+        state: directory
+        owner: caddy
+        group: caddy
+        mode: "0755"
+      tags: [caddy]
+
+    - name: Create Caddy conf.d directory
+      file:
+        path: /etc/caddy/conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+      tags: [caddy]
+
+    - name: Deploy main Caddyfile
+      copy:
+        dest: /etc/caddy/Caddyfile
+        content: |
+          {
+              log {
+                  output file /var/log/caddy/caddy.log {
+                      roll_size 100MiB
+                      roll_keep 5
+                      roll_keep_for 720h
+                  }
+                  level INFO
+              }
+          }
+
+          import /etc/caddy/conf.d/*.caddy
+        owner: root
+        group: root
+        mode: "0644"
+      notify: reload caddy
+      tags: [caddy]
+
+    - name: Deploy Caddy site config
+      copy:
+        dest: "/etc/caddy/conf.d/{{ domain }}.caddy"
+        content: |
+          {{ domain }} {
+              reverse_proxy localhost:{{ puma_port }}
+
+              log {
+                  output file /var/log/caddy/{{ domain }}.access.log {
+                      roll_size 100MiB
+                      roll_keep 5
+                      roll_keep_for 720h
+                  }
+                  format json
+                  level DEBUG
+              }
+          }
+        owner: root
+        group: root
+        mode: "0644"
+      notify: reload caddy
+      tags: [caddy, update]
+
+    - name: Deploy logrotate config for Caddy
+      copy:
+        dest: /etc/logrotate.d/caddy
+        content: |
+          /var/log/caddy/*.log {
+              daily
+              missingok
+              rotate 14
+              compress
+              delaycompress
+              notifempty
+              create 0644 caddy caddy
+              sharedscripts
+              postrotate
+                  systemctl reload caddy > /dev/null 2>&1 || true
+              endscript
+          }
+        owner: root
+        group: root
+        mode: "0644"
+      tags: [caddy]
+
+    - name: Enable and start Caddy
+      systemd:
+        name: caddy
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      tags: [caddy]
+
+    # =========================================================================
+    # Database setup (initial install only)
+    # =========================================================================
+    - name: Install MySQL packages
+      apt:
+        name:
+          - mysql-server
+          - mysql-client
+          - python3-mysqldb
+        state: present
+      tags: [db]
+
+    - name: Start and enable MySQL
+      systemd:
+        name: mysql
+        enabled: yes
+        state: started
+      tags: [db]
+
+    - name: Create MySQL database
+      mysql_db:
+        name: "{{ gate_database }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      tags: [db]
+
+    - name: Create MySQL user
+      mysql_user:
+        name: "{{ gate_database_user }}"
+        password: "{{ gate_database_password }}"
+        priv: "{{ gate_database }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      tags: [db]
+
+    # =========================================================================
+    # Configuration (initial install only)
+    # =========================================================================
+    - name: Deploy puma systemd unit
+      template:
+        src: templates/gate-wireguard.service.j2
+        dest: /etc/systemd/system/gate-wireguard.service
+      notify: reload systemd
+      tags: [config]
+
+    - name: Deploy sudoers file
+      template:
+        src: templates/sudoers-gate.j2
+        dest: /etc/sudoers.d/gate-wireguard
+        mode: "0440"
+        validate: "visudo -cf %s"
+      tags: [config]
+
+    - name: Deploy logrotate configuration
+      copy:
+        content: |
+          {{ app_dir }}/log/*.log {
+            daily
+            missingok
+            rotate 14
+            compress
+            delaycompress
+            notifempty
+            copytruncate
+          }
+        dest: /etc/logrotate.d/gate-wireguard
+      tags: [config]
+
+    - name: Enable and start Redis
+      systemd:
+        name: redis-server
+        enabled: yes
+        state: started
+        daemon_reload: yes
+      tags: [config]
+
+    # =========================================================================
+    # DEPLOYMENT (update tag) — follows strict ordering:
+    #   1. Stop web (Puma)
+    #   2. Backup rotation + mysqldump
+    #   3. Clone/pull repo
+    #   4. Post-clone (bundle, .env, assets, caches)
+    #   5. Database migrate
+    #   6. Start Puma — wait for port, verify stable
+    #   7. Reload Caddy (only if config changed — handled by handler)
+    # =========================================================================
+
+    # ----- 1. Stop web — disable + kill + free port -------------------------
+    - name: Stop Puma
+      systemd:
+        name: gate-wireguard
+        state: stopped
+      ignore_errors: yes
+      tags: [update]
+
+    - name: Kill orphan processes on port {{ puma_port }}
+      shell: fuser -k {{ puma_port }}/tcp || true
+      changed_when: false
+      tags: [update]
+
+    - name: Verify port {{ puma_port }} is free
+      shell: "! ss -tlnp | grep -q ':{{ puma_port }} '"
+      changed_when: false
+      tags: [update]
+
+    # ----- 2. Backup rotation + mysqldump -----------------------------------
+    - name: Create backup directory
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0750"
+      tags: [update]
+
+    - name: Dump MySQL database
+      shell: >
+        mysqldump --single-transaction
+        {{ gate_database }}
+        > {{ backup_dir }}/{{ gate_database }}_$(date +%Y%m%d_%H%M%S).sql
+      args:
+        executable: /bin/bash
+      register: db_backup
+      tags: [update]
+
+    - name: Rotate old backups (keep {{ backup_keep }} most recent)
+      shell: |
+        cd {{ backup_dir }}
+        ls -1t *.sql 2>/dev/null | tail -n +{{ backup_keep | int + 1 }} | xargs -r rm -f
+      args:
+        executable: /bin/bash
+      changed_when: false
+      tags: [update]
+
+    # ----- 3. Clone / pull repo ---------------------------------------------
     - name: Generate SSH key for app user
       become_user: "{{ app_user }}"
       shell: ssh-keygen -t ed25519 -f /home/{{ app_user }}/.ssh/id_ed25519 -N "" -C "gate@{{ inventory_hostname }}"
@@ -325,7 +582,7 @@
         path: /home/{{ app_user }}/.ssh/known_hosts
       tags: [app, update]
 
-    - name: Clone application repository
+    - name: Pull latest code
       become_user: "{{ app_user }}"
       git:
         repo: "{{ git_repo }}"
@@ -335,6 +592,7 @@
         accept_hostkey: yes
       tags: [app, update]
 
+    # ----- 4. Post-clone — bundle, .env, assets, caches --------------------
     - name: Create application directories
       file:
         path: "{{ app_dir }}/{{ item }}"
@@ -373,6 +631,15 @@
       changed_when: "'YN0000' in yarn_result.stdout"
       tags: [app, update]
 
+    - name: Deploy .env file
+      template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0600"
+      tags: [config, update]
+
     - name: Precompile assets
       become_user: "{{ app_user }}"
       shell: |
@@ -381,135 +648,20 @@
         SECRET_KEY_BASE_DUMMY=1 RAILS_ENV=production bundle exec rails assets:precompile
       args:
         chdir: "{{ app_dir }}"
-      notify: restart puma
       tags: [app, update]
 
-    # =========================================================================
-    # Configuration
-    # =========================================================================
-    - name: Check if SSL certificate exists
-      stat:
-        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
-      register: ssl_cert
-      tags: [config, update]
+    - name: Clear Rails cache
+      become_user: "{{ app_user }}"
+      shell: |
+        export PATH="/home/{{ app_user }}/.rbenv/bin:$PATH"
+        eval "$(rbenv init -)"
+        RAILS_ENV=production bundle exec rails tmp:clear
+      args:
+        chdir: "{{ app_dir }}"
+      changed_when: false
+      tags: [update]
 
-    - name: Set SSL cert fact
-      set_fact:
-        ssl_cert_exists: "{{ ssl_cert.stat.exists }}"
-      tags: [config, update]
-
-    - name: Deploy .env file
-      template:
-        src: templates/env.j2
-        dest: "{{ app_dir }}/.env"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: "0600"
-      notify: restart puma
-      tags: [config, update]
-
-    - name: Deploy nginx configuration
-      template:
-        src: templates/nginx-gate.conf.j2
-        dest: /etc/nginx/sites-available/gate-wireguard
-      notify: reload nginx
-      tags: [config]
-
-    - name: Enable nginx site
-      file:
-        src: /etc/nginx/sites-available/gate-wireguard
-        dest: /etc/nginx/sites-enabled/gate-wireguard
-        state: link
-      notify: reload nginx
-      tags: [config]
-
-    - name: Remove default nginx site
-      file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
-      notify: reload nginx
-      tags: [config]
-
-    - name: Deploy puma systemd unit
-      template:
-        src: templates/gate-wireguard.service.j2
-        dest: /etc/systemd/system/gate-wireguard.service
-      notify:
-        - reload systemd
-        - restart puma
-      tags: [config]
-
-    - name: Deploy sudoers file
-      template:
-        src: templates/sudoers-gate.j2
-        dest: /etc/sudoers.d/gate-wireguard
-        mode: "0440"
-        validate: "visudo -cf %s"
-      tags: [config]
-
-    - name: Deploy logrotate configuration
-      copy:
-        content: |
-          {{ app_dir }}/log/*.log {
-            daily
-            missingok
-            rotate 14
-            compress
-            delaycompress
-            notifempty
-            copytruncate
-          }
-        dest: /etc/logrotate.d/gate-wireguard
-      tags: [config]
-
-    - name: Enable and start services
-      systemd:
-        name: "{{ item }}"
-        enabled: yes
-        state: started
-        daemon_reload: yes
-      loop:
-        - redis-server
-        - nginx
-        - gate-wireguard
-      tags: [config]
-
-    # =========================================================================
-    # Database
-    # =========================================================================
-    - name: Install MySQL packages
-      apt:
-        name:
-          - mysql-server
-          - mysql-client
-          - python3-mysqldb
-        state: present
-      tags: [db]
-
-    - name: Start and enable MySQL
-      systemd:
-        name: mysql
-        enabled: yes
-        state: started
-      tags: [db]
-
-    - name: Create MySQL database
-      mysql_db:
-        name: "{{ gate_database }}"
-        state: present
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-      tags: [db]
-
-    - name: Create MySQL user
-      mysql_user:
-        name: "{{ gate_database_user }}"
-        password: "{{ gate_database_password }}"
-        priv: "{{ gate_database }}.*:ALL"
-        host: localhost
-        state: present
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-      tags: [db]
-
+    # ----- 5. Database — ensure DB exists + migrate -------------------------
     - name: Run database migrations
       become_user: "{{ app_user }}"
       shell: |
@@ -522,50 +674,35 @@
       changed_when: "'Migrating' in db_migrate.stdout or 'Created database' in db_migrate.stdout"
       tags: [db, update]
 
-    # =========================================================================
-    # SSL (Let's Encrypt)
-    # =========================================================================
-    - name: Install certbot
-      apt:
-        name:
-          - certbot
-          - python3-certbot-nginx
-        state: present
-      tags: [ssl]
-
-    - name: Check if SSL certificate already exists
-      stat:
-        path: /etc/letsencrypt/live/{{ domain }}/fullchain.pem
-      register: ssl_cert_check
-      tags: [ssl]
-
-    - name: Obtain SSL certificate
-      shell: certbot --nginx -d {{ domain }} --non-interactive --agree-tos --register-unsafely-without-email
-      when: not ssl_cert_check.stat.exists
-      ignore_errors: yes
-      register: certbot_result
-      tags: [ssl]
-
-    - name: Show certbot failure message
-      debug:
-        msg: >
-          SSL certificate could not be obtained. This is usually because DNS is not yet pointing
-          to this server. The app will work on HTTP for now. Once DNS is configured, re-run with:
-          ./deploy/install_gate.sh {{ inventory_hostname }} --tags ssl
-      when: certbot_result is defined and certbot_result is failed
-      tags: [ssl]
-
-    - name: Enable certbot auto-renewal timer
+    # ----- 6. Start Puma — wait for port, verify stable ---------------------
+    - name: Reload systemd units
       systemd:
-        name: certbot.timer
+        daemon_reload: yes
+      tags: [update]
+
+    - name: Start Puma
+      systemd:
+        name: gate-wireguard
         enabled: yes
         state: started
-      tags: [ssl]
+      tags: [update]
 
-    - name: Update nginx config after SSL
-      template:
-        src: templates/nginx-gate.conf.j2
-        dest: /etc/nginx/sites-available/gate-wireguard
-      notify: reload nginx
-      when: ssl_cert_check.stat.exists or (certbot_result is defined and certbot_result is succeeded)
-      tags: [ssl]
+    - name: Wait for Puma to listen on port {{ puma_port }}
+      wait_for:
+        port: "{{ puma_port }}"
+        host: 127.0.0.1
+        delay: 2
+        timeout: 30
+      tags: [update]
+
+    - name: Verify Puma is stable (still running after 5s)
+      shell: sleep 5 && systemctl is-active gate-wireguard
+      register: puma_stable
+      changed_when: false
+      failed_when: puma_stable.stdout != "active"
+      tags: [update]
+
+    # ----- 7. Reload Caddy (only if config changed — via handler) -----------
+    # The "Deploy Caddy site config" task above (tagged [caddy, update]) uses
+    # notify: reload caddy — so Caddy only reloads when the config file
+    # actually changes. Handlers fire at end of play, after Puma is up.

@@ -43,59 +43,47 @@
   </div>
 <% end %>
 
-<% vpn_devices.each do |vpn_device| %>
-  <% if vpn_device.description? %>
-    <div class="card mb-3 mx-3" <%= "data-controller=qr-code data-qr-code-url-value=#{vpn_device_qr_code_path(vpn_device)}".html_safe unless vpn_device.node %>>
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <span><%= vpn_device.description %><% if vpn_device.node %> <span class="badge bg-secondary">Node</span><% end %></span>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-8">
-            <div class="config-row">
-              <div class="config-label"><i class="bi bi-server text-primary"></i> VPN Server IP</div>
-              <div class="config-value"><code><%= @vpn_configuration.wg_ip_address %></code></div>
-            </div>
-            <div class="config-row">
-              <div class="config-label"><i class="bi bi-key-fill text-warning"></i> Private Key</div>
-              <div class="config-value"><code class="font-mono" style="font-size: 0.75rem; word-break: break-all;"><%= vpn_device.private_key %></code></div>
-            </div>
-            <div class="config-row">
-              <div class="config-label"><i class="bi bi-shield-check text-success"></i> Public Key</div>
-              <div class="config-value"><code class="font-mono" style="font-size: 0.75rem; word-break: break-all;"><%= vpn_device.public_key %></code></div>
-            </div>
-            <div class="config-row">
-              <div class="config-label"><i class="bi bi-router-fill text-info"></i> Device IP</div>
-              <div class="config-value"><code><%= vpn_device.ip_allocation.ip_address %></code></div>
-            </div>
-            <div class="config-row">
-              <div class="config-label"><i class="bi bi-diagram-3 text-secondary"></i> Networks</div>
-              <div class="config-value"><%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></div>
-            </div>
-
-            <div class="mt-3 d-flex gap-2">
-              <%= link_to download_config_path(vpn_device.id), class: "btn btn-primary btn-sm" do %>
-                <i class="bi bi-download"></i> Download
-              <% end %>
-              <% unless vpn_device.node %>
-                <button class="btn btn-outline-secondary btn-sm"
-                        data-qr-code-target="button"
-                        data-action="click->qr-code#toggle">
-                  <i class="bi bi-qr-code"></i> Show QR
-                </button>
-                <%= link_to vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger btn-sm" do %>
-                  <i class="bi bi-trash3"></i> Remove
-                <% end %>
-              <% end %>
-            </div>
-          </div>
-          <% unless vpn_device.node %>
-            <div class="col-md-4 text-center py-2 d-none" data-qr-code-target="container">
-              <div class="qr-container"></div>
-            </div>
+<% vpn_devices.select(&:description?).each do |vpn_device| %>
+  <div class="device-item" <%= "data-controller=qr-code data-qr-code-url-value=#{vpn_device_qr_code_path(vpn_device)}".html_safe unless vpn_device.node %>>
+    <div class="device-item-header">
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-phone<%= vpn_device.node ? '-fill' : '' %> device-icon"></i>
+        <div>
+          <span class="fw-semibold"><%= vpn_device.description %></span>
+          <% if vpn_device.node %>
+            <span class="badge bg-secondary ms-1">Node</span>
           <% end %>
         </div>
       </div>
+      <div class="d-flex gap-1">
+        <%= link_to download_config_path(vpn_device.id), class: "btn btn-outline-primary btn-sm", title: "Download config" do %>
+          <i class="bi bi-download"></i>
+        <% end %>
+        <% unless vpn_device.node %>
+          <button class="btn btn-outline-secondary btn-sm"
+                  data-action="click->qr-code#open"
+                  title="Show QR code">
+            <i class="bi bi-qr-code"></i>
+          </button>
+          <%= link_to vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger btn-sm", title: "Remove device" do %>
+            <i class="bi bi-trash3"></i>
+          <% end %>
+        <% end %>
+      </div>
     </div>
-  <% end %>
+    <div class="device-item-body">
+      <div class="device-detail">
+        <span class="device-detail-label">IP</span>
+        <code><%= vpn_device.ip_allocation.ip_address %></code>
+      </div>
+      <div class="device-detail">
+        <span class="device-detail-label">Public Key</span>
+        <code class="font-mono text-truncate" style="max-width: 260px; font-size: 0.75rem;"><%= vpn_device.public_key %></code>
+      </div>
+      <div class="device-detail">
+        <span class="device-detail-label">Networks</span>
+        <span class="text-muted"><%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></span>
+      </div>
+    </div>
+  </div>
 <% end %>

@@ -1,4 +1,4 @@
-<div class="container-fluid" data-controller="clipboard">
+<div class="container-fluid" data-controller="clipboard<%= ' qr-code' unless @vpn_device.node %>" <%= "data-qr-code-url-value=#{vpn_device_qr_code_path(@vpn_device)}".html_safe unless @vpn_device.node %>>
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
 
@@ -112,23 +112,30 @@
                   <%= link_to download_config_path(@vpn_device.id), class: "btn btn-primary" do %>
                     <i class="bi bi-download"></i> Download Configuration
                   <% end %>
+                  <% unless @vpn_device.node %>
+                    <button class="btn btn-outline-secondary"
+                            data-qr-code-target="button"
+                            data-action="click->qr-code#toggle">
+                      <i class="bi bi-qr-code"></i> Show QR
+                    </button>
+                  <% end %>
                   <%= link_to @vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to remove this device?" }, class: "btn btn-outline-danger" do %>
                     <i class="bi bi-trash3"></i> Remove Device
                   <% end %>
                 </div>
               </div>
 
-              <div class="col-lg-4">
-                <div class="text-center">
-                  <div class="qr-container">
-                    <%= raw @vpn_device.generate_qr_code %>
-                  </div>
-                  <div class="mt-3">
-                    <h6 class="fw-semibold mb-1">Quick Setup</h6>
-                    <p class="text-muted small mb-0">Scan with WireGuard app</p>
+              <% unless @vpn_device.node %>
+                <div class="col-lg-4">
+                  <div class="text-center d-none" data-qr-code-target="container">
+                    <div class="qr-container"></div>
+                    <div class="mt-3">
+                      <h6 class="fw-semibold mb-1">Quick Setup</h6>
+                      <p class="text-muted small mb-0">Scan with WireGuard app</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              <% end %>
 
             </div>
           </div>

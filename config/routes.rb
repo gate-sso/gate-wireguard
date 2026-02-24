@@ -45,6 +45,7 @@ Rails.application.routes.draw do
 
   # download the wireguard configuration file
   get 'vpn_devices/download/:id', to: 'vpn_devices#download_config', as: 'download_config'
+  get 'vpn_devices/:id/qr_code', to: 'vpn_devices#qr_code', as: 'vpn_device_qr_code'
 
   # Defines the root path route ("/")
   root 'admin#index'

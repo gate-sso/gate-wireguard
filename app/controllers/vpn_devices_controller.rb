@@ -26,6 +26,11 @@ class VpnDevicesController < ApplicationController
     @vpn_configuration = VpnConfiguration.first
   end
 
+  def qr_code
+    @vpn_device = current_user.vpn_devices.find(params[:id])
+    render html: @vpn_device.generate_qr_code.html_safe, layout: false
+  end
+
   def download_config
     @vpn_device = current_user.vpn_devices.find(params[:id])
     @vpn_configuration = VpnConfiguration.first

@@ -140,7 +140,7 @@
       <div class="row g-2 align-items-end">
         <div class="col-md-8">
           <label class="form-label" for="network_address">Network Address (CIDR format)</label>
-          <%= form.text_field :network_address, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
+          <%= text_field_tag :network_address, nil, id: "network_address", class: "form-control", placeholder: "X.X.X.X/YY" %>
         </div>
         <div class="col-md-4">
           <%= form.submit "Add Network Address", class: "btn btn-primary w-100", data: { turbo_confirm: "Adding a network address may require client reconfiguration. Continue?" } %>

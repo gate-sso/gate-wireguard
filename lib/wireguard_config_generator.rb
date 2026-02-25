@@ -35,10 +35,13 @@ class WireguardConfigGenerator
       # Use wg_fqdn if available, otherwise fall back to wg_ip_address
       endpoint = vpn_configuration.wg_fqdn.present? ? vpn_configuration.wg_fqdn : vpn_configuration.wg_ip_address
       config += "Endpoint = #{endpoint}:#{vpn_configuration.wg_port}\n"
-      config += "AllowedIPs = #{vpn_subnet(vpn_configuration)}\n"
+      allowed_ips = []
+      allowed_ips << "#{vpn_configuration.server_vpn_ip_address}/32"
+
       vpn_configuration.network_addresses.each do |ip_address|
-        config += "AllowedIPs = #{ip_address.network_address}\n"
+        allowed_ips << ip_address.network_address
       end
+      config += "AllowedIPs = #{allowed_ips.join(', ')}\n"
       config += "PersistentKeepalive = 20\n" if vpn_configuration.wg_keep_alive.present?
       config += "\n"
 

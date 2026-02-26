@@ -35,6 +35,11 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$(cd "$(dirname "$ENV_FILE")" && pwd)/$(basename "$ENV_FILE")"
 
+# SSH multiplexing — reuse a single TCP connection for all Ansible tasks
+export ANSIBLE_SSH_ARGS="-o ControlMaster=auto -o ControlPersist=60s -o ControlPath=/tmp/ansible-ssh-%h-%p-%r -o StrictHostKeyChecking=no"
+# Pipelining — send commands over the existing SSH connection instead of creating temp files
+export ANSIBLE_PIPELINING=true
+
 ansible-playbook "$SCRIPT_DIR/rails-production.yml" \
   -i "$HOST," \
   -u root \

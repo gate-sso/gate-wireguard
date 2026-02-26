@@ -9,31 +9,28 @@
     app_path: "{{ home_path }}/{{ app_name }}"
     gem_home: "{{ home_path }}/.ruby"
     wg_conf_group: wg_conf
+    ruby_env:
+      GEM_HOME: "{{ gem_home }}"
+      PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
   tasks:
     # ----------------------------------------------------------------
-    # 1. Clone / update application repository
+    # 1. Backup and clone application
     # ----------------------------------------------------------------
-    - name: Check if app directory exists
-      ansible.builtin.stat:
-        path: "{{ app_path }}"
-      register: app_dir
-
-    - name: Rotate old backups (keep max 5)
+    - name: Backup and rotate old releases
       ansible.builtin.shell: |
-        rm -rf "{{ app_path }}.bak.5"
-        for i in 4 3 2 1; do
-          src="{{ app_path }}.bak.${i}"
-          dst="{{ app_path }}.bak.$((i+1))"
-          [ -d "$src" ] && mv "$src" "$dst"
-        done
-      when: app_dir.stat.exists
-
-    - name: Backup current app directory
-      ansible.builtin.shell: |
-        rm -rf "{{ app_path }}.bak.1"
-        mv "{{ app_path }}" "{{ app_path }}.bak.1"
-      when: app_dir.stat.exists
+        if [ -d "{{ app_path }}" ] && [ "$(ls -A {{ app_path }})" ]; then
+          for i in 4 3 2 1; do
+            src="{{ app_path }}.bak.${i}"
+            dst="{{ app_path }}.bak.$((i+1))"
+            [ -d "$src" ] && mv "$src" "$dst"
+          done
+          rm -rf "{{ app_path }}.bak.5" "{{ app_path }}.bak.1"
+          mv "{{ app_path }}" "{{ app_path }}.bak.1"
+        else
+          rm -rf "{{ app_path }}"
+        fi
+      changed_when: true
 
     - name: Clone gate-wireguard repository
       ansible.builtin.git:
@@ -43,27 +40,14 @@
         accept_hostkey: yes
       become_user: "{{ deploy_user }}"
 
-    - name: Create required tmp directories
-      ansible.builtin.file:
-        path: "{{ app_path }}/{{ item }}"
-        state: directory
-        owner: "{{ deploy_user }}"
-        group: "{{ deploy_user }}"
-      loop:
-        - tmp/pids
-        - tmp/cache
-        - tmp/sockets
-
-    - name: Ensure deploy user owns application directory
-      ansible.builtin.file:
-        path: "{{ app_path }}"
-        owner: "{{ deploy_user }}"
-        group: "{{ deploy_user }}"
-        recurse: yes
+    - name: Create required directories and set ownership
+      ansible.builtin.shell: |
+        mkdir -p "{{ app_path }}/tmp/pids" "{{ app_path }}/tmp/cache" "{{ app_path }}/tmp/sockets" "{{ app_path }}/log"
+        chown -R {{ deploy_user }}:{{ deploy_user }} "{{ app_path }}"
+      changed_when: true
 
     # ----------------------------------------------------------------
     # 2. Deploy .env file and generate SECRET_KEY_BASE
-    #    (must happen before bundle/yarn so env is available)
     # ----------------------------------------------------------------
     - name: Copy .env file to app directory
       ansible.builtin.copy:
@@ -108,28 +92,24 @@
       no_log: true
 
     # ----------------------------------------------------------------
-    # 3. Install Bundler and app gems
+    # 3. Install gems and Yarn dependencies
     # ----------------------------------------------------------------
     - name: Install Bundler gem
       community.general.gem:
         name: bundler
         state: present
-      environment:
-        GEM_HOME: "{{ gem_home }}"
-        PATH: "{{ gem_home }}/bin:{{ ansible_facts['env']['PATH'] }}"
+      environment: "{{ ruby_env }}"
 
-    - name: Run bundle install
-      ansible.builtin.command:
-        cmd: bundle install
+    - name: Configure bundle path and install gems
+      ansible.builtin.shell: |
+        bundle config set --local path {{ home_path }}/.bundledgems
+        bundle install --jobs 4 --retry 3
+      args:
         chdir: "{{ app_path }}"
+        executable: /bin/bash
       become_user: "{{ deploy_user }}"
-      environment:
-        GEM_HOME: "{{ gem_home }}"
-        PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
+      environment: "{{ ruby_env }}"
 
-    # ----------------------------------------------------------------
-    # 4. Install Yarn dependencies
-    # ----------------------------------------------------------------
     - name: Install Yarn dependencies
       ansible.builtin.shell: |
         export NVM_DIR="{{ home_path }}/.nvm"
@@ -141,29 +121,22 @@
       become_user: "{{ deploy_user }}"
 
     # ----------------------------------------------------------------
-    # 5. Create MySQL database and user
+    # 4. Create MySQL database and user
     # ----------------------------------------------------------------
-    - name: Read database name from .env
-      ansible.builtin.shell: grep '^GATE_DATABASE=' {{ app_path }}/.env | cut -d= -f2
-      register: db_name_raw
-      changed_when: false
-
-    - name: Read database user from .env
-      ansible.builtin.shell: grep '^GATE_DATABASE_USER=' {{ app_path }}/.env | cut -d= -f2
-      register: db_user_raw
-      changed_when: false
-
-    - name: Read database password from .env
-      ansible.builtin.shell: grep '^GATE_DATABASE_PASSWORD=' {{ app_path }}/.env | cut -d= -f2
-      register: db_pass_raw
+    - name: Read database credentials from .env
+      ansible.builtin.shell: |
+        grep '^GATE_DATABASE=' {{ app_path }}/.env | cut -d= -f2
+        grep '^GATE_DATABASE_USER=' {{ app_path }}/.env | cut -d= -f2
+        grep '^GATE_DATABASE_PASSWORD=' {{ app_path }}/.env | cut -d= -f2
+      register: db_creds_raw
       changed_when: false
       no_log: true
 
     - name: Set database facts
       ansible.builtin.set_fact:
-        db_name: "{{ db_name_raw.stdout | trim }}"
-        db_user: "{{ db_user_raw.stdout | trim }}"
-        db_pass: "{{ db_pass_raw.stdout | trim }}"
+        db_name: "{{ db_creds_raw.stdout_lines[0] | trim }}"
+        db_user: "{{ db_creds_raw.stdout_lines[1] | trim }}"
+        db_pass: "{{ db_creds_raw.stdout_lines[2] | trim }}"
       no_log: true
 
     - name: Create MySQL database
@@ -183,7 +156,7 @@
       no_log: true
 
     # ----------------------------------------------------------------
-    # 6. Run database migrations
+    # 5. Database migrations and asset precompilation
     # ----------------------------------------------------------------
     - name: Run database migrations
       ansible.builtin.command:
@@ -196,9 +169,6 @@
         GEM_HOME: "{{ gem_home }}"
         PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
-    # ----------------------------------------------------------------
-    # 7. Precompile assets
-    # ----------------------------------------------------------------
     - name: Precompile assets
       ansible.builtin.shell: |
         export NVM_DIR="{{ home_path }}/.nvm"
@@ -215,32 +185,17 @@
         PATH: "{{ gem_home }}/bin:/usr/local/bin:{{ ansible_facts['env']['PATH'] }}"
 
     # ----------------------------------------------------------------
-    # 8. Ensure log directory exists and symlink config/wireguard
+    # 6. Symlink WireGuard config
     # ----------------------------------------------------------------
-    - name: Ensure log directory exists
-      ansible.builtin.file:
-        path: "{{ app_path }}/log"
-        state: directory
-        owner: "{{ deploy_user }}"
-        group: "{{ deploy_user }}"
-        mode: "0755"
-
-    - name: Remove config/wireguard directory if it exists
-      ansible.builtin.file:
-        path: "{{ app_path }}/config/wireguard"
-        state: absent
-
     - name: Symlink config/wireguard to /etc/wireguard
-      ansible.builtin.file:
-        src: /etc/wireguard
-        dest: "{{ app_path }}/config/wireguard"
-        state: link
-        owner: "{{ deploy_user }}"
-        group: "{{ wg_conf_group }}"
-        force: yes
+      ansible.builtin.shell: |
+        rm -rf "{{ app_path }}/config/wireguard"
+        ln -sf /etc/wireguard "{{ app_path }}/config/wireguard"
+        chown -h {{ deploy_user }}:{{ wg_conf_group }} "{{ app_path }}/config/wireguard"
+      changed_when: true
 
     # ----------------------------------------------------------------
-    # 10. Create systemd service and restart Puma
+    # 7. Create systemd service and restart Puma
     # ----------------------------------------------------------------
     - name: Create systemd service for Puma
       ansible.builtin.copy:

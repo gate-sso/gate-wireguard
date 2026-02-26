@@ -9,35 +9,21 @@
 
   tasks:
     # ----------------------------------------------------------------
-    # 1. Install Caddy (from official apt repo)
+    # 1. Install Caddy and set up directories
     # ----------------------------------------------------------------
-    - name: Install prerequisites for Caddy repo
-      ansible.builtin.apt:
-        name:
-          - debian-keyring
-          - debian-archive-keyring
-          - apt-transport-https
-          - curl
-        state: present
-        update_cache: yes
-
-    - name: Add Caddy GPG key
+    - name: Install Caddy and set up directories
       ansible.builtin.shell: |
-        curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-      args:
-        creates: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-
-    - name: Add Caddy apt repository
-      ansible.builtin.copy:
-        dest: /etc/apt/sources.list.d/caddy-stable.list
-        content: "deb [signed-by=/usr/share/keyrings/caddy-stable-archive-keyring.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main\n"
-        mode: "0644"
-
-    - name: Install Caddy
-      ansible.builtin.apt:
-        name: caddy
-        state: present
-        update_cache: yes
+        apt-get update -qq
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https curl
+        if [ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]; then
+          curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/caddy-stable-archive-keyring.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main" > /etc/apt/sources.list.d/caddy-stable.list
+          apt-get update -qq
+        fi
+        apt-get install -y -qq caddy
+        mkdir -p /var/log/caddy /etc/caddy/conf.d
+        chown caddy:caddy /var/log/caddy
+      changed_when: true
 
     # ----------------------------------------------------------------
     # 2. Detect Puma port from deployed config
@@ -47,37 +33,14 @@
       register: detected_port
       changed_when: false
 
-    - name: Set puma_port fact
-      ansible.builtin.set_fact:
-        puma_port: "{{ detected_port.stdout }}"
-
     - name: Verify Puma port was detected
       ansible.builtin.fail:
         msg: "Could not detect Puma port from {{ app_path }}/config/puma.rb"
-      when: puma_port == ""
+      when: detected_port.stdout == ""
 
     # ----------------------------------------------------------------
-    # 3. Configure logging directory
+    # 3. Deploy Caddy configuration
     # ----------------------------------------------------------------
-    - name: Create Caddy log directory
-      ansible.builtin.file:
-        path: /var/log/caddy
-        state: directory
-        owner: caddy
-        group: caddy
-        mode: "0755"
-
-    # ----------------------------------------------------------------
-    # 4. Configure Caddy conf.d structure
-    # ----------------------------------------------------------------
-    - name: Create Caddy conf.d directory
-      ansible.builtin.file:
-        path: /etc/caddy/conf.d
-        state: directory
-        owner: root
-        group: root
-        mode: "0755"
-
     - name: Deploy main Caddyfile with global log and conf.d import
       ansible.builtin.copy:
         dest: /etc/caddy/Caddyfile
@@ -99,15 +62,12 @@
         mode: "0644"
       notify: Reload Caddy
 
-    # ----------------------------------------------------------------
-    # 5. Deploy site-specific Caddy config
-    # ----------------------------------------------------------------
     - name: Deploy Caddy site config for {{ domain }}
       ansible.builtin.copy:
         dest: "/etc/caddy/conf.d/{{ domain }}.caddy"
         content: |
           {{ domain }} {
-              reverse_proxy localhost:{{ puma_port }}
+              reverse_proxy localhost:{{ detected_port.stdout }}
 
               log {
                   output file /var/log/caddy/{{ domain }}.access.log {
@@ -124,9 +84,6 @@
         mode: "0644"
       notify: Reload Caddy
 
-    # ----------------------------------------------------------------
-    # 6. Deploy logrotate config for Caddy
-    # ----------------------------------------------------------------
     - name: Deploy logrotate config for Caddy
       ansible.builtin.copy:
         dest: /etc/logrotate.d/caddy
@@ -149,7 +106,7 @@
         mode: "0644"
 
     # ----------------------------------------------------------------
-    # 7. Allow HTTP (port 80) in UFW for ACME challenge
+    # 4. Firewall and service
     # ----------------------------------------------------------------
     - name: Allow HTTP (port 80) for Let's Encrypt ACME challenge
       community.general.ufw:
@@ -157,9 +114,6 @@
         port: "80"
         proto: tcp
 
-    # ----------------------------------------------------------------
-    # 8. Enable and start Caddy
-    # ----------------------------------------------------------------
     - name: Enable and restart Caddy
       ansible.builtin.systemd:
         name: caddy

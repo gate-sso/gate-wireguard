@@ -37,59 +37,28 @@
     # ----------------------------------------------------------------
     # 2. Install system packages
     # ----------------------------------------------------------------
-    - name: Update apt cache
-      ansible.builtin.apt:
-        update_cache: yes
-
-    - name: Upgrade all packages
-      ansible.builtin.apt:
-        upgrade: dist
-      environment:
-        DEBIAN_FRONTEND: noninteractive
-
-    - name: Install system dependencies
-      ansible.builtin.apt:
-        name:
-          - ca-certificates
-          - curl
-          - wget
-          - rsync
-          - git
-          - build-essential
-          - pkg-config
-          - libssl-dev
-          - libreadline-dev
-          - zlib1g-dev
-          - libffi-dev
-          - libffi8
-          - libyaml-dev
-          - libmysqlclient-dev
-          - libvips
-          - openssh-server
-          - net-tools
-          - redis-server
-          - redis-tools
-          - inotify-tools
-          - ufw
-          - acl
-        state: present
-      environment:
-        DEBIAN_FRONTEND: noninteractive
+    - name: Update, upgrade, and install system dependencies
+      ansible.builtin.shell: |
+        apt-get update -qq
+        DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y -qq
+        DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+          ca-certificates curl wget rsync git build-essential pkg-config \
+          libssl-dev libreadline-dev zlib1g-dev libffi-dev libffi8 \
+          libyaml-dev libmysqlclient-dev libvips openssh-server net-tools \
+          redis-server redis-tools inotify-tools ufw acl
+      changed_when: true
 
     # ----------------------------------------------------------------
     # 3. Install Rust (needed for Ruby YJIT)
     # ----------------------------------------------------------------
-    - name: Check if Rust is installed
-      ansible.builtin.command: "{{ home_path }}/.cargo/bin/rustc --version"
+    - name: Install Rust if missing and set stable toolchain
+      ansible.builtin.shell: |
+        if ! {{ home_path }}/.cargo/bin/rustc --version > /dev/null 2>&1; then
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        fi
+        {{ home_path }}/.cargo/bin/rustup default stable
       become_user: "{{ deploy_user }}"
-      register: rust_check
-      changed_when: false
-      failed_when: false
-
-    - name: Install Rust via rustup
-      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-      become_user: "{{ deploy_user }}"
-      when: rust_check.rc != 0
+      changed_when: true
 
     # ----------------------------------------------------------------
     # 4. Install Ruby from source
@@ -135,12 +104,8 @@
             PATH: "{{ home_path }}/.cargo/bin:{{ ansible_facts['env']['PATH'] }}"
 
         - name: Clean up Ruby source
-          ansible.builtin.file:
-            path: "{{ item }}"
-            state: absent
-          loop:
-            - "/tmp/ruby-{{ ruby_version }}.tar.gz"
-            - "/tmp/ruby-{{ ruby_version }}"
+          ansible.builtin.shell: rm -rf "/tmp/ruby-{{ ruby_version }}.tar.gz" "/tmp/ruby-{{ ruby_version }}"
+          changed_when: true
 
     # ----------------------------------------------------------------
     # 5. Configure GEM_HOME for deploy user
@@ -155,7 +120,7 @@
         owner: "{{ deploy_user }}"
 
     # ----------------------------------------------------------------
-    # 6. Install NVM and Node.js
+    # 6. Install NVM, Node.js, and Yarn
     # ----------------------------------------------------------------
     - name: Check if NVM is installed
       ansible.builtin.stat:
@@ -167,49 +132,20 @@
       become_user: "{{ deploy_user }}"
       when: not nvm_stat.stat.exists
 
-    - name: Check if Node.js {{ node_version }} is installed
+    - name: Install Node.js {{ node_version }} and Yarn
       ansible.builtin.shell: |
         export NVM_DIR="{{ home_path }}/.nvm"
         . "$NVM_DIR/nvm.sh"
-        node --version
+        if ! node --version 2>/dev/null | grep -q "v{{ node_version }}"; then
+          nvm install {{ node_version }}
+        fi
+        if ! yarn --version > /dev/null 2>&1; then
+          npm install yarn -g
+        fi
       become_user: "{{ deploy_user }}"
       args:
         executable: /bin/bash
-      register: node_check
-      changed_when: false
-      failed_when: false
-
-    - name: Install Node.js {{ node_version }}
-      ansible.builtin.shell: |
-        export NVM_DIR="{{ home_path }}/.nvm"
-        . "$NVM_DIR/nvm.sh"
-        nvm install {{ node_version }}
-      become_user: "{{ deploy_user }}"
-      args:
-        executable: /bin/bash
-      when: node_check.rc != 0 or node_version not in (node_check.stdout | default(''))
-
-    - name: Check if Yarn is installed
-      ansible.builtin.shell: |
-        export NVM_DIR="{{ home_path }}/.nvm"
-        . "$NVM_DIR/nvm.sh"
-        yarn --version
-      become_user: "{{ deploy_user }}"
-      args:
-        executable: /bin/bash
-      register: yarn_check
-      changed_when: false
-      failed_when: false
-
-    - name: Install Yarn globally
-      ansible.builtin.shell: |
-        export NVM_DIR="{{ home_path }}/.nvm"
-        . "$NVM_DIR/nvm.sh"
-        npm install yarn -g
-      become_user: "{{ deploy_user }}"
-      args:
-        executable: /bin/bash
-      when: yarn_check.rc != 0
+      changed_when: true
 
     # ----------------------------------------------------------------
     # 7. Install MySQL server
@@ -240,16 +176,11 @@
           - wireguard-tools
         state: present
 
-    - name: Create wg_conf group
-      ansible.builtin.group:
-        name: "{{ wg_conf_group }}"
-        state: present
-
-    - name: Add deploy user to wg_conf group
-      ansible.builtin.user:
-        name: "{{ deploy_user }}"
-        groups: "{{ wg_conf_group }}"
-        append: yes
+    - name: Create wg_conf group and add deploy user
+      ansible.builtin.shell: |
+        groupadd -f {{ wg_conf_group }}
+        usermod -aG {{ wg_conf_group }} {{ deploy_user }}
+      changed_when: true
 
     - name: Ensure /etc/wireguard directory
       ansible.builtin.file:
@@ -358,40 +289,13 @@
     # ----------------------------------------------------------------
     # 11. Configure UFW firewall
     # ----------------------------------------------------------------
-    - name: Allow SSH (port 22)
-      community.general.ufw:
-        rule: allow
-        port: "22"
-        proto: tcp
-
-    - name: Allow HTTP (port 80)
-      community.general.ufw:
-        rule: allow
-        port: "80"
-        proto: tcp
-
-    - name: Allow HTTPS (port 443)
-      community.general.ufw:
-        rule: allow
-        port: "443"
-        proto: tcp
-
-    - name: Allow WireGuard (port {{ wg_port }}/udp)
-      community.general.ufw:
-        rule: allow
-        port: "{{ wg_port }}"
-        proto: udp
-
-    - name: Set UFW default deny incoming
-      community.general.ufw:
-        default: deny
-        direction: incoming
-
-    - name: Set UFW default allow outgoing
-      community.general.ufw:
-        default: allow
-        direction: outgoing
-
-    - name: Enable UFW
-      community.general.ufw:
-        state: enabled
+    - name: Configure UFW rules and enable
+      ansible.builtin.shell: |
+        ufw allow 22/tcp
+        ufw allow 80/tcp
+        ufw allow 443/tcp
+        ufw allow {{ wg_port }}/udp
+        ufw default deny incoming
+        ufw default allow outgoing
+        ufw --force enable
+      changed_when: true

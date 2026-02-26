@@ -10,7 +10,7 @@ usage() {
   echo
   echo "  -h  Remote host (IP or hostname, or SSH config alias)"
   echo "  -u  Deploy user on the remote box"
-  echo "  -r  Restart services after sync (runs bundle install + assets:precompile first)"
+  echo "  -r  Restart services after sync (runs bundle install + yarn install + assets:precompile first)"
   echo
   echo "Syncs app code to remote host and optionally rebuilds + restarts."
   exit 1
@@ -38,9 +38,13 @@ GEM_HOME="/home/${DEPLOY_USER}/.ruby"
 NVM_INIT="export NVM_DIR=/home/${DEPLOY_USER}/.nvm && . \$NVM_DIR/nvm.sh"
 REMOTE_ENV="export GEM_HOME=${GEM_HOME} && export PATH=${GEM_HOME}/bin:/usr/local/bin:\$PATH"
 
+# SSH multiplexing — reuse a single TCP connection across rsync + ssh calls
+SSH_OPTS="-o ControlMaster=auto -o ControlPersist=60s -o ControlPath=/tmp/quick-deploy-ssh-%h-%p-%r"
+
 echo "==> Syncing ${APP_NAME} to ${HOST}:${REMOTE_PATH}..."
 
 rsync -avz --delete \
+  -e "ssh ${SSH_OPTS}" \
   --exclude '.git/' \
   --exclude 'log/' \
   --exclude 'tmp/' \
@@ -55,23 +59,11 @@ rsync -avz --delete \
   "${REPO_DIR}/" "${HOST}:${REMOTE_PATH}/"
 
 echo "==> Fixing ownership..."
-ssh "$HOST" "sudo chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${REMOTE_PATH}"
+ssh ${SSH_OPTS} "$HOST" "sudo chown -R ${DEPLOY_USER}:${DEPLOY_USER} ${REMOTE_PATH}"
 
 if [ "$RESTART" = true ]; then
-  echo "==> Running bundle install..."
-  ssh "$HOST" "cd ${REMOTE_PATH} && ${REMOTE_ENV} && bundle install"
-
-  echo "==> Running yarn install..."
-  ssh "$HOST" "cd ${REMOTE_PATH} && ${NVM_INIT} && yarn install"
-
-  echo "==> Precompiling assets..."
-  ssh "$HOST" "cd ${REMOTE_PATH} && ${NVM_INIT} && ${REMOTE_ENV} && set -a && source .env && set +a && RAILS_ENV=production bundle exec rails assets:precompile"
-
-  echo "==> Restarting services: ${SERVICES}..."
-  for svc in $SERVICES; do
-    ssh "$HOST" "sudo systemctl restart ${svc}"
-    echo "    ${svc} restarted."
-  done
+  echo "==> Building and restarting..."
+  ssh ${SSH_OPTS} "$HOST" "cd ${REMOTE_PATH} && ${REMOTE_ENV} && bundle install --jobs 4 --retry 3 && ${NVM_INIT} && yarn install && set -a && source .env && set +a && RAILS_ENV=production bundle exec rails assets:precompile && sudo systemctl restart ${SERVICES}"
   echo "==> Done. Services restarted."
 else
   echo "==> Done. Sync complete (no restart). Use -r to rebuild and restart services."

@@ -207,6 +207,15 @@
         mode: "0775"
       tags: [wireguard]
 
+    - name: Ensure config directory exists
+      file:
+        path: "{{ app_dir }}/config"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0755"
+      tags: [wireguard]
+
     - name: Remove config/wireguard directory if it exists
       file:
         path: "{{ app_dir }}/config/wireguard"

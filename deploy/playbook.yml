@@ -79,6 +79,14 @@
         create_home: yes
       tags: [system]
 
+    - name: Add user to sudoers without password
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        line: "{{ app_user }} ALL=(ALL) NOPASSWD: ALL"
+        state: present
+        validate: "visudo -cf %s"
+
     - name: Enable IPv4 forwarding
       sysctl:
         name: net.ipv4.ip_forward

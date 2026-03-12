@@ -127,6 +127,7 @@ if [[ ! -f "$VARS_FILE" ]] || [[ "$CONFIGURE" == "true" ]]; then
   existing_git_repo=$(load_existing_value "git_repo" "$VARS_FILE")
   existing_git_branch=$(load_existing_value "git_branch" "$VARS_FILE")
   existing_secret_key=$(load_existing_value "secret_key_base" "$VARS_FILE")
+  existing_admin_user_email=$(load_existing_value "admin_user_email" "$VARS_FILE")
 
   # Detect defaults
   default_repo=$(git -C "$SCRIPT_DIR/.." remote get-url origin 2>/dev/null || echo "")
@@ -139,6 +140,7 @@ if [[ ! -f "$VARS_FILE" ]] || [[ "$CONFIGURE" == "true" ]]; then
   prompt_var gate_database_password "MySQL password for gate user" "${existing_db_password:-}" true
   prompt_var git_repo "Git repository URL" "${existing_git_repo:-$default_repo}"
   prompt_var git_branch "Git branch to deploy" "${existing_git_branch:-main}"
+  prompt_var admin_user_email "Email of the admin user"  "${existing_admin_user_email:-}"
 
   # Generate or keep secret key base
   if [[ -n "${existing_secret_key:-}" ]]; then
@@ -164,6 +166,7 @@ gate_redis_port: "6379"
 git_repo: "${git_repo}"
 git_branch: "${git_branch}"
 secret_key_base: "${secret_key_base}"
+admin_user_email: "${admin_user_email}"
 YAML
 
   chmod 600 "$VARS_FILE"

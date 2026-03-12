@@ -180,6 +180,19 @@
         update_cache: yes
       tags: [node]
 
+    - name: Install Yarn globally
+      npm:
+        name: yarn
+        global: yes
+      tags: [node]
+
+    # 3️⃣ Verify Yarn installation
+    - name: Check Yarn version
+      command: yarn --version
+      register: yarn_version
+      changed_when: false
+      tags: [node]
+
     - name: Enable corepack
       shell: corepack enable
       args:

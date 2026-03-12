@@ -9,7 +9,7 @@
     app_dir: /home/gate/gate-wireguard
     backup_dir: /home/gate/backups
     backup_keep: 5
-    ruby_version: "3.3.4"
+    ruby_version: "4.0.1"
     node_major_version: "20"
     wg_conf_group: wg_conf
     puma_port: 3000
@@ -590,6 +590,25 @@
         key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 github.com 2>/dev/null') }}"
         path: /home/{{ app_user }}/.ssh/known_hosts
       tags: [app, update]
+
+    - name: Check if repo already initialized
+      stat:
+        path: "{{ app_dir }}/.git"
+      register: repo_stat
+
+    - name: Initialize git repo in existing directory
+      become_user: "{{ app_user }}"
+      command: git init
+      args:
+        chdir: "{{ app_dir }}"
+      when: not repo_stat.stat.exists
+
+    - name: Add remote origin
+      become_user: "{{ app_user }}"
+      command: git remote add origin {{ git_repo }}
+      args:
+        chdir: "{{ app_dir }}"
+      when: not repo_stat.stat.exists
 
     - name: Pull latest code
       become_user: "{{ app_user }}"

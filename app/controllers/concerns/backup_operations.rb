@@ -1,7 +1,7 @@
 # typed: false
 # frozen_string_literal: true
 
-module BackupOperations
+module BackupOperations # rubocop:disable Metrics/ModuleLength
   extend ActiveSupport::Concern
 
   private
@@ -9,7 +9,7 @@ module BackupOperations
   def generate_backup_data
     {
       metadata: {
-        version: '1.0',
+        version: '1.1',
         created_at: Time.current,
         app_version: Rails::VERSION::STRING
       },
@@ -17,7 +17,9 @@ module BackupOperations
       vpn_devices: export_vpn_devices,
       users: export_users,
       network_addresses: export_network_addresses,
-      dns_records: export_dns_records
+      dns_records: export_dns_records,
+      ip_allocations: export_ip_allocations,
+      api_keys: export_api_keys
     }
   end
 
@@ -36,28 +38,57 @@ module BackupOperations
   end
 
   def export_network_addresses
-    NetworkAddress.all.map { |addr| addr.attributes.except('created_at', 'updated_at') }
+    NetworkAddress.all.map do |addr|
+      addr.attributes.except('created_at', 'updated_at')
+    end
   end
 
   def export_dns_records
     DnsRecord.all.map { |record| record.attributes.except('created_at', 'updated_at') }
   end
 
-  def restore_from_backup(backup_data)
-    ActiveRecord::Base.transaction do
-      clear_existing_data if params[:clear_existing] == '1'
-      restore_users(backup_data['users'] || [])
-      restore_vpn_configurations(backup_data['vpn_configurations'] || [])
-      restore_network_addresses(backup_data['network_addresses'] || [])
-      restore_vpn_devices(backup_data['vpn_devices'] || [])
-      restore_dns_records(backup_data['dns_records'] || [])
+  def export_ip_allocations
+    IpAllocation.all.map do |alloc|
+      alloc.attributes.except('created_at', 'updated_at').merge(
+        'user_email' => alloc.vpn_device&.user&.email,
+        'device_description' => alloc.vpn_device&.description
+      )
     end
   end
 
+  def export_api_keys
+    ApiKey.all.map { |key| key.attributes.except('created_at', 'updated_at') }
+  end
+
+  def restore_from_backup(backup_data)
+    ActiveRecord::Base.transaction do
+      clear_existing_data if params[:clear_existing] == '1'
+      restore_all_models(backup_data)
+      sync_wireguard_config
+    end
+  end
+
+  def restore_all_models(data)
+    {
+      'users' => :restore_users, 'vpn_configurations' => :restore_vpn_configurations,
+      'network_addresses' => :restore_network_addresses, 'vpn_devices' => :restore_vpn_devices,
+      'dns_records' => :restore_dns_records, 'ip_allocations' => :restore_ip_allocations,
+      'api_keys' => :restore_api_keys
+    }.each { |key, method| send(method, data[key] || []) }
+  end
+
+  def sync_wireguard_config
+    config = VpnConfiguration.first
+    WireguardConfigGenerator.write_server_configuration(config) if config
+  end
+
   def clear_existing_data
-    VpnDevice.destroy_all
-    NetworkAddress.destroy_all
-    DnsRecord.destroy_all
+    # Nullify device references first, then delete in dependency order
+    IpAllocation.update_all(vpn_device_id: nil, allocated: false) # rubocop:disable Rails/SkipsModelValidations
+    ApiKey.delete_all
+    DnsRecord.delete_all
+    VpnDevice.delete_all
+    NetworkAddress.delete_all
   end
 
   def restore_users(users_data)
@@ -83,7 +114,15 @@ module BackupOperations
   end
 
   def restore_network_addresses(addresses_data)
-    addresses_data.each { |addr_data| NetworkAddress.create!(addr_data.except('id')) }
+    config = VpnConfiguration.first
+    return unless config
+
+    addresses_data.each do |addr_data|
+      NetworkAddress.find_or_create_by!(
+        network_address: addr_data['network_address'],
+        vpn_configuration_id: config.id
+      )
+    end
   end
 
   def restore_vpn_devices(devices_data)
@@ -109,6 +148,33 @@ module BackupOperations
         existing_record.update!(record_data.except('id'))
       else
         DnsRecord.create!(record_data.except('id'))
+      end
+    end
+  end
+
+  def restore_ip_allocations(allocations_data)
+    allocations_data.each do |alloc_data|
+      user = User.find_by(email: alloc_data['user_email'])
+      device = user ? VpnDevice.find_by(user: user, description: alloc_data['device_description']) : nil
+      alloc_attrs = alloc_data.except('id', 'user_email', 'device_description')
+                              .merge('vpn_device_id' => device&.id)
+
+      existing_alloc = IpAllocation.find_by(ip_address: alloc_data['ip_address'])
+      if existing_alloc
+        existing_alloc.update!(alloc_attrs)
+      else
+        IpAllocation.create!(alloc_attrs)
+      end
+    end
+  end
+
+  def restore_api_keys(api_keys_data)
+    api_keys_data.each do |key_data|
+      existing_key = ApiKey.find_by(token_digest: key_data['token_digest'])
+      if existing_key
+        existing_key.update!(key_data.except('id'))
+      else
+        ApiKey.create!(key_data.except('id'))
       end
     end
   end

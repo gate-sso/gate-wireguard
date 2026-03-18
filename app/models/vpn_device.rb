@@ -31,7 +31,7 @@ class VpnDevice < ApplicationRecord
 
   sig { returns(String) }
   def generate_qr_code
-    raise "QR codes are not supported for infrastructure nodes" if node?
+    raise 'QR codes are not supported for infrastructure nodes' if node?
 
     qr = RQRCode::QRCode.new(WireguardConfigGenerator.generate_client_config(self, VpnConfiguration.first))
     qr.as_svg(

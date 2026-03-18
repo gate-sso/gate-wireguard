@@ -91,7 +91,7 @@
               <div class="d-grid">
                 <%= link_to admin_backup_download_path,
                     class: "btn btn-success btn-lg",
-                    data: { turbo_method: :get, confirm: "Download a complete system backup?" } do %>
+                    data: { turbo: false } do %>
                   <i class="bi bi-download me-2"></i>Download Backup
                 <% end %>
               </div>

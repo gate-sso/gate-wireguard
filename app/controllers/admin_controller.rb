@@ -12,9 +12,15 @@ class AdminController < ApplicationController
 
   def index
     @vpn_configuration = VpnConfiguration.first
+    @device_statuses = WireguardStatus.device_statuses
+    @online_count = @device_statuses.count { |d| d[:online] }
     return unless @vpn_configuration.nil?
 
     redirect_to admin_vpn_configurations_path
+  end
+
+  def device_status
+    render json: WireguardStatus.device_statuses
   end
 
   def users

@@ -192,6 +192,39 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 // ============================================================
+// Status indicators
+// ============================================================
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+
+  &.online {
+    background-color: #10b981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  }
+
+  &.offline {
+    background-color: var(--color-text-muted);
+    opacity: 0.5;
+  }
+}
+
+[data-bs-theme="dark"] .status-dot.online {
+  background-color: #00ff88;
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+.sparkline {
+  display: inline-block;
+  min-width: 80px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+// ============================================================
 // Tables
 // ============================================================
 .table {

@@ -8,7 +8,7 @@
 </div>
 
 <% if @current_user.admin? %>
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4" data-controller="device-status" data-device-status-url-value="<%= admin_device_status_path %>" data-device-status-interval-value="30000">
     <div class="col-sm-3">
       <div class="card stat-card">
         <div class="stat-value text-primary"><%= User.count %></div>
@@ -29,8 +29,8 @@
     </div>
     <div class="col-sm-3">
       <div class="card stat-card">
-        <div class="stat-value text-warning"><%= IpAllocation.allocated.count %></div>
-        <div class="stat-label">ips allocated</div>
+        <div class="stat-value" style="color: var(--color-accent);" id="online-count"><%= @online_count %></div>
+        <div class="stat-label">online</div>
       </div>
     </div>
   </div>
@@ -46,9 +46,49 @@
       <a href="/api_keys" class="btn btn-outline-primary btn-sm"><i class="bi bi-key"></i> API Keys</a>
     </div>
   </div>
+
+  <% if @device_statuses&.any? %>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 font-mono" style="font-size: 0.8rem; letter-spacing: 0.05em;">PEER STATUS</h6>
+        <%= link_to new_vpn_device_path, class: "btn btn-primary btn-sm" do %><i class="bi bi-plus-lg"></i> Add Device<% end %>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Device</th>
+              <th>IP</th>
+              <th>Endpoint</th>
+              <th>Last Seen</th>
+              <th>RX / TX</th>
+              <th>Traffic</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @device_statuses.each do |device| %>
+              <tr data-device-id="<%= device[:id] %>">
+                <td><span class="status-dot <%= device[:online] ? 'online' : 'offline' %>" title="<%= device[:online] ? 'Online' : 'Offline' %>"></span></td>
+                <td>
+                  <span class="fw-semibold"><%= device[:description] %></span>
+                  <% if device[:node] %><span class="badge bg-secondary ms-1">Node</span><% end %>
+                </td>
+                <td><code class="font-mono" style="font-size: 0.75rem;"><%= device[:ip] %></code></td>
+                <td class="endpoint"><code class="font-mono" style="font-size: 0.7rem;"><%= device[:endpoint] || '-' %></code></td>
+                <td class="last-seen font-mono" style="font-size: 0.75rem;"><%= device[:last_handshake_ago] || 'never' %></td>
+                <td class="transfer font-mono" style="font-size: 0.7rem;"><%= number_to_human_size(device[:rx_bytes]) %> / <%= number_to_human_size(device[:tx_bytes]) %></td>
+                <td><span class="sparkline" data-history="[<%= device[:rx_bytes] + device[:tx_bytes] %>]"></span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
 <% end %>
 
-<% if @current_user.vpn_devices.any? %>
+<% if @current_user.vpn_devices.any? && !@current_user.admin? %>
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Your Devices</h5>
@@ -58,7 +98,7 @@
       <%= render 'vpn_devices/vpn_devices', vpn_devices: @current_user.vpn_devices %>
     </div>
   </div>
-<% else %>
+<% elsif !@current_user.admin? %>
   <div class="card">
     <div class="empty-state">
       <i class="bi bi-router text-muted"></i>

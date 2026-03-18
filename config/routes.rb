@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   delete 'admin/users/:id', to: 'admin#destroy_user', as: 'destroy_user'
   patch 'admin/users/:id/toggle_admin', to: 'admin#toggle_admin', as: 'toggle_admin'
   patch 'admin/users/:id/toggle_active', to: 'admin#toggle_active', as: 'toggle_active'
+  get 'admin/device_status', to: 'admin#device_status', as: 'admin_device_status'
   get 'admin/vpn_configurations'
   patch 'admin/vpn_configuration/:id', to: 'admin#update_vpn_configuration', as: 'update_vpn_configuration'
 

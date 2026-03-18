@@ -48,36 +48,29 @@ RSpec.describe VpnConfiguration do
     end
   end
 
-  describe 'server IP calculation (last usable host)' do
-    def last_usable_ip(range)
-      addr, prefix = range.include?('/') ? range.split('/') : [range, '24']
-      network = IPAddr.new("#{addr}/#{prefix}")
-      broadcast_int = network.to_range.last.to_i
-      IPAddr.new(broadcast_int - 1, Socket::AF_INET).to_s
-    end
-
+  describe '.compute_last_usable_ip' do
     it 'calculates last usable IP for /24' do
-      expect(last_usable_ip('10.42.5.0/24')).to eq('10.42.5.254')
+      expect(described_class.compute_last_usable_ip('10.42.5.0/24')).to eq('10.42.5.254')
     end
 
     it 'calculates last usable IP for /16' do
-      expect(last_usable_ip('192.168.0.0/16')).to eq('192.168.255.254')
+      expect(described_class.compute_last_usable_ip('192.168.0.0/16')).to eq('192.168.255.254')
     end
 
     it 'calculates last usable IP for /8' do
-      expect(last_usable_ip('10.0.0.0/8')).to eq('10.255.255.254')
+      expect(described_class.compute_last_usable_ip('10.0.0.0/8')).to eq('10.255.255.254')
     end
 
     it 'calculates last usable IP for /30' do
-      expect(last_usable_ip('172.16.1.0/30')).to eq('172.16.1.2')
+      expect(described_class.compute_last_usable_ip('172.16.1.0/30')).to eq('172.16.1.2')
     end
 
     it 'calculates last usable IP for /28' do
-      expect(last_usable_ip('192.168.1.96/28')).to eq('192.168.1.110')
+      expect(described_class.compute_last_usable_ip('192.168.1.96/28')).to eq('192.168.1.110')
     end
 
     it 'defaults to /24 when no CIDR specified' do
-      expect(last_usable_ip('192.168.100.0')).to eq('192.168.100.254')
+      expect(described_class.compute_last_usable_ip('192.168.100.0')).to eq('192.168.100.254')
     end
   end
 

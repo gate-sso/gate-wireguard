@@ -50,6 +50,7 @@ class VpnConfiguration < ApplicationRecord
     @vpn_configuration.wg_public_key = keys[:public_key]
     @vpn_configuration.wg_port = keys[:port]
     @vpn_configuration.wg_ip_range = keys[:range]
+    @vpn_configuration.server_vpn_ip_address = compute_last_usable_ip(keys[:range])
     @vpn_configuration.dns_servers = keys[:dns_servers]
     @vpn_configuration.wg_interface_name = keys[:interface_name]
     @vpn_configuration.wg_keep_alive = keys[:keep_alive]
@@ -59,6 +60,14 @@ class VpnConfiguration < ApplicationRecord
     @network_address.vpn_configuration_id = @vpn_configuration.id
     @network_address.save!
     @vpn_configuration
+  end
+
+  sig { params(range: String).returns(String) }
+  def self.compute_last_usable_ip(range)
+    addr, prefix = range.include?('/') ? range.split('/') : [range, '24']
+    network = IPAddr.new("#{addr}/#{prefix}")
+    broadcast_int = network.to_range.last.to_i
+    IPAddr.new(broadcast_int - 1, Socket::AF_INET).to_s
   end
 
   private

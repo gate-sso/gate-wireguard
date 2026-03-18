@@ -78,7 +78,8 @@ class AdminController < ApplicationController
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
       if vpn_configuration_params[:wg_ip_range].present?
-        @vpn_configuration.server_vpn_ip_address = last_usable_ip(vpn_configuration_params[:wg_ip_range])
+        @vpn_configuration.server_vpn_ip_address =
+          VpnConfiguration.compute_last_usable_ip(vpn_configuration_params[:wg_ip_range])
       end
       if @vpn_configuration.update(vpn_configuration_params)
         format.html { redirect_to admin_vpn_configurations_path, notice: 'Vpn configuration was successfully updated.' }
@@ -132,13 +133,6 @@ class AdminController < ApplicationController
                     wg_network_address wg_interface_name wg_listen_address
                     wg_keep_alive wg_forward_interface wg_fqdn
                   ])
-  end
-
-  def last_usable_ip(range)
-    addr, prefix = range.include?('/') ? range.split('/') : [range, '24']
-    network = IPAddr.new("#{addr}/#{prefix}")
-    broadcast_int = network.to_range.last.to_i
-    IPAddr.new(broadcast_int - 1, Socket::AF_INET).to_s
   end
 
   def update_wireguard_config

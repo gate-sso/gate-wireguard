@@ -32,6 +32,17 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Stub wg CLI commands globally since wg is not available in test environment
+  config.before do
+    allow(Open3).to receive(:capture2).with('wg genkey').and_return(
+      ["#{SecureRandom.base64(32)}\n", instance_double(Process::Status, success?: true)]
+    )
+    allow(Open3).to receive(:capture2).with('wg pubkey', stdin_data: anything).and_return(
+      ["#{SecureRandom.base64(32)}\n", instance_double(Process::Status, success?: true)]
+    )
+    allow(WireguardConfigGenerator).to receive(:write_server_configuration)
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')

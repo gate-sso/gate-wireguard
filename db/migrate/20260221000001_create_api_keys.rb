@@ -9,9 +9,9 @@ class CreateApiKeys < ActiveRecord::Migration[8.0]
       t.datetime :revoked_at
 
       t.timestamps
-    end
 
-    add_index :api_keys, :token_digest, unique: true
-    add_index :api_keys, :revoked_at
+      t.index :token_digest, unique: true
+      t.index :revoked_at
+    end
   end
 end

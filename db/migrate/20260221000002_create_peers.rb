@@ -11,11 +11,11 @@ class CreatePeers < ActiveRecord::Migration[8.0]
       t.datetime :removed_at
 
       t.timestamps
-    end
 
-    add_index :peers, :name, unique: true
-    add_index :peers, :vpn_ip, unique: true
-    add_index :peers, :public_key, unique: true
-    add_index :peers, :removed_at
+      t.index :name, unique: true
+      t.index :vpn_ip, unique: true
+      t.index :public_key, unique: true
+      t.index :removed_at
+    end
   end
 end

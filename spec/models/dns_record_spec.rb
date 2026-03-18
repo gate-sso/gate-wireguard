@@ -3,55 +3,82 @@
 require 'rails_helper'
 
 RSpec.describe DnsRecord do
-  before do
-    # Set up test environment variables if not present
-    allow(ENV).to receive(:fetch).with('GATE_REDIS_HOST', nil).and_return('127.0.0.1')
-    allow(ENV).to receive(:fetch).with('GATE_REDIS_PORT', nil).and_return('6379')
-    allow(ENV).to receive(:fetch).with('GATE_DNS_ZONE', nil).and_return('test.local')
-
-    @dns_zone = 'test.local'
-    @dns_server = 'localhost'
-    @dns_server_port = 1053
+  describe '.time_to_live' do
+    it 'returns 300 seconds' do
+      expect(described_class.time_to_live).to eq(300)
+    end
   end
 
-  # Clean up after each test - no actual cleanup needed since we're mocking
+  describe '.add_host' do
+    let(:mock_redis) { instance_double(Redis) }
 
-  describe '.dns_record_exists?' do
-    it 'returns true if the DNS record exists using a custom DNS server' do
-      # Mock the DNS resolution to avoid dependency on external DNS server
-      allow(DnsRecordsHelper).to receive(:resolve_dns_record).and_return(true)
-
-      result = DnsRecordsHelper.resolve_dns_record('orbit.soracloud.dev', dns_server: @dns_server,
-                                                                          dns_server_port: @dns_server_port)
-
-      expect(result).to be_truthy
-    end
-
-    it 'adds the dns record to redis' do
-      # Mock the connection pool wrapper by creating a real ConnectionPool::Wrapper with a mocked Redis
-      mock_redis = instance_double(Redis)
-      allow(mock_redis).to receive(:hset).and_return(true)
-
-      # Create a real ConnectionPool::Wrapper that yields our mocked Redis
+    before do
       mock_pool = ConnectionPool::Wrapper.new { mock_redis }
       stub_const('REDIS', mock_pool)
+      allow(mock_redis).to receive(:hset)
+    end
 
-      # Mock the DNS helper methods to return expected values
-      allow(DnsRecordsHelper).to receive(:get_ip_addres).with("orbit.#{@dns_zone}", dns_server: @dns_server,
-                                                                                    dns_server_port: @dns_server_port).and_return('10.8.1.1')
-      allow(DnsRecordsHelper).to receive(:get_ip_addres).with("orbit01.#{@dns_zone}", dns_server: @dns_server,
-                                                                                      dns_server_port: @dns_server_port).and_return('10.8.2.2')
+    it 'writes the correct JSON record to Redis' do
+      described_class.add_host('test.local', 'myhost', '10.8.1.1')
 
-      described_class.add_host(@dns_zone, 'orbit', '10.8.1.1')
-      described_class.add_host(@dns_zone, 'orbit01', '10.8.2.2')
+      expected_json = { a: [{ ip: '10.8.1.1', ttl: 300 }] }.to_json
+      expect(mock_redis).to have_received(:hset).with('test.local.', 'myhost', expected_json)
+    end
 
-      result1 = DnsRecordsHelper.get_ip_addres("orbit.#{@dns_zone}", dns_server: @dns_server,
-                                                                     dns_server_port: @dns_server_port)
-      expect(result1.to_s).to eq('10.8.1.1')
+    it 'appends a dot to zone if missing' do
+      described_class.add_host('test.local', 'web', '10.0.0.1')
 
-      result2 = DnsRecordsHelper.get_ip_addres("orbit01.#{@dns_zone}", dns_server: @dns_server,
-                                                                       dns_server_port: @dns_server_port)
-      expect(result2.to_s).to eq('10.8.2.2')
+      expect(mock_redis).to have_received(:hset).with('test.local.', 'web', anything)
+    end
+
+    it 'does not double-dot if zone already ends with dot' do
+      described_class.add_host('test.local.', 'web', '10.0.0.1')
+
+      expect(mock_redis).to have_received(:hset).with('test.local.', 'web', anything)
+    end
+  end
+
+  describe '.add_host_to_zone' do
+    let(:mock_redis) { instance_double(Redis) }
+    let(:user) { User.create!(email: 'test@example.com', name: 'Test', active: true) }
+    let(:record) { described_class.new(host_name: 'myhost', ip_address: '10.0.0.5', user: user) }
+
+    before do
+      mock_pool = ConnectionPool::Wrapper.new { mock_redis }
+      stub_const('REDIS', mock_pool)
+      allow(mock_redis).to receive(:hset)
+      allow(ENV).to receive(:fetch).with('GATE_DNS_ZONE', nil).and_return('example.zone')
+    end
+
+    it 'calls add_host with the correct zone, hostname, and IP' do
+      described_class.add_host_to_zone(record)
+
+      expected_json = { a: [{ ip: '10.0.0.5', ttl: 300 }] }.to_json
+      expect(mock_redis).to have_received(:hset).with('example.zone.', 'myhost', expected_json)
+    end
+  end
+
+  describe '.refresh_zones' do
+    let(:mock_redis) { instance_double(Redis) }
+    let(:user) { User.create!(email: 'test@example.com', name: 'Test', active: true) }
+
+    before do
+      mock_pool = ConnectionPool::Wrapper.new { mock_redis }
+      stub_const('REDIS', mock_pool)
+      allow(mock_redis).to receive(:hset)
+      allow(mock_redis).to receive(:del)
+      allow(ENV).to receive(:fetch).with('GATE_DNS_ZONE', nil).and_return('example.zone')
+    end
+
+    it 'clears the zone and re-adds all records' do
+      described_class.create!(host_name: 'host1', ip_address: '10.0.0.1', user: user)
+      described_class.create!(host_name: 'host2', ip_address: '10.0.0.2', user: user)
+
+      described_class.refresh_zones
+
+      expect(mock_redis).to have_received(:del).with('example.zone.')
+      expect(mock_redis).to have_received(:hset).with('example.zone.', 'host1', anything)
+      expect(mock_redis).to have_received(:hset).with('example.zone.', 'host2', anything)
     end
   end
 end

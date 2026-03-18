@@ -262,7 +262,9 @@ RSpec.describe 'Api::V1::Devices' do
 
       expect { delete "/api/v1/devices/#{device_id}", headers: auth_headers }
         .to change(VpnDevice, :count).by(-1)
-        .and change(IpAllocation, :count).by(-1)
+
+      # IP allocation is soft-deleted (marked unallocated), not destroyed
+      expect(IpAllocation.where(allocated: false).count).to eq(1)
 
       expect(response).to have_http_status(:ok)
     end

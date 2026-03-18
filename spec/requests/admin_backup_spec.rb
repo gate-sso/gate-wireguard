@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Admin Backup System', type: :request do
+RSpec.describe 'Admin Backup System' do
   let!(:admin_user) { User.create!(name: 'Admin User', email: 'admin@example.com', admin: true) }
 
   describe 'GET /admin/backups' do

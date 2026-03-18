@@ -6,7 +6,7 @@ class AddActiveToUsers < ActiveRecord::Migration[8.0]
 
     reversible do |dir|
       dir.up do
-        User.update_all(active: true)
+        User.update_all(active: true) # rubocop:disable Rails/SkipsModelValidations
       end
     end
   end

@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 class VpnDevicesController < ApplicationController
@@ -28,7 +29,7 @@ class VpnDevicesController < ApplicationController
 
   def qr_code
     @vpn_device = current_user.vpn_devices.find(params[:id])
-    render html: @vpn_device.generate_qr_code.html_safe, layout: false
+    render html: @vpn_device.generate_qr_code.html_safe, layout: false # rubocop:disable Rails/OutputSafety
   end
 
   def download_config
@@ -105,7 +106,7 @@ class VpnDevicesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def vpn_device_params
-    params.expect(vpn_device: %i[user_id description private_key public_key node])
+    params.expect(vpn_device: %i[user_id description private_key public_key node served_networks])
   end
 
   def update_wireguard_config

@@ -31,7 +31,7 @@ RSpec.describe WireguardConfigGenerator do
       config = described_class.generate_server_config
 
       expect(config[:port]).to eq(51_820)
-      expect(config[:range]).to eq('10.42.5.0')
+      expect(config[:range]).to eq('10.42.5.0/24')
       expect(config[:interface_name]).to eq('wg0')
       expect(config[:keep_alive]).to eq('25')
       expect(config[:forward_interface]).to eq('eth0')
@@ -134,9 +134,8 @@ RSpec.describe WireguardConfigGenerator do
       it 'includes all network addresses in AllowedIPs' do
         config = described_class.generate_client_config(vpn_device, vpn_configuration)
 
-        expect(config).to include('AllowedIPs = 192.168.1.0/24')
-        expect(config).to include('AllowedIPs = 172.16.0.0/16')
-        expect(config).to include('AllowedIPs = 10.42.5.0/24')
+        expect(config).to include('192.168.1.0/24')
+        expect(config).to include('172.16.0.0/16')
       end
     end
 
@@ -268,9 +267,8 @@ RSpec.describe WireguardConfigGenerator do
         expect(config).to include('[Peer]')
         expect(config).to include('PublicKey = test_public_key')
         expect(config).to include('Endpoint = corporate-vpn.company.com:51820')
-        expect(config).to include('AllowedIPs = 10.42.5.0/24')
-        expect(config).to include('AllowedIPs = 10.0.0.0/8')
-        expect(config).to include('AllowedIPs = 172.16.0.0/12')
+        expect(config).to include('10.0.0.0/8')
+        expect(config).to include('172.16.0.0/12')
         expect(config).to include('PersistentKeepalive = 20')
       end
     end

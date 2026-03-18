@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Sessions', type: :request do
+RSpec.describe 'Sessions' do
   let(:auth_hash) do
     OmniAuth::AuthHash.new(
       provider: 'google_oauth2',

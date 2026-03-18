@@ -5,25 +5,37 @@ require 'rails_helper'
 RSpec.describe VpnConfiguration do
   let(:vpn_configuration) { described_class.new }
 
-  describe 'validations and attributes' do
-    it 'allows setting wg_fqdn' do
-      vpn_configuration.wg_fqdn = 'vpn.example.com'
-      expect(vpn_configuration.wg_fqdn).to eq('vpn.example.com')
-    end
-
-    it 'allows setting dns_servers' do
-      vpn_configuration.dns_servers = '8.8.8.8, 1.1.1.1'
-      expect(vpn_configuration.dns_servers).to eq('8.8.8.8, 1.1.1.1')
-    end
-
-    it 'allows setting wg_ip_range' do
+  describe '#cidr_prefix' do
+    it 'parses prefix from CIDR range' do
       vpn_configuration.wg_ip_range = '10.42.5.0/24'
-      expect(vpn_configuration.wg_ip_range).to eq('10.42.5.0/24')
+      expect(vpn_configuration.cidr_prefix).to eq(24)
     end
 
-    it 'allows setting server_vpn_ip_address' do
-      vpn_configuration.server_vpn_ip_address = '10.42.5.254'
-      expect(vpn_configuration.server_vpn_ip_address).to eq('10.42.5.254')
+    it 'handles /16 networks' do
+      vpn_configuration.wg_ip_range = '192.168.0.0/16'
+      expect(vpn_configuration.cidr_prefix).to eq(16)
+    end
+
+    it 'defaults to 24 without CIDR notation' do
+      vpn_configuration.wg_ip_range = '10.42.5.0'
+      expect(vpn_configuration.cidr_prefix).to eq(24)
+    end
+
+    it 'defaults to 24 when range is nil' do
+      vpn_configuration.wg_ip_range = nil
+      expect(vpn_configuration.cidr_prefix).to eq(24)
+    end
+  end
+
+  describe '#network_address_base' do
+    it 'strips CIDR suffix' do
+      vpn_configuration.wg_ip_range = '10.42.5.0/24'
+      expect(vpn_configuration.network_address_base).to eq('10.42.5.0')
+    end
+
+    it 'returns as-is without CIDR' do
+      vpn_configuration.wg_ip_range = '10.42.5.0'
+      expect(vpn_configuration.network_address_base).to eq('10.42.5.0')
     end
   end
 
@@ -53,7 +65,7 @@ RSpec.describe VpnConfiguration do
 
         config = described_class.get_vpn_configuration
         expect(config.wg_port).to eq('51820')
-        expect(config.wg_ip_range).to eq('10.42.5.0')
+        expect(config.wg_ip_range).to eq('10.42.5.0/24')
         expect(config.wg_interface_name).to eq('wg0')
         expect(config.wg_keep_alive).to eq('25')
         expect(config.wg_forward_interface).to eq('eth0')

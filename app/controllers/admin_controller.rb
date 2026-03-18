@@ -1,4 +1,7 @@
+# typed: false
 # frozen_string_literal: true
+
+require 'ipaddr'
 
 class AdminController < ApplicationController
   before_action :require_login
@@ -74,16 +77,15 @@ class AdminController < ApplicationController
   def update_vpn_configuration
     respond_to do |format|
       @vpn_configuration = VpnConfiguration.find(params[:id])
-      if vpn_configuration_params[:wg_ip_range]
-        ip_parts = vpn_configuration_params[:wg_ip_range].split('.')[0..2]
-        @vpn_configuration.server_vpn_ip_address = "#{ip_parts.join('.')}.1"
+      if vpn_configuration_params[:wg_ip_range].present?
+        @vpn_configuration.server_vpn_ip_address = last_usable_ip(vpn_configuration_params[:wg_ip_range])
       end
       if @vpn_configuration.update(vpn_configuration_params)
         format.html { redirect_to admin_vpn_configurations_path, notice: 'Vpn configuration was successfully updated.' }
         format.json { render :show, status: :ok, location: @vpn_configuration }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @vpn_configuration.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @vpn_configuration.errors, status: :unprocessable_content }
       end
     end
   end
@@ -99,8 +101,8 @@ class AdminController < ApplicationController
         format.html { redirect_to '/admin/vpn_configurations', notice: 'Network address was successfully added.' }
         format.json { render :show, status: :ok, location: @vpn_configuration }
       else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @network_address.errors, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: @network_address.errors, status: :unprocessable_content }
       end
     end
   end
@@ -130,6 +132,13 @@ class AdminController < ApplicationController
                     wg_network_address wg_interface_name wg_listen_address
                     wg_keep_alive wg_forward_interface wg_fqdn
                   ])
+  end
+
+  def last_usable_ip(range)
+    addr, prefix = range.include?('/') ? range.split('/') : [range, '24']
+    network = IPAddr.new("#{addr}/#{prefix}")
+    broadcast_int = network.to_range.last.to_i
+    IPAddr.new(broadcast_int - 1, Socket::AF_INET).to_s
   end
 
   def update_wireguard_config

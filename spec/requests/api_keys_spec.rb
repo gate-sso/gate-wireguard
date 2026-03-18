@@ -72,9 +72,9 @@ RSpec.describe 'ApiKeys' do
     it 'creates a new API key and redirects' do
       sign_in(admin_user)
 
-      expect {
+      expect do
         post '/api_keys', params: { api_key: { name: 'My New Key' } }
-      }.to change(ApiKey, :count).by(1)
+      end.to change(ApiKey, :count).by(1)
 
       expect(response).to redirect_to(api_keys_path)
       follow_redirect!

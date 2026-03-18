@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Admin User Management', type: :request do
+RSpec.describe 'Admin User Management' do
   let!(:admin_user) do
     User.create!(name: 'Admin', email: 'admin@example.com', admin: true, active: true, provider: 'oauth', uid: '1')
   end

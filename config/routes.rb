@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   # API endpoints for programmatic device provisioning
   namespace :api do
     namespace :v1 do
-      resources :devices, only: %i[index show create destroy]
+      resources :devices, only: %i[index show create update destroy]
     end
   end
 

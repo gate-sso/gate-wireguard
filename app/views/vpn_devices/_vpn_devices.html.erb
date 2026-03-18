@@ -21,6 +21,9 @@
                 <%= form.check_box(:node, class: "form-check-input") %>
                 <label class="form-check-label">Infra node?</label>
               </div>
+              <div class="mt-1">
+                <%= form.text_field :served_networks, class: "form-control form-control-sm", placeholder: "Served networks (e.g. 192.168.1.0/24, 10.0.0.0/8)" %>
+              </div>
             <% end %>
           </div>
           <div class="col-md-3 d-flex gap-2">
@@ -56,6 +59,14 @@
         </div>
       </div>
       <div class="d-flex gap-1">
+        <% if @current_user&.admin? %>
+          <button class="btn btn-outline-secondary btn-sm"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#edit-device-<%= vpn_device.id %>"
+                  title="Edit device">
+            <i class="bi bi-pencil"></i>
+          </button>
+        <% end %>
         <%= link_to download_config_path(vpn_device.id), class: "btn btn-outline-primary btn-sm", title: "Download config" do %>
           <i class="bi bi-download"></i>
         <% end %>
@@ -71,6 +82,32 @@
         <% end %>
       </div>
     </div>
+    <% if @current_user&.admin? %>
+      <div class="collapse" id="edit-device-<%= vpn_device.id %>">
+        <div class="p-3 border-top bg-light">
+          <%= form_with model: vpn_device, class: "row g-2 align-items-end" do |form| %>
+            <div class="col-md-3">
+              <label class="form-label small">Description</label>
+              <%= form.text_field :description, class: "form-control form-control-sm" %>
+            </div>
+            <div class="col-md-2">
+              <div class="form-check">
+                <%= form.check_box(:node, class: "form-check-input") %>
+                <label class="form-check-label">Infra node?</label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Served Networks</label>
+              <%= form.text_field :served_networks, class: "form-control form-control-sm", placeholder: "192.168.1.0/24, 10.0.0.0/8" %>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+              <%= form.submit "Save", class: "btn btn-primary btn-sm" %>
+              <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#edit-device-<%= vpn_device.id %>">Cancel</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
     <div class="device-item-body">
       <div class="device-detail">
         <span class="device-detail-label">IP</span>
@@ -84,6 +121,12 @@
         <span class="device-detail-label">Networks</span>
         <span class="text-muted"><%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></span>
       </div>
+      <% if vpn_device.node? && vpn_device.served_networks_list.any? %>
+        <div class="device-detail">
+          <span class="device-detail-label">Served Networks</span>
+          <span class="text-muted"><%= vpn_device.served_networks_list.join(", ") %></span>
+        </div>
+      <% end %>
     </div>
   </div>
 <% end %>

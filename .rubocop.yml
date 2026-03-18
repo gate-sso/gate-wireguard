@@ -91,3 +91,6 @@ RSpec/NestedGroups:
 
 RSpec/LetSetup:
   Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false

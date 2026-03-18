@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 class ApiKey < ApplicationRecord
@@ -22,7 +23,7 @@ class ApiKey < ApplicationRecord
 
     digest = Digest::SHA256.hexdigest(token)
     key = active.find_by(token_digest: digest)
-    key&.touch(:last_used_at)
+    key&.update(last_used_at: Time.current)
     key
   end
 

@@ -1,4 +1,8 @@
 --dir
-.
+app/
+--dir
+lib/
+--dir
+sorbet/rbi/shims/
 --ignore=tmp/
 --ignore=vendor/

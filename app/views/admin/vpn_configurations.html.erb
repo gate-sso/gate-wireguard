@@ -44,8 +44,8 @@
     <div class="card-body" data-controller="network-address">
       <div class="row g-3">
         <div class="col-md-6">
-          <label class="form-label" for="wg_ip_range">Client IP Range (/24)</label>
-          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
+          <label class="form-label" for="wg_ip_range">Client IP Range (CIDR)</label>
+          <%= form.text_field :wg_ip_range, id: "wg_ip_range", class: "form-control", placeholder: "10.42.5.0/24", data: { network_address_target: "networkRange", action: "input->network-address#calculateServerIp" } %>
         </div>
         <div class="col-md-6">
           <label class="form-label" for="server_vpn_ip_address">Server VPN IP Address</label>

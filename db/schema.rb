@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_22_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_18_000002) do
   create_table "api_keys", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "last_used_at"
@@ -31,10 +31,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_000001) do
   end
 
   create_table "ip_allocations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.boolean "allocated", default: true, null: false
     t.datetime "created_at", null: false
     t.string "ip_address"
     t.datetime "updated_at", null: false
-    t.bigint "vpn_device_id", null: false
+    t.bigint "vpn_device_id"
+    t.index ["allocated"], name: "index_ip_allocations_on_allocated"
     t.index ["vpn_device_id"], name: "index_ip_allocations_on_vpn_device_id"
   end
 
@@ -81,12 +83,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_22_000001) do
     t.boolean "node"
     t.string "private_key"
     t.string "public_key"
+    t.text "served_networks"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_vpn_devices_on_user_id"
   end
 
-  add_foreign_key "ip_allocations", "vpn_devices"
   add_foreign_key "network_addresses", "vpn_configurations"
   add_foreign_key "vpn_devices", "users"
 end

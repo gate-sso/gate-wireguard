@@ -1,3 +1,4 @@
+# typed: false
 # frozen_string_literal: true
 
 # DNS Record is a model that represents a DNS record in the database.
@@ -11,8 +12,8 @@ class DnsRecord < ApplicationRecord
   def self.add_host(zone, host, ip_address)
     zone += '.' unless zone.end_with?('.')
     a = [
-      ip: ip_address,
-      ttl: time_to_live
+      { ip: ip_address,
+        ttl: time_to_live }
     ]
 
     host_record = { a: a }

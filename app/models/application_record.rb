@@ -1,3 +1,4 @@
+# typed: true
 # frozen_string_literal: true
 
 # first active record base class

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>GateWireguard</title>
+    <title><%= content_for?(:title) ? "#{content_for(:title)} - GATE" : "GATE" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>

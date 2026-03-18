@@ -1,39 +1,49 @@
+<% content_for :title, "Dashboard" %>
+
 <div class="page-header">
   <div>
     <h3>Dashboard</h3>
-    <div class="page-header-subtitle">Welcome back, <%= @current_user.name %></div>
+    <div class="page-header-subtitle"><%= @current_user.name %> @ gate-wireguard</div>
   </div>
 </div>
 
 <% if @current_user.admin? %>
   <div class="row g-3 mb-4">
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <div class="card stat-card">
         <div class="stat-value text-primary"><%= User.count %></div>
-        <div class="stat-label">Users</div>
+        <div class="stat-label">users</div>
       </div>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <div class="card stat-card">
         <div class="stat-value text-success"><%= VpnDevice.count %></div>
-        <div class="stat-label">Devices</div>
+        <div class="stat-label">devices</div>
       </div>
     </div>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
       <div class="card stat-card">
-        <div class="stat-value text-info"><%= VpnDevice.where.not(description: [nil, '']).count %></div>
-        <div class="stat-label">Active Devices</div>
+        <div class="stat-value text-info"><%= VpnDevice.where(node: true).count %></div>
+        <div class="stat-label">nodes</div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="card stat-card">
+        <div class="stat-value text-warning"><%= IpAllocation.allocated.count %></div>
+        <div class="stat-label">ips allocated</div>
       </div>
     </div>
   </div>
 
   <div class="card p-4 mb-4">
-    <h5 class="mb-3">Quick Actions</h5>
+    <h6 class="mb-3 font-mono text-muted" style="font-size: 0.8rem; letter-spacing: 0.05em;">QUICK ACTIONS</h6>
     <div class="d-flex flex-wrap gap-2">
-      <a href="/admin/users" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Manage Users</a>
-      <a href="/vpn_devices" class="btn btn-outline-primary btn-sm"><i class="bi bi-router"></i> All Devices</a>
-      <a href="/admin/vpn_configurations" class="btn btn-outline-primary btn-sm"><i class="bi bi-gear"></i> VPN Config</a>
-      <a href="/admin/backups" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-check"></i> Backups</a>
+      <a href="/admin/users" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Users</a>
+      <a href="/vpn_devices" class="btn btn-outline-primary btn-sm"><i class="bi bi-router"></i> Devices</a>
+      <a href="/vpn_devices?nodes=true" class="btn btn-outline-primary btn-sm"><i class="bi bi-diagram-3"></i> Nodes</a>
+      <a href="/admin/vpn_configurations" class="btn btn-outline-primary btn-sm"><i class="bi bi-gear"></i> Config</a>
+      <a href="/admin/backups" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-check"></i> Backup</a>
+      <a href="/api_keys" class="btn btn-outline-primary btn-sm"><i class="bi bi-key"></i> API Keys</a>
     </div>
   </div>
 <% end %>

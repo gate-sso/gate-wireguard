@@ -52,7 +52,7 @@
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Your Devices</h5>
-      <a href="/vpn_devices/new" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Add Device</a>
+      <%= link_to new_vpn_device_path, class: "btn btn-primary btn-sm" do %><i class="bi bi-plus-lg"></i> Add Device<% end %>
     </div>
     <div class="card-body p-0">
       <%= render 'vpn_devices/vpn_devices', vpn_devices: @current_user.vpn_devices %>
@@ -64,7 +64,7 @@
       <i class="bi bi-router text-muted"></i>
       <h5>No devices yet</h5>
       <p>Create your first VPN device to get started with secure network access.</p>
-      <a href="/vpn_devices/new" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add a Device</a>
+      <%= link_to new_vpn_device_path, class: "btn btn-primary" do %><i class="bi bi-plus-lg"></i> Add a Device<% end %>
     </div>
   </div>
 <% end %>

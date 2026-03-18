@@ -58,18 +58,23 @@ class VpnDevicesController < ApplicationController
     send_data config_content, filename: filename
   end
 
+  # GET /vpn_devices/new
+  def new
+    @vpn_device = current_user.vpn_devices.build
+  end
+
   # POST /vpn_devices or /vpn_devices.json
   def create
-    @vpn_device = current_user.vpn_devices.build
+    @vpn_device = current_user.vpn_devices.build(vpn_device_params)
     @vpn_device.setup_device_with_keys
 
     respond_to do |format|
       if @vpn_device.save
         IpAllocation.allocate_ip(@vpn_device)
-        format.html { redirect_to root_path, notice: 'Vpn device was successfully created.' }
+        format.html { redirect_to vpn_device_path(@vpn_device), notice: 'Device created successfully.' }
         format.json { render :show, status: :created, location: @vpn_device }
       else
-        format.html { redirect_to root_path, alert: 'Failed to create VPN device.' }
+        format.html { render :new, status: :unprocessable_content }
         format.json { render json: @vpn_device.errors, status: :unprocessable_content }
       end
     end

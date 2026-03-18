@@ -1,51 +1,3 @@
-<% vpn_devices_require_updates = vpn_devices.select { |d| d.description.blank? } %>
-
-<% if vpn_devices_require_updates.any? %>
-  <div class="p-3">
-    <div class="alert alert-warning mb-3">
-      <i class="bi bi-exclamation-triangle me-2"></i>
-      Please add a description to the following device(s). Devices without a description cannot have configurations.
-    </div>
-    <% vpn_devices_require_updates.each do |vpn_device| %>
-      <%= form_with model: vpn_device, class: "mb-3" do |form| %>
-        <div class="row g-2 align-items-center">
-          <div class="col-md-4">
-            <%= form.text_field :description, class: "form-control", placeholder: "Device Description" %>
-          </div>
-          <div class="col-md-3">
-            <%= form.text_field :private_key, class: "form-control font-mono", disabled: true, placeholder: "Private Key" %>
-          </div>
-          <div class="col-md-2">
-            <% if @current_user.admin %>
-              <div class="form-check">
-                <%= form.check_box(:node, class: "form-check-input") %>
-                <label class="form-check-label">Infra node?</label>
-              </div>
-              <div class="mt-1">
-                <%= form.text_field :served_networks, class: "form-control form-control-sm", placeholder: "Served networks (e.g. 192.168.1.0/24, 10.0.0.0/8)" %>
-              </div>
-            <% end %>
-          </div>
-          <div class="col-md-3 d-flex gap-2">
-            <%= form.submit "Update", class: "btn btn-primary btn-sm" %>
-            <%= link_to vpn_device, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger btn-sm" do %>
-              Remove
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
-<% end %>
-
-<% if vpn_devices_require_updates.empty? %>
-  <div class="p-3">
-    <%= button_to vpn_devices_path, class: "btn btn-primary btn-sm" do %>
-      <i class="bi bi-plus-lg"></i> Add a VPN Device
-    <% end %>
-  </div>
-<% end %>
-
 <% vpn_devices.select(&:description?).each do |vpn_device| %>
   <div class="device-item" <%= "data-controller=qr-code data-qr-code-url-value=#{vpn_device_qr_code_path(vpn_device)}".html_safe unless vpn_device.node %>>
     <div class="device-item-header">
@@ -76,9 +28,9 @@
                   title="Show QR code">
             <i class="bi bi-qr-code"></i>
           </button>
-          <%= link_to vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger btn-sm", title: "Remove device" do %>
-            <i class="bi bi-trash3"></i>
-          <% end %>
+        <% end %>
+        <%= link_to vpn_device, method: :delete, data: { turbo_method: :delete, turbo_confirm: "Are you sure?" }, class: "btn btn-outline-danger btn-sm", title: "Remove device" do %>
+          <i class="bi bi-trash3"></i>
         <% end %>
       </div>
     </div>
@@ -111,7 +63,7 @@
     <div class="device-item-body">
       <div class="device-detail">
         <span class="device-detail-label">IP</span>
-        <code><%= vpn_device.ip_allocation.ip_address %></code>
+        <code><%= vpn_device.ip_allocation&.ip_address %></code>
       </div>
       <div class="device-detail">
         <span class="device-detail-label">Public Key</span>
@@ -119,7 +71,7 @@
       </div>
       <div class="device-detail">
         <span class="device-detail-label">Networks</span>
-        <span class="text-muted"><%= @vpn_configuration.network_addresses.map(&:network_address).join(", ") %></span>
+        <span class="text-muted"><%= @vpn_configuration&.network_addresses&.map(&:network_address)&.join(", ") %></span>
       </div>
       <% if vpn_device.node? && vpn_device.served_networks_list.any? %>
         <div class="device-detail">

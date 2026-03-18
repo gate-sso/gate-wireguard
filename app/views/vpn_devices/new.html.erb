@@ -39,24 +39,48 @@
         </div>
 
         <% if current_user.admin? %>
-          <div class="card mb-4">
+          <div class="card mb-4" data-controller="served-networks">
             <div class="card-header">
               <h6 class="mb-0 font-mono" style="font-size: 0.8rem; letter-spacing: 0.05em;">NODE SETTINGS</h6>
             </div>
-            <div class="card-body" data-controller="served-networks">
+            <div class="card-body">
               <div class="form-check mb-3">
-                <%= form.check_box :node, class: "form-check-input", id: "node_toggle" %>
+                <%= form.check_box :node, class: "form-check-input", id: "node_toggle",
+                                   data: { served_networks_target: "nodeCheckbox", action: "change->served-networks#toggle" } %>
                 <label class="form-check-label" for="node_toggle">
                   <strong>Infrastructure Node</strong>
                 </label>
                 <div class="form-text">Mark as infra node that routes traffic for internal networks.</div>
               </div>
 
-              <div class="mb-2">
+              <div class="d-none" data-served-networks-target="container">
                 <label class="form-label small">Served Networks</label>
                 <div class="form-text mb-2">Networks reachable through this node. Add one CIDR per row.</div>
 
                 <div data-served-networks-target="list">
+                  <%# Hydrate existing values if any (useful for validation re-renders) %>
+                  <% networks = @vpn_device.served_networks_list %>
+                  <% (networks.any? ? networks : [""]).each do |cidr| %>
+                    <div class="input-group input-group-sm mb-2">
+                      <span class="input-group-text font-mono" style="font-size: 0.75rem;">CIDR</span>
+                      <input type="text" class="form-control font-mono" placeholder="192.168.1.0/24" value="<%= cidr %>"
+                             data-served-networks-target="entry" data-action="input->served-networks#sync">
+                      <button type="button" class="btn btn-outline-danger" data-action="click->served-networks#remove">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                  <% end %>
+                </div>
+
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="click->served-networks#add">
+                  <i class="bi bi-plus-lg"></i> Add Network
+                </button>
+
+                <%# Hidden field to store the joined CSV string %>
+                <%= form.hidden_field :served_networks, data: { served_networks_target: "hidden" } %>
+
+                <%# Template for new rows %>
+                <template data-served-networks-target="template">
                   <div class="input-group input-group-sm mb-2">
                     <span class="input-group-text font-mono" style="font-size: 0.75rem;">CIDR</span>
                     <input type="text" class="form-control font-mono" placeholder="192.168.1.0/24"
@@ -65,13 +89,7 @@
                       <i class="bi bi-x-lg"></i>
                     </button>
                   </div>
-                </div>
-
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="click->served-networks#add">
-                  <i class="bi bi-plus-lg"></i> Add Network
-                </button>
-
-                <%= form.hidden_field :served_networks, data: { served_networks_target: "hidden" } %>
+                </template>
               </div>
             </div>
           </div>

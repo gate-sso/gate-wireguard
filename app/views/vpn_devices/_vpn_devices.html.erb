@@ -36,23 +36,47 @@
     </div>
     <% if @current_user&.admin? %>
       <div class="collapse" id="edit-device-<%= vpn_device.id %>">
-        <div class="p-3 border-top bg-light">
-          <%= form_with model: vpn_device, class: "row g-2 align-items-end" do |form| %>
+        <div class="p-3 border-top bg-light" data-controller="served-networks">
+          <%= form_with model: vpn_device, class: "row g-2 align-items-start" do |form| %>
             <div class="col-md-3">
               <label class="form-label small">Description</label>
               <%= form.text_field :description, class: "form-control form-control-sm" %>
             </div>
             <div class="col-md-2">
-              <div class="form-check">
-                <%= form.check_box(:node, class: "form-check-input") %>
-                <label class="form-check-label">Infra node?</label>
+              <div class="form-check mt-4">
+                <%= form.check_box :node, class: "form-check-input",
+                                   data: { served_networks_target: "nodeCheckbox", action: "change->served-networks#toggle" } %>
+                <label class="form-check-label small">Infra node?</label>
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 d-none" data-served-networks-target="container">
               <label class="form-label small">Served Networks</label>
-              <%= form.text_field :served_networks, class: "form-control form-control-sm", placeholder: "192.168.1.0/24, 10.0.0.0/8" %>
+              <div data-served-networks-target="list">
+                <% vpn_device.served_networks_list.each do |cidr| %>
+                  <div class="input-group input-group-sm mb-1">
+                    <input type="text" class="form-control font-mono" style="font-size: 0.7rem;" value="<%= cidr %>"
+                           data-served-networks-target="entry" data-action="input->served-networks#sync">
+                    <button type="button" class="btn btn-outline-danger" data-action="click->served-networks#remove">
+                      <i class="bi bi-x-lg" style="font-size: 0.6rem;"></i>
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-xs" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;" data-action="click->served-networks#add">
+                <i class="bi bi-plus-lg"></i> Add CIDR
+              </button>
+              <%= form.hidden_field :served_networks, data: { served_networks_target: "hidden" } %>
+              <template data-served-networks-target="template">
+                <div class="input-group input-group-sm mb-1">
+                  <input type="text" class="form-control font-mono" style="font-size: 0.7rem;" placeholder="10.0.0.0/8"
+                         data-served-networks-target="entry" data-action="input->served-networks#sync">
+                  <button type="button" class="btn btn-outline-danger" data-action="click->served-networks#remove">
+                    <i class="bi bi-x-lg" style="font-size: 0.6rem;"></i>
+                  </button>
+                </div>
+              </template>
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-3 d-flex gap-2 mt-4 justify-content-end">
               <%= form.submit "Save", class: "btn btn-primary btn-sm" %>
               <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#edit-device-<%= vpn_device.id %>">Cancel</button>
             </div>

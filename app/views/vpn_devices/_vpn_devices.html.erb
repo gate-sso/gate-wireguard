@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-phone<%= vpn_device.node ? '-fill' : '' %> device-icon"></i>
         <div>
-          <span class="fw-semibold"><%= vpn_device.description %></span>
+          <span class="fw-semibold"><%= link_to vpn_device.description, vpn_device_path(vpn_device), class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark" %></span>
           <% if vpn_device.node %>
             <span class="badge bg-secondary ms-1">Node</span>
           <% end %>

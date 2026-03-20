@@ -34,7 +34,9 @@
               <% unless @user_devices_only %>
                 <td><%= vpn_device.user.name %></td>
               <% end %>
-              <td><%= vpn_device.description %></td>
+              <td>
+                <%= link_to vpn_device.description, vpn_device, class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark fw-medium" %>
+              </td>
               <td class="text-end">
                 <% if @user_devices_only || current_user&.admin? %>
                   <div class="d-flex gap-2 justify-content-end">

@@ -71,14 +71,17 @@
               <tr data-device-id="<%= device[:id] %>">
                 <td><span class="status-dot <%= device[:online] ? 'online' : 'offline' %>" title="<%= device[:online] ? 'Online' : 'Offline' %>"></span></td>
                 <td>
-                  <span class="fw-semibold"><%= device[:description] %></span>
+                  <span class="fw-semibold"><%= link_to device[:description], vpn_device_path(device[:id]), class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark" %></span>
                   <% if device[:node] %><span class="badge bg-secondary ms-1">Node</span><% end %>
                 </td>
                 <td><code class="font-mono" style="font-size: 0.75rem;"><%= device[:ip] %></code></td>
                 <td class="endpoint"><code class="font-mono" style="font-size: 0.7rem;"><%= device[:endpoint] || '-' %></code></td>
                 <td class="last-seen font-mono" style="font-size: 0.75rem;"><%= device[:last_handshake_ago] || 'never' %></td>
-                <td class="transfer font-mono" style="font-size: 0.7rem;"><%= number_to_human_size(device[:rx_bytes]) %> / <%= number_to_human_size(device[:tx_bytes]) %></td>
-                <td><span class="sparkline" data-history="[<%= device[:rx_bytes] + device[:tx_bytes] %>]"></span></td>
+                <td class="transfer font-mono" style="font-size: 0.7rem;">
+                  <span class="text-info">↓ <%= number_to_human_size(device[:rx_bytes]) %></span> / 
+                  <span class="text-success">↑ <%= number_to_human_size(device[:tx_bytes]) %></span>
+                </td>
+                <td><span class="sparkline" data-rx-history="[<%= device[:rx_bytes] %>]" data-tx-history="[<%= device[:tx_bytes] %>]"></span></td>
               </tr>
             <% end %>
           </tbody>

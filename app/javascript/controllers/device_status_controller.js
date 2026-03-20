@@ -62,44 +62,67 @@ export default class extends Controller {
         endpoint.textContent = device.endpoint || "-"
       }
 
-      // Sparkline (rx + tx combined, appended as new data point)
+      // Dual Sparkline (rx in neon blue, tx in neon green)
       const sparkline = row.querySelector(".sparkline")
       if (sparkline) {
-        this.updateSparkline(sparkline, device.rx_bytes + device.tx_bytes)
+        this.updateDualSparkline(sparkline, device.rx_bytes, device.tx_bytes)
       }
     })
   }
 
-  updateSparkline(el, totalBytes) {
-    // Store history as data attribute (JSON array of values)
-    let history = JSON.parse(el.dataset.history || "[]")
-    history.push(totalBytes)
-    // Keep last 60 samples (at 30s interval = 30 minutes of data)
-    if (history.length > 60) history = history.slice(-60)
-    el.dataset.history = JSON.stringify(history)
+  updateDualSparkline(el, rxBytes, txBytes) {
+    // Store histories as data attributes
+    let rxHistory = JSON.parse(el.dataset.rxHistory || "[]")
+    let txHistory = JSON.parse(el.dataset.txHistory || "[]")
 
-    // Compute deltas (rate of change between samples)
-    if (history.length < 2) return
-    const deltas = []
+    rxHistory.push(rxBytes)
+    txHistory.push(txBytes)
+
+    // Keep last 40 samples for better visibility in small graph
+    if (rxHistory.length > 40) rxHistory = rxHistory.slice(-40)
+    if (txHistory.length > 40) txHistory = txHistory.slice(-40)
+
+    el.dataset.rxHistory = JSON.stringify(rxHistory)
+    el.dataset.txHistory = JSON.stringify(txHistory)
+
+    if (rxHistory.length < 2) return
+
+    // Compute rates (delta between samples)
+    const rxRates = this.computeRates(rxHistory)
+    const txRates = this.computeRates(txHistory)
+
+    // Draw SVG
+    const width = 100
+    const height = 24
+    const max = Math.max(...rxRates, ...txRates, 1024) // min 1KB scale
+    const step = width / Math.max(rxRates.length - 1, 1)
+
+    const rxPoints = this.generatePoints(rxRates, max, width, height, step)
+    const txPoints = this.generatePoints(txRates, max, width, height, step)
+
+    // Neon Blue for RX (Download), Neon Green for TX (Upload)
+    el.innerHTML = `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow: visible;">
+        <polyline points="${rxPoints}" fill="none" stroke="#00d2ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 2px rgba(0,210,255,0.5));"/>
+        <polyline points="${txPoints}" fill="none" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 2px rgba(57,255,20,0.5));"/>
+      </svg>
+    `
+  }
+
+  computeRates(history) {
+    const rates = []
     for (let i = 1; i < history.length; i++) {
-      deltas.push(Math.max(0, history[i] - history[i - 1]))
+      rates.push(Math.max(0, history[i] - history[i - 1]))
     }
+    return rates
+  }
 
-    // Draw SVG sparkline
-    const max = Math.max(...deltas, 1)
-    const width = 80
-    const height = 20
-    const step = width / Math.max(deltas.length - 1, 1)
-
-    const points = deltas.map((v, i) => {
+  generatePoints(rates, max, width, height, step) {
+    return rates.map((v, i) => {
       const x = i * step
       const y = height - (v / max) * height
       return `${x},${y}`
     }).join(" ")
-
-    el.innerHTML = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-      <polyline points="${points}" fill="none" stroke="var(--color-accent, #10b981)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>`
   }
 
   formatBytes(bytes) {

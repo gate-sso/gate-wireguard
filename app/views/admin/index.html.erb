@@ -71,7 +71,7 @@
               <tr data-device-id="<%= device[:id] %>">
                 <td><span class="status-dot <%= device[:online] ? 'online' : 'offline' %>" title="<%= device[:online] ? 'Online' : 'Offline' %>"></span></td>
                 <td>
-                  <span class="fw-semibold"><%= link_to device[:description], vpn_device_path(device[:id]), class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark" %></span>
+                  <span class="fw-semibold"><%= link_to device[:description], vpn_device_path(device[:id]), class: "link-body-emphasis link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" %></span>
                   <% if device[:node] %><span class="badge bg-secondary ms-1">Node</span><% end %>
                 </td>
                 <td><code class="font-mono" style="font-size: 0.75rem;"><%= device[:ip] %></code></td>

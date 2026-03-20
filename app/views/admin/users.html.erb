@@ -40,7 +40,7 @@
             <td><%= user.email %></td>
             <td>
               <% if user.provider.blank? %>
-                <span class="badge bg-warning text-dark">Pending</span>
+                <span class="badge text-bg-warning">Pending</span>
               <% elsif user == current_user %>
                 <span class="badge bg-success">Active</span>
               <% else %>

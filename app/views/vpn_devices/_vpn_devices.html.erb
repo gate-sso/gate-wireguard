@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-phone<%= vpn_device.node ? '-fill' : '' %> device-icon"></i>
         <div>
-          <span class="fw-semibold"><%= link_to vpn_device.description, vpn_device_path(vpn_device), class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark" %></span>
+          <span class="fw-semibold"><%= link_to vpn_device.description, vpn_device_path(vpn_device), class: "link-body-emphasis link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover" %></span>
           <% if vpn_device.node %>
             <span class="badge bg-secondary ms-1">Node</span>
           <% end %>
@@ -36,7 +36,7 @@
     </div>
     <% if @current_user&.admin? %>
       <div class="collapse" id="edit-device-<%= vpn_device.id %>">
-        <div class="p-3 border-top bg-light" data-controller="served-networks">
+        <div class="p-3 border-top bg-body-secondary" data-controller="served-networks">
           <%= form_with model: vpn_device, class: "row g-2 align-items-start" do |form| %>
             <div class="col-md-3">
               <label class="form-label small">Description</label>

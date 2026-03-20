@@ -19,7 +19,7 @@
 <% if flash[:raw_token] %>
   <div class="alert alert-warning alert-dismissible fade show">
     <strong><i class="bi bi-exclamation-triangle"></i> New API Token (copy now!)</strong>
-    <code class="d-block mt-2 p-2 bg-dark text-light rounded" style="word-break: break-all;"><%= flash[:raw_token] %></code>
+    <code class="d-block mt-2 p-2 bg-body-secondary text-body rounded font-mono" style="word-break: break-all;"><%= flash[:raw_token] %></code>
     <small class="text-muted">This token will not be shown again.</small>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>

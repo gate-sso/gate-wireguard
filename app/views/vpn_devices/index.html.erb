@@ -35,7 +35,7 @@
                 <td><%= vpn_device.user.name %></td>
               <% end %>
               <td>
-                <%= link_to vpn_device.description, vpn_device, class: "link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover text-dark fw-medium" %>
+                <%= link_to vpn_device.description, vpn_device, class: "link-body-emphasis link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover fw-medium" %>
               </td>
               <td class="text-end">
                 <% if @user_devices_only || current_user&.admin? %>

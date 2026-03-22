@@ -97,4 +97,29 @@ RSpec.describe IpAllocation do
       expect(described_class.next_fresh_ip).to eq('10.42.5.2')
     end
   end
+
+  context 'with /16 range' do
+    before do
+      vpn_configuration.update!(wg_ip_range: '10.5.0.0/16', server_vpn_ip_address: '10.5.255.254')
+    end
+
+    it 'allocates first ip address' do
+      expect(described_class.next_fresh_ip).to eq('10.5.0.1')
+    end
+
+    it 'skips the server IP' do
+      vpn_configuration.update!(server_vpn_ip_address: '10.5.0.1')
+      expect(described_class.next_fresh_ip).to eq('10.5.0.2')
+    end
+
+    it 'rolls over to the next /24 block' do
+      (1..255).each do |i|
+        device = create_device("dev#{i}")
+        described_class.create!(vpn_device: device, ip_address: "10.5.0.#{i}", allocated: true)
+      end
+
+      ip = described_class.next_fresh_ip
+      expect(ip).to eq('10.5.1.0')
+    end
+  end
 end

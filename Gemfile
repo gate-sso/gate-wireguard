@@ -67,7 +67,6 @@ group :development do
   # Please note Sorbet required watchman, install in your system
   # after that rung
   # bundle exec srb typecheck --lsp
-  gem 'sorbet-static-and-runtime', require: false
   gem 'tapioca', require: false, group: %i[development test]
   gem 'web-console'
 
@@ -80,6 +79,7 @@ end
 
 gem 'dotenv-rails'
 gem 'omniauth-google-oauth2'
+gem 'sorbet-static-and-runtime', require: false
 
 gem 'redis'
 gem 'rqrcode'

@@ -45,7 +45,10 @@ class WireguardConfigGenerator
       allowed_ips << "#{vpn_configuration.server_vpn_ip_address}/32"
 
       vpn_configuration.network_addresses.each do |ip_address|
-        allowed_ips << ip_address.network_address
+        # Defensive: skip blanks even though the model now validates presence.
+        # Legacy records pre-dating that validation may still exist.
+        cidr = ip_address.network_address.to_s.strip
+        allowed_ips << cidr if cidr.present?
       end
 
       # Add networks served by infra nodes so clients can route to them

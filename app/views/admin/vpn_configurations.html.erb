@@ -54,7 +54,7 @@
         <div class="col-md-6">
           <label class="form-label" for="wg_listen_address">Private Interface Address</label>
           <% default_ip = @network_interface_info&.dig(:success) ? @network_interface_info[:ip_address] : "" %>
-          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", value: default_ip, placeholder: "Private interface IP (auto-detected)" %>
+          <%= form.text_field :wg_listen_address, id: "wg_listen_address", class: "form-control", value: @vpn_configuration.wg_listen_address.presence || default_ip, placeholder: "Private interface IP (auto-detected)" %>
           <% if @network_interface_info&.dig(:success) %>
             <small class="form-text text-success">Auto-detected: <%= @network_interface_info[:ip_address] %></small>
           <% elsif @network_interface_info&.dig(:error) %>
@@ -89,7 +89,7 @@
         <div class="col-md-6">
           <label class="form-label" for="wg_forward_interface">Forward Interface</label>
           <% default_interface = @network_interface_info&.dig(:success) ? @network_interface_info[:interface_name] : "" %>
-          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", value: default_interface, placeholder: "Default gateway interface (auto-detected)" %>
+          <%= form.text_field :wg_forward_interface, id: "wg_forward_interface", class: "form-control", value: @vpn_configuration.wg_forward_interface.presence || default_interface, placeholder: "Default gateway interface (auto-detected)" %>
           <% if @network_interface_info&.dig(:success) %>
             <small class="form-text text-success">Auto-detected: <%= @network_interface_info[:interface_name] %></small>
           <% elsif @network_interface_info&.dig(:error) %>

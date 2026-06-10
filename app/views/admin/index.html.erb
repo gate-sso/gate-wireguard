@@ -38,6 +38,7 @@
   <div class="card p-4 mb-4">
     <h6 class="mb-3 font-mono text-muted" style="font-size: 0.8rem; letter-spacing: 0.05em;">QUICK ACTIONS</h6>
     <div class="d-flex flex-wrap gap-2">
+      <%= link_to new_vpn_device_path, class: "btn btn-primary btn-sm" do %><i class="bi bi-plus-lg"></i> Add Device<% end %>
       <a href="/admin/users" class="btn btn-outline-primary btn-sm"><i class="bi bi-people"></i> Users</a>
       <a href="/vpn_devices" class="btn btn-outline-primary btn-sm"><i class="bi bi-router"></i> Devices</a>
       <a href="/vpn_devices?nodes=true" class="btn btn-outline-primary btn-sm"><i class="bi bi-diagram-3"></i> Nodes</a>

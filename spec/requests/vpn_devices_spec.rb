@@ -175,7 +175,8 @@ RSpec.describe 'VpnDevices' do
       it 'handles invalid device ID gracefully' do
         get '/vpn_devices/download/99999'
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to redirect_to(my_devices_path)
+        expect(flash[:alert]).to be_present
       end
 
       context 'when device does not belong to user' do
@@ -193,7 +194,8 @@ RSpec.describe 'VpnDevices' do
         it 'does not allow access to other users devices' do
           get "/vpn_devices/download/#{other_device.id}"
 
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(my_devices_path)
+          expect(response.body).not_to include('other_private_key')
         end
       end
     end

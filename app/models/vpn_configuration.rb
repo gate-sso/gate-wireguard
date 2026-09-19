@@ -56,9 +56,10 @@ class VpnConfiguration < ApplicationRecord
     @vpn_configuration.wg_keep_alive = keys[:keep_alive]
     @vpn_configuration.wg_forward_interface = keys[:forward_interface]
     @vpn_configuration.save!
-    @network_address = NetworkAddress.new
-    @network_address.vpn_configuration_id = @vpn_configuration.id
-    @network_address.save!
+    # The tunnel range is the first network every client must route: without
+    # it in AllowedIPs, peer-to-peer traffic never leaves the client. This used
+    # to create an empty row, which the presence validation now rejects.
+    NetworkAddress.create!(vpn_configuration: @vpn_configuration, network_address: keys[:range])
     @vpn_configuration
   end
 

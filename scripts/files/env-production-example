@@ -24,6 +24,10 @@ GATE_DATABASE_PASSWORD=
 # Email of the first admin user (auto-activated and granted admin on first login)
 ADMIN_USER_EMAIL=
 
+# Comma-separated email domains whose users may sign up on first login (active,
+# not admin). Anyone else must be added by an administrator first.
+AUTHORIZED_DOMAINS=
+
 # Rails settings
 RAILS_SERVE_STATIC_FILES=true
 RAILS_MAX_THREADS=5

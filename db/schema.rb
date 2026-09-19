@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_18_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_19_000000) do
   create_table "api_keys", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "last_used_at"
@@ -61,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_000002) do
   end
 
   create_table "vpn_configurations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "authorized_domains"
     t.datetime "created_at", null: false
     t.string "dns_servers"
     t.string "server_vpn_ip_address"

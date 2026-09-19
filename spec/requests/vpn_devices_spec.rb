@@ -21,6 +21,44 @@ RSpec.describe 'VpnDevices' do
   end
 
   describe 'GET #download_config' do
+    context 'when the device belongs to someone else' do
+      let(:other_user) { User.create!(email: 'other@example.com', name: 'Other User') }
+      let(:other_device) do
+        device = other_user.vpn_devices.create!(
+          description: 'Other Device', private_key: 'k', public_key: 'p'
+        )
+        IpAllocation.create!(vpn_device: device, ip_address: '10.42.5.101')
+        device
+      end
+
+      before do
+        VpnConfiguration.create!(
+          wg_fqdn: 'vpn.example.com', wg_ip_address: '203.0.113.10',
+          wg_private_key: 'server_private_key', wg_public_key: 'server_public_key',
+          wg_port: '51820', wg_ip_range: '10.42.5.0/24', server_vpn_ip_address: '10.42.5.254'
+        )
+      end
+
+      it 'redirects an ordinary user with an explanation instead of a 404' do
+        get "/vpn_devices/download/#{other_device.id}"
+        expect(response).to redirect_to(my_devices_path)
+        expect(flash[:alert]).to match(/not yours/)
+      end
+
+      it 'lets an administrator download it' do
+        user.update!(admin: true)
+        get "/vpn_devices/download/#{other_device.id}"
+        expect(response).to have_http_status(:ok)
+        expect(response.headers['Content-Disposition']).to include('vpn.example.com.conf')
+      end
+
+      it 'redirects an administrator for a device that does not exist' do
+        user.update!(admin: true)
+        get '/vpn_devices/download/999999'
+        expect(response).to redirect_to(my_devices_path)
+      end
+    end
+
     context 'with FQDN configured' do
       let!(:vpn_configuration) do
         VpnConfiguration.create!(
@@ -137,7 +175,8 @@ RSpec.describe 'VpnDevices' do
       it 'handles invalid device ID gracefully' do
         get '/vpn_devices/download/99999'
 
-        expect(response).to have_http_status(:not_found)
+        expect(response).to redirect_to(my_devices_path)
+        expect(flash[:alert]).to be_present
       end
 
       context 'when device does not belong to user' do
@@ -155,7 +194,8 @@ RSpec.describe 'VpnDevices' do
         it 'does not allow access to other users devices' do
           get "/vpn_devices/download/#{other_device.id}"
 
-          expect(response).to have_http_status(:not_found)
+          expect(response).to redirect_to(my_devices_path)
+          expect(response.body).not_to include('other_private_key')
         end
       end
     end

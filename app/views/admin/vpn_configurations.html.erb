@@ -34,6 +34,11 @@
           <label class="form-label" for="wg_ip_address">Public IP Address</label>
           <%= form.text_field :wg_ip_address, id: "wg_ip_address", class: "form-control", placeholder: "Enter IP address", data: { fqdn_resolver_target: "publicIp" } %>
         </div>
+        <div class="col-md-6">
+          <label class="form-label" for="authorized_domains">Authorized Domains</label>
+          <%= form.text_field :authorized_domains, id: "authorized_domains", class: "form-control", placeholder: "example.com, example.org" %>
+          <small class="form-text text-muted">People with a Google account on these domains sign up on first login. Everyone else must be added under Users first.</small>
+        </div>
       </div>
     </div>
   </div>

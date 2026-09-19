@@ -63,6 +63,25 @@ RSpec.describe User do
       end
     end
 
+    context 'when the email domain is in the configuration setting' do
+      before do
+        VpnConfiguration.create!(
+          wg_ip_address: '203.0.113.10', wg_private_key: 'k', wg_public_key: 'p',
+          wg_port: '51820', wg_ip_range: '10.42.5.0/24', server_vpn_ip_address: '10.42.5.254',
+          authorized_domains: ' example.com ,Other.test'
+        )
+      end
+
+      it 'creates an active, non-admin user on first login' do
+        expect { described_class.from_omniauth(auth) }.to change(described_class, :count).by(1)
+        expect(described_class.find_by(email: 'user@example.com')).to be_active
+      end
+
+      it 'lists the configured domains, normalised' do
+        expect(described_class.authorized_domains).to eq(%w[example.com other.test])
+      end
+    end
+
     context 'when user email is pre-authorized' do
       let!(:pre_added_user) { described_class.create!(email: 'user@example.com', active: true) }
 

@@ -37,8 +37,9 @@ class User < ApplicationRecord
 
   # Anyone whose (Google-verified) address is on an authorized domain signs up
   # on first login -- active, not an administrator. Everyone else still has to
-  # be added by an administrator first, which is the invite. AUTHORIZED_DOMAINS
-  # is a comma-separated list; empty or unset keeps the invite-only behaviour.
+  # be added by an administrator first, which is the invite. The list is the
+  # `authorized_domains` setting on the VPN configuration (admin UI), plus the
+  # AUTHORIZED_DOMAINS env var; empty keeps the invite-only behaviour.
   def self.auto_create_from_domain(auth)
     email = auth.info.email.to_s.strip.downcase
     domain = email.split('@', 2).last
@@ -52,7 +53,8 @@ class User < ApplicationRecord
   end
 
   def self.authorized_domains
-    ENV.fetch('AUTHORIZED_DOMAINS', '').split(',').map { |d| d.strip.downcase }.compact_blank
+    configured = VpnConfiguration.first&.authorized_domains.to_s
+    "#{configured},#{ENV.fetch('AUTHORIZED_DOMAINS', '')}".split(',').map { |d| d.strip.downcase }.compact_blank.uniq
   end
 
   def self.update_omniauth_fields(user, auth)

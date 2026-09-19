@@ -138,6 +138,7 @@ class AdminController < ApplicationController
                     wg_ip_address dns_servers wg_port wg_ip_range
                     wg_network_address wg_interface_name wg_listen_address
                     wg_keep_alive wg_forward_interface wg_fqdn
+                    authorized_domains
                   ])
   end
 

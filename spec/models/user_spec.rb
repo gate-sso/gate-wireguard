@@ -26,6 +26,43 @@ RSpec.describe User do
       end
     end
 
+    context 'when the email domain is in AUTHORIZED_DOMAINS' do
+      around do |example|
+        previous = ENV.fetch('AUTHORIZED_DOMAINS', nil)
+        ENV['AUTHORIZED_DOMAINS'] = 'Example.com, other.test'
+        example.run
+      ensure
+        ENV['AUTHORIZED_DOMAINS'] = previous
+      end
+
+      it 'creates an active, non-admin user on first login' do
+        expect { described_class.from_omniauth(auth) }.to change(described_class, :count).by(1)
+        user = described_class.find_by(email: 'user@example.com')
+        expect(user).to be_active
+        expect(user).not_to be_admin
+        expect(user.provider).to eq('google_oauth2')
+        expect(user.uid).to eq('123456')
+      end
+
+      it 'returns the same user on the next login' do
+        first = described_class.from_omniauth(auth)
+        expect(described_class.from_omniauth(auth)).to eq(first)
+      end
+
+      it 'still refuses an address on another domain' do
+        other = OmniAuth::AuthHash.new(
+          provider: 'google_oauth2', uid: '654321',
+          info: { email: 'user@elsewhere.example', name: 'Other User', image: nil }
+        )
+        expect(described_class.from_omniauth(other)).to be_nil
+      end
+
+      it 'does not promote a listed domain to admin even if ADMIN_USER_EMAIL is unset' do
+        user = described_class.from_omniauth(auth)
+        expect(user.admin).to be(false)
+      end
+    end
+
     context 'when user email is pre-authorized' do
       let!(:pre_added_user) { described_class.create!(email: 'user@example.com', active: true) }
 

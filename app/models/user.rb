@@ -14,7 +14,7 @@ class User < ApplicationRecord
   end
 
   def self.from_omniauth(auth)
-    user = find_for_omniauth(auth) || auto_create_admin(auth)
+    user = find_for_omniauth(auth) || auto_create_admin(auth) || auto_create_from_domain(auth)
     return nil unless user
 
     update_omniauth_fields(user, auth)
@@ -33,6 +33,26 @@ class User < ApplicationRecord
       profile_picture_url: process_profile_picture_url(auth.info.image),
       provider: auth.provider, uid: auth.uid, admin: true, active: true
     )
+  end
+
+  # Anyone whose (Google-verified) address is on an authorized domain signs up
+  # on first login -- active, not an administrator. Everyone else still has to
+  # be added by an administrator first, which is the invite. AUTHORIZED_DOMAINS
+  # is a comma-separated list; empty or unset keeps the invite-only behaviour.
+  def self.auto_create_from_domain(auth)
+    email = auth.info.email.to_s.strip.downcase
+    domain = email.split('@', 2).last
+    return nil if domain.blank? || authorized_domains.exclude?(domain)
+
+    create!(
+      email: email, name: auth.info.name,
+      profile_picture_url: process_profile_picture_url(auth.info.image),
+      provider: auth.provider, uid: auth.uid, admin: false, active: true
+    )
+  end
+
+  def self.authorized_domains
+    ENV.fetch('AUTHORIZED_DOMAINS', '').split(',').map { |d| d.strip.downcase }.compact_blank
   end
 
   def self.update_omniauth_fields(user, auth)

@@ -28,12 +28,16 @@ class VpnDevicesController < ApplicationController
   end
 
   def qr_code
-    @vpn_device = current_user.vpn_devices.find(params[:id])
+    @vpn_device = downloadable_device
+    return if performed?
+
     render html: @vpn_device.generate_qr_code.html_safe, layout: false # rubocop:disable Rails/OutputSafety
   end
 
   def download_config
-    @vpn_device = current_user.vpn_devices.find(params[:id])
+    @vpn_device = downloadable_device
+    return if performed?
+
     @vpn_configuration = VpnConfiguration.first
 
     # Handle case where no VPN configuration exists
@@ -107,6 +111,17 @@ class VpnDevicesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_vpn_device
     @vpn_device = VpnDevice.find(params[:id])
+  end
+
+  # A device's config is the user's own to download -- or any device's, for an
+  # administrator, who sees every device in the list and gets a working button
+  # rather than a 404. A person who ends up with two user rows (a new email, a
+  # re-invite) otherwise finds their old devices visible but not downloadable,
+  # and the only clue was Rails' error page. Not found is a flash and a
+  # redirect, not an exception.
+  def downloadable_device
+    scope = current_user.admin? ? VpnDevice.all : current_user.vpn_devices
+    scope.find_by(id: params[:id]) || redirect_to(my_devices_path, alert: 'That device is not yours to download.')
   end
 
   # Only allow a list of trusted parameters through.
